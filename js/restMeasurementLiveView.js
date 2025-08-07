@@ -452,7 +452,7 @@ export async function initRestMeasurementLiveView(showViewCallback) {
                 };
 
                 try {
-                    await putData('trainingSessions', sessionToSave);
+                    await putData('restSessionsFree', sessionToSave);
                     showNotification('Meting succesvol opgeslagen!', 'success');
                     if (showViewCallback) {
                         showViewCallback('trainingReportsView'); // Navigeer naar de rapportenpagina

@@ -9,6 +9,10 @@ let currentDetailedChart; // Houd de gedetailleerde grafiek bij
 export async function initMemberSpecificprogressView() {
     console.log("User Progressie View geïnitialiseerd.");
     const userProgressView = document.getElementById('memberSpecificprogressView');
+    if (!userProgressView) {
+        console.error("Element with ID 'memberSpecificprogressView' not found.");
+        return;
+    }
     // Voorkom dubbele initialisatie van grafieken als de view opnieuw wordt geladen zonder refresh
     if (userProgressView.dataset.chartsInitialized) {
         // Indien al geïnitialiseerd, update dan alleen de data indien nodig.

@@ -1,5 +1,5 @@
 const DB_NAME = 'SportsCRMDB';
-const DB_VERSION = 11; // VERSIE VERHOOGD NAAR 11
+const DB_VERSION = 12; // VERSIE VERHOOGD NAAR 11
 
 const USER_PROFILE_STORE = 'userProfile';
 const TRAINING_SESSIONS_STORE = 'trainingSessions';
@@ -49,7 +49,9 @@ export async function openDatabase() {
                 DASHBOARD_SETTINGS_STORE, NUTRITION_PROGRAMS_STORE,
                 SPORT_STORE, ACTIVITIES_STORE, PERMISSIONS_STORE, NOTES_STORE, ACTION_CENTER_STORE,
                 USER_ROLE_STORE,
-                SLEEP_DATA_STORE
+                SLEEP_DATA_STORE,
+                'restSessionsFree',
+                'restSessionsAdvanced'
             ];
 
             stores.forEach(storeName => {

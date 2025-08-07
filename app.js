@@ -44,6 +44,7 @@ import { initActivitiesView } from './js/activitiesView.js';
 import { initPermissionsView } from './js/permissionsView.js';
 import { initNotesView } from './js/notesView.js';
 import { initActionCenterView } from './js/actionCenterView.js';
+import { initRestReportsView } from './js/restReportsView.js';
 
 // Importeer het nieuwe notificatiesysteem
 import { showNotification } from './js/notifications.js';
@@ -117,6 +118,7 @@ const viewConfig = {
     'permissionsView': { html: './views/permissionsView.html', init: initPermissionsView },
     'notesView': { html: './views/notesView.html', init: initNotesView },
     'actionCenterView': { html: './views/actionCenterView.html', init: initActionCenterView },
+    'restReportsView': { html: './views/restReportsView.html', init: initRestReportsView },
 };
 
 

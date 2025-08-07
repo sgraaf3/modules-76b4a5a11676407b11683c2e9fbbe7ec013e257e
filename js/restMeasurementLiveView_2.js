@@ -182,51 +182,119 @@ class BreathManager {
 
 // Functie voor rapportage, nu uitgebreid met nieuwe data
 function generateReport(sessionData, measurementType, bodystandardAnalysis, vo2Analysis, runtimesVo2Analysis) {
-    let reportContent = `--- Measurement Report ---\n`;
-    reportContent += `Measurement Type: ${measurementType}\n`;
-    reportContent += `Duration: ${sessionData.totalDuration} seconds\n`;
-    reportContent += `Average Heart Rate: ${sessionData.avgHr.toFixed(0)} BPM\n`;
-    reportContent += `RMSSD: ${sessionData.rmssd.toFixed(2)} MS\n`;
-    reportContent += `SDNN: ${sessionData.sdnn.toFixed(2)} MS\n`;
-    reportContent += `Breathing Rate: ${sessionData.avgBreathRate.toFixed(1)} BPM\n`;
-    reportContent += `Calories Burned: ${sessionData.caloriesBurned} kcal\n`;
-    reportContent += `\nRaw HR Data Points: ${sessionData.heartRates.length}\n`;
-    reportContent += `Raw RR Data Points: ${sessionData.rrIntervals.length}\n`;
-    reportContent += `VLF Power: ${sessionData.vlfPower.toFixed(2)}\n`;
-    reportContent += `LF Power: ${sessionData.lfPower.toFixed(2)}\n`;
-    reportContent += `HF Power: ${sessionData.hfPower.toFixed(2)}\n`;
+    let reportContent = `
+--- REST MEASUREMENT REPORT ---
+Date: ${new Date().toLocaleDateString()}
+Measurement Type: ${measurementType}
+
+--- OVERVIEW ---
+Duration: ${sessionData.totalDuration} seconds
+Average Heart Rate: ${sessionData.avgHr.toFixed(0)} BPM
+Calories Burned: ${sessionData.caloriesBurned} kcal
+
+--- HRV ANALYSIS ---
+RMSSD: ${sessionData.rmssd.toFixed(2)} MS
+  - Explanation: RMSSD reflects the beat-to-beat variance in heart rate, primarily indicating parasympathetic nervous system activity. Higher values generally suggest better recovery and readiness.
+  - Interpretation: `;
+    if (sessionData.rmssd >= 70) {
+        reportContent += `Excellent recovery and high parasympathetic activity. You are likely well-rested and ready for intense activity.
+  - Improvement: Maintain healthy habits, ensure adequate sleep, and manage stress effectively.
+`;
+    } else if (sessionData.rmssd >= 50) {
+        reportContent += `Good recovery. Your body is responding well to training and stress. Continue with your current recovery strategies.
+  - Improvement: Focus on consistent sleep, balanced nutrition, and active recovery.
+`;
+    } else if (sessionData.rmssd >= 30) {
+        reportContent += `Moderate recovery. You might be experiencing some fatigue or stress. Consider light activity or active recovery.
+  - Improvement: Prioritize rest, reduce training intensity, and incorporate stress-reduction techniques.
+`;
+    } else {
+        reportContent += `Low recovery. This may indicate significant fatigue, stress, or illness. Consider taking a rest day or consulting a professional.
+  - Improvement: Complete rest, stress management, and re-evaluation of training load are crucial.
+`;
+    }
+    reportContent += `SDNN: ${sessionData.sdnn.toFixed(2)} MS
+  - Explanation: SDNN represents the overall variability of heart rate over a period. It reflects both sympathetic and parasympathetic nervous system activity.
+  - Interpretation: `;
+    if (sessionData.sdnn >= 100) {
+        reportContent += `Very high overall HRV, indicating excellent adaptability and resilience.
+`;
+    } else if (sessionData.sdnn >= 50) {
+        reportContent += `Good overall HRV, suggesting a healthy and adaptable cardiovascular system.
+`;
+    } else {
+        reportContent += `Lower overall HRV, which can be a sign of chronic stress, overtraining, or underlying health issues.
+`;
+    }
+    reportContent += `VLF Power: ${sessionData.vlfPower.toFixed(2)}
+LF Power: ${sessionData.lfPower.toFixed(2)}
+HF Power: ${sessionData.hfPower.toFixed(2)}
+
+--- BREATHING ANALYSIS ---
+Breathing Rate: ${sessionData.avgBreathRate.toFixed(1)} BPM
+  - Explanation: Your breathing rate indicates how many breaths you take per minute. A lower resting breathing rate often correlates with better cardiovascular health and relaxation.
+  - Interpretation: `;
+    if (sessionData.avgBreathRate >= 16) {
+        reportContent += `Elevated breathing rate. This could be due to stress, anxiety, or poor breathing habits.
+  - Improvement: Practice diaphragmatic breathing exercises, mindfulness, and stress reduction techniques.
+`;
+    } else if (sessionData.avgBreathRate >= 12) {
+        reportContent += `Normal breathing rate. Consistent, calm breathing is beneficial for overall health.
+  - Improvement: Continue to be mindful of your breathing, especially during stressful situations.
+`;
+    } else if (sessionData.avgBreathRate >= 8) {
+        reportContent += `Optimal breathing rate. This indicates good respiratory efficiency and a relaxed state.
+  - Improvement: Maintain your current breathing patterns and consider advanced breathing techniques for performance enhancement.
+`;
+    } else {
+        reportContent += `Very low breathing rate. While often good, extremely low rates might warrant professional consultation if accompanied by other symptoms.
+  - Improvement: Ensure adequate oxygen intake and consult a specialist if concerned.
+`;
+    }
 
     if (bodystandardAnalysis && Object.keys(bodystandardAnalysis).length > 0) {
-        reportContent += `\n--- Body Standard Analysis ---\n`;
-        reportContent += `LBM: ${bodystandardAnalysis.LBM} kg\n`;
-        reportContent += `Fat Mass: ${bodystandardAnalysis.fatMass} kg\n`;
-        reportContent += `Muscle Mass: ${bodystandardAnalysis.muscleMass} kg\n`;
-        reportContent += `BMI: ${bodystandardAnalysis.bmi}\n`;
-        reportContent += `Ideal Weight (BMI): ${bodystandardAnalysis.idealWeightBMI} kg\n`;
-        reportContent += `Metabolic Age: ${bodystandardAnalysis.metabolicAge} years\n`;
-        reportContent += `BMR: ${bodystandardAnalysis.bmr} kcal/day\n`;
+        reportContent += `
+--- BODY COMPOSITION ANALYSIS ---
+LBM: ${bodystandardAnalysis.LBM} kg
+Fat Mass: ${bodystandardAnalysis.fatMass} kg
+Muscle Mass: ${bodystandardAnalysis.muscleMass} kg
+BMI: ${bodystandardAnalysis.bmi}
+Ideal Weight (BMI): ${bodystandardAnalysis.idealWeightBMI} kg
+Metabolic Age: ${bodystandardAnalysis.metabolicAge} years
+BMR: ${bodystandardAnalysis.bmr} kcal/day
+`;
     }
     if (vo2Analysis && Object.keys(vo2Analysis).length > 0) {
-        reportContent += `\n--- VO2 Analysis ---\n`;
-        reportContent += `Maximal Oxygen Uptake: ${vo2Analysis.maximalOxygenUptake}\n`;
-        reportContent += `VO2 Standard: ${vo2Analysis.vo2Standard}\n`;
-        reportContent += `VO2 Max Potential: ${vo2Analysis.vo2MaxPotential}\n`;
-        reportContent += `Theoretical Max: ${vo2Analysis.theoreticalMax}\n`;
-        reportContent += `Warming Up HR: ${vo2Analysis.warmingUp} BPM\n`;
-        if (vo2Analysis.coolingDown) reportContent += `Cooling Down HR: ${vo2Analysis.coolingDown} BPM\n`;
-        if (vo2Analysis.endurance1) reportContent += `Endurance 1 HR: ${vo2Analysis.endurance1} BPM\n`;
-        if (vo2Analysis.endurance2) reportContent += `Endurance 2 HR: ${vo2Analysis.endurance2} BPM\n`;
-        if (vo2Analysis.endurance3) reportContent += `Endurance 3 HR: ${vo2Analysis.endurance3} BPM\n`;
+        reportContent += `
+--- VO2 ANALYSIS ---
+Maximal Oxygen Uptake: ${vo2Analysis.maximalOxygenUptake}
+VO2 Standard: ${vo2Analysis.vo2Standard}
+VO2 Max Potential: ${vo2Analysis.vo2MaxPotential}
+Theoretical Max: ${vo2Analysis.theoreticalMax}
+Warming Up HR: ${vo2Analysis.warmingUp} BPM
+`;
+        if (vo2Analysis.coolingDown) reportContent += `Cooling Down HR: ${vo2Analysis.coolingDown} BPM
+`;
+        if (vo2Analysis.endurance1) reportContent += `Endurance 1 HR: ${vo2Analysis.endurance1} BPM
+`;
+        if (vo2Analysis.endurance2) reportContent += `Endurance 2 HR: ${vo2Analysis.endurance2} BPM
+`;
+        if (vo2Analysis.endurance3) reportContent += `Endurance 3 HR: ${vo2Analysis.endurance3} BPM
+`;
     }
     if (runtimesVo2Analysis && Object.keys(runtimesVo2Analysis).length > 0 && runtimesVo2Analysis.times) {
-        reportContent += `\n--- Estimated Run Times (based on VO2 Max) ---\n`;
+        reportContent += `
+--- ESTIMATED RUN TIMES (based on VO2 Max) ---
+`;
         for (const [distance, time] of Object.entries(runtimesVo2Analysis.times)) {
             const minutes = Math.floor(time / 60);
             const seconds = time % 60;
-            reportContent += `${distance}: ${minutes}m ${seconds}s\n`;
+            reportContent += `${distance}: ${minutes}m ${seconds}s
+`;
         }
     }
-    reportContent += `\n--- End of Report ---`;
+    reportContent += `
+--- End of Report ---`;
     return reportContent;
 }
 
@@ -943,7 +1011,7 @@ export async function initRestMeasurementLiveView_2(showViewCallback) {
                 };
 
                 try {
-                    await putData('trainingSessions', sessionToSave);
+                    await putData('restSessionsAdvanced', sessionToSave);
                     showNotification('Meting succesvol opgeslagen!', 'success');
                     if (showViewCallback) {
                         showViewCallback('trainingReportsView');

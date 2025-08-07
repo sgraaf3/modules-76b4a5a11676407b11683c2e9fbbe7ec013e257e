@@ -13,29 +13,107 @@ async function generateTrainingReport(session) {
     const doc = new jsPDF();
     let yPos = 10;
 
-    let reportContent = `--- Training Report ---\n`;
-    reportContent += `Session Date: ${session.date || 'Unknown'}\n`;
-    reportContent += `Duration: ${session.duration || '--'} minutes\n`;
-    reportContent += `Average Heart Rate: ${session.avgHr || '--'} BPM\n`;
-    reportContent += `RMSSD: ${session.rmssd ? session.rmssd.toFixed(2) : '--'} MS\n`;
-    reportContent += `Calories Burned: ${session.caloriesBurned || '--'} kcal\n`;
-    reportContent += `\nRaw HR Data Points: ${session.rawHrData ? session.rawHrData.length : 0}\n`;
-    reportContent += `Raw RR Data Points: ${session.rawRrData ? session.rawRrData.length : 0}\n`;
-    reportContent += `\n--- End of Report ---`;
+    let reportContent = `
+--- TRAINING REPORT ---
+Date: ${session.date || 'Unknown'}
+Measurement Type: Training Session
+
+--- OVERVIEW ---
+Duration: ${session.duration || '--'} minutes
+Average Heart Rate: ${session.avgHr || '--'} BPM
+  - Explanation: Your average heart rate during this session indicates the intensity of your workout. Higher values mean more intense effort.
+  - Interpretation: `;
+    const avgHr = parseFloat(session.avgHr);
+    if (avgHr > 150) {
+        reportContent += `This was a high-intensity session. Great for improving cardiovascular fitness and endurance.
+  - Improvement: Ensure adequate recovery after such intense efforts. Listen to your body and don't overtrain.
+`;
+    } else if (avgHr > 120) {
+        reportContent += `This was a moderate-intensity session. Ideal for building aerobic base and improving stamina.
+  - Improvement: Consistency is key. Aim for regular moderate-intensity workouts. Consider varying intensity for optimal results.
+`;
+    } else if (avgHr > 90) {
+        reportContent += `This was a low-intensity session, suitable for active recovery or warm-up/cool-down. Good for promoting blood flow and recovery.
+  - Improvement: Incorporate these sessions for recovery or as part of a varied training plan. If this was meant to be intense, consider increasing effort.
+`;
+    } else {
+        reportContent += `Very low heart rate, likely indicating a very light activity or rest. Ensure your heart rate monitor was functioning correctly.
+  - Improvement: If this was a workout, assess your effort level or equipment. If it was a rest period, this is a good sign of relaxation.
+`;
+    }
+
+    reportContent += `
+--- HRV ANALYSIS ---
+RMSSD: ${session.rmssd ? session.rmssd.toFixed(2) : '--'} MS
+  - Explanation: RMSSD reflects the beat-to-beat variance in heart rate, primarily indicating parasympathetic nervous system activity. Higher values generally suggest better recovery and readiness.
+  - Interpretation: `;
+    const rmssd = parseFloat(session.rmssd);
+    if (rmssd >= 70) {
+        reportContent += `Excellent recovery and high parasympathetic activity. You are likely well-rested and ready for intense activity.
+  - Improvement: Maintain healthy habits, ensure adequate sleep, and manage stress effectively.
+`;
+    } else if (rmssd >= 50) {
+        reportContent += `Good recovery. Your body is responding well to training and stress. Continue with your current recovery strategies.
+  - Improvement: Focus on consistent sleep, balanced nutrition, and active recovery.
+`;
+    } else if (rmssd >= 30) {
+        reportContent += `Moderate recovery. You might be experiencing some fatigue or stress. Consider light activity or active recovery.
+  - Improvement: Prioritize rest, reduce training intensity, and incorporate stress-reduction techniques.
+`;
+    } else if (rmssd > 0) {
+        reportContent += `Low recovery. This may indicate significant fatigue, stress, or illness. Consider taking a rest day or consulting a professional.
+  - Improvement: Complete rest, stress management, and re-evaluation of training load are crucial.
+`;
+    } else {
+        reportContent += `RMSSD data not available or invalid. Ensure proper measurement.
+`;
+    }
+
+    reportContent += `
+--- OTHER METRICS ---
+Calories Burned: ${session.caloriesBurned || '--'} kcal
+Raw HR Data Points: ${session.rawHrData ? session.rawHrData.length : 0}
+Raw RR Data Points: ${session.rawRrData ? session.rawRrData.length : 0}
+
+--- End of Report ---`;
 
     doc.text(reportContent, 10, yPos);
     yPos += reportContent.split('\n').length * 5; // Estimate line height;
 
-    // Add charts if available (assuming they are generated dynamically or from raw data)
-    // For simplicity, we'll just add a placeholder for now, or you can integrate chart generation here
-    // Example: if you have a canvas element for a chart, you can convert it to an image
-    // const chartCanvas = document.getElementById('yourChartCanvasId');
-    // if (chartCanvas) {
-    //     const chartImg = await html2canvas(chartCanvas);
-    //     const chartDataUrl = chartImg.toDataURL('image/png');
-    //     doc.addImage(chartDataUrl, 'PNG', 10, yPos, 180, 90);
-    //     yPos += 100;
-    // }
+    // Capture and add charts
+    const chartsToCapture = [
+        { id: 'individualHrChart', title: 'Individual HR Chart' },
+        { id: 'individualHrvChart', title: 'Individual HRV Chart' },
+        { id: 'breathRateChart', title: 'Breath Rate Chart' }
+    ];
+
+    for (const chartInfo of chartsToCapture) {
+        const canvas = document.getElementById(chartInfo.id);
+        if (canvas) {
+            // Temporarily make chart visible for html2canvas if it's hidden
+            const originalDisplay = canvas.style.display;
+            canvas.style.display = 'block';
+            try {
+                const img = await html2canvas(canvas);
+                const imgData = img.toDataURL('image/png');
+                
+                // Add a new page if content exceeds current page
+                if (yPos + 100 > doc.internal.pageSize.height - 20) { // 100 for image height + margin, 20 for bottom margin
+                    doc.addPage();
+                    yPos = 10; // Reset y position for new page
+                }
+
+                doc.text(chartInfo.title, 10, yPos);
+                yPos += 7; // Space for title
+                doc.addImage(imgData, 'PNG', 10, yPos, 180, 90); // Adjust width and height as needed
+                yPos += 100; // Space after image
+            } catch (error) {
+                console.error(`Error capturing chart ${chartInfo.id}:`, error);
+            } finally {
+                canvas.style.display = originalDisplay; // Restore original display
+            }
+        }
+    }
 
     doc.save(`training_report_${session.date || 'unknown'}.pdf`);
     showNotification('Rapport succesvol gedownload!', 'success');
