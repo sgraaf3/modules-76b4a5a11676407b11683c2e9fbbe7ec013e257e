@@ -57,3 +57,59 @@ export class RuntimesVo2 {
         this.times = vo2ToRunTimesMap.get(closestVo2) || {};
     }
 }
+
+export class HRVAnalyzer {
+    constructor(rrIntervals) {
+        this.rrIntervals = rrIntervals;
+        this.rmssd = this.calculateRmssd();
+        this.sdnn = this.calculateSdnn();
+        this.pnn50 = this.calculatePnnX(50);
+        this.frequency = this.calculateFrequencyDomain();
+        this.lfPower = this.frequency.lfPower;
+        this.hfPower = this.frequency.hfPower;
+        this.vlfPower = this.frequency.vlfPower;
+        this.lfHfRatio = this.frequency.lfHfRatio;
+    }
+
+    calculateRmssd() {
+        if (this.rrIntervals.length < 2) return 0;
+        let sumOfDifferencesSquared = 0;
+        for (let i = 0; i < this.rrIntervals.length - 1; i++) {
+            const diff = this.rrIntervals[i + 1] - this.rrIntervals[i];
+            sumOfDifferencesSquared += diff * diff;
+        }
+        return Math.sqrt(sumOfDifferencesSquared / (this.rrIntervals.length - 1));
+    }
+
+    calculateSdnn() {
+        if (this.rrIntervals.length < 2) return 0;
+        const mean = this.rrIntervals.reduce((sum, val) => sum + val, 0) / this.rrIntervals.length;
+        const sumOfSquaredDifferences = this.rrIntervals.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0);
+        return Math.sqrt(sumOfSquaredDifferences / (this.rrIntervals.length - 1));
+    }
+
+    calculatePnnX(threshold) {
+        if (this.rrIntervals.length < 2) return 0;
+        let n = 0;
+        for (let i = 0; i < this.rrIntervals.length - 1; i++) {
+            const diff = Math.abs(this.rrIntervals[i + 1] - this.rrIntervals[i]);
+            if (diff > threshold) {
+                n++;
+            }
+        }
+        return (n / (this.rrIntervals.length - 1)) * 100;
+    }
+
+    calculateFrequencyDomain() {
+        // Placeholder for frequency domain calculations.
+        // This would typically involve more complex signal processing (FFT).
+        // For now, return dummy values or implement a simplified approximation if suitable.
+        // In a real scenario, you'd use a library like 'fft.js' or similar.
+        return {
+            vlfPower: 0, // Very Low Frequency
+            lfPower: 0,  // Low Frequency
+            hfPower: 0,  // High Frequency
+            lfHfRatio: 0 // LF/HF Ratio
+        };
+    }
+}

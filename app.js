@@ -18,7 +18,8 @@ import { initTestingView } from './js/testingView.js';
 import { initTrainingView } from './js/trainingView.js';
 import { initNutritionView } from './js/nutritionView.js';
 import { initSleepView } from './js/sleepView.js';
-
+import { initTrainingReportsView } from './js/trainingReportsView.js';
+import { initRestReportsView } from './js/restReportsView.js'; // NIEUW: Importeer de nieuwe rustrapporten view
 import { initDashboardReportsView } from './js/dashboardReportsView.js';
 import { initSchedulesView } from './js/schedulesView.js';
 import { initLessonSchedulerView } from './js/lessonSchedulerView.js';

@@ -836,9 +836,7 @@ export async function initRestMeasurementLiveView_2(showViewCallback) {
                 }
                 if (poincarePlotChart) {
                     const poincareDataFiltered = rrData.slice(0, -1).map((val, i) => ({ x: val, y: rrData[i + 1] }));
-                    const poincareDataRaw = currentSessionData.rawRrIntervals.slice(0, -1).map((val, i) => ({ x: val, y: currentSessionData.rawRrIntervals[i + 1] }));
-                    poincarePlotChart.data.datasets[0].data = poincareDataRaw;
-                    poincarePlotChart.data.datasets[1].data = poincareDataFiltered;
+                    poincarePlotChart.data.datasets[0].data = poincareDataFiltered;
                     poincarePlotChart.update();
                 }
                 if (powerSpectrumChart) {
