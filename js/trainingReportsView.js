@@ -1,4 +1,5 @@
 // Bestand: js/trainingReportsView.js
+// Added a comment to force cache refresh.
 // Bevat logica voor geavanceerde rapportagemogelijkheden en diepgaande analyses voor individuele trainingssessies.
 
 import { getAllData, getData } from '../database.js';
@@ -19,6 +20,14 @@ function formatTime(seconds) {
 }
 
 // Helper function to determine HR Zone (copied from restMeasurementLiveView_2.js for consistency)
+function getHrvBasedRestZone(rmssd) {
+    if (rmssd >= 70) return 'Relaxed';
+    if (rmssd >= 50) return 'Rest';
+    if (rmssd >= 30) return 'Active Low';
+    if (rmssd >= 10) return 'Active High';
+    return 'Transition to sportzones';
+}
+
 function getHrZone(currentHR, at, rmssd) {
     const warmupHrThreshold = at * 0.65;
     if (currentHR >= at * 1.06) return 'Intensive 2';
@@ -28,17 +37,10 @@ function getHrZone(currentHR, at, rmssd) {
     if (currentHR >= at * 0.80) return 'Endurance 2';
     if (currentHR >= at * 0.70) return 'Endurance 1';
     if (currentHR >= warmupHrThreshold + 5) return 'Cooldown';
-    if (currentHR >= warmupHrThreshold) return 'Warmup';
-    // If below warmup threshold, use HRV-based zones
-    if (rmssd !== undefined) { // Check if rmssd is provided and valid
-        if (rmssd >= 70) return 'Relaxed';
-        if (rmssd >= 50) return 'Rest';
-        if (rmssd >= 30) return 'Active Low';
-        if (rmssd >= 10) return 'Active High';
-        return 'Transition to sportzones';
-    }
-    return 'Resting'; // Fallback if no AT or RMSSD is available
+    if (currentHR = warmupHrThreshold) return 'Warmup';
+    return getHrvBasedRestZone(rmssd);
 }
+
 
 // Functie om een gedetailleerd rapport te genereren en weer te geven
 async function generateTrainingReport(session) {
@@ -60,6 +62,12 @@ async function generateTrainingReport(session) {
     const rmssd = parseFloat(session.rmssd) || 0;
     const sdnn = parseFloat(session.sdnn) || 0;
     const avgBreathRate = parseFloat(session.avgBreathRate) || 0;
+    const pnn50 = parseFloat(session.pnn50) || 0;
+    const lfPower = parseFloat(session.lfPower) || 0;
+    const hfPower = parseFloat(session.hfPower) || 0;
+    const vlfPower = parseFloat(session.vlfPower) || 0;
+    const lfHfRatio = (hfPower > 0) ? (lfPower / hfPower).toFixed(2) : '--';
+
 
     // Interpretatie teksten
     let hrInterpretation = `Je gemiddelde hartslag tijdens deze sessie was ${avgHr} BPM.`;
@@ -75,15 +83,15 @@ async function generateTrainingReport(session) {
     }
 
     let hrvInterpretation = `Je RMSSD was ${rmssd.toFixed(2)} MS en je SDNN was ${sdnn.toFixed(2)} MS.`;
-    if (rmssd >= 50) hrvInterpretation += ` Deze waarden duiden op uitstekend herstel en een gebalanceerd zenuwstelsel. Je bent waarschijnlijk goed uitgerust.`;
-    else if (rmssd >= 25) hrvInterpretation += ` Deze waarden suggereren goed herstel. Je lichaam reageert goed op training.`;
-    else if (rmssd >= 10) hrvInterpretation += ` Deze waarden wijzen op redelijk herstel. Mogelijk ervaar je enige vermoeidheid of stress. Overweeg een lichtere training.`;
-    else hrvInterpretation += ` Deze lage waarden kunnen duiden op aanzienlijke vermoeidheid of stress. Volledige rust of overleg met een professional kan nodig zijn.`;
+    if (rmssd >= 50) hrvInterpretation += ` Deze waarden duiden op uitstekend herstel en een gebalanceerd zenuwstelsel. Je bent waarschijnlijk goed uitgerust en klaar voor inspanning.`;
+    else if (rmssd >= 25) hrvInterpretation += ` Deze waarden suggereren goed herstel. Je lichaam reageert goed op stress en training.`;
+    else if (rmssd >= 10) hrvInterpretation += ` Deze waarden wijzen op redelijk herstel. Mogelijk ervaar je enige vermoeidheid of stress. Overweeg extra rust.`;
+    else hrvInterpretation += ` Deze lage waarden kunnen duiden op aanzienlijke vermoeidheid, stress of ziekte. Volledige rust of overleg met een professional kan nodig zijn.`;
 
     let breathInterpretation = `Je gemiddelde ademhalingsfrequentie was ${avgBreathRate.toFixed(1)} BPM.`;
     if (avgBreathRate >= 8 && avgBreathRate <= 12) breathInterpretation += ` Dit is een optimale frequentie, wat duidt op efficiënte ademhaling en ontspanning.`;
     else if ((avgBreathRate >= 6 && avgBreathRate < 8) || (avgBreathRate > 12 && avgBreathRate <= 15)) breathInterpretation += ` Deze frequentie is acceptabel, maar er is ruimte voor verbetering in ademhalingsefficiëntie.`;
-    else breathInterpretation += ` Deze frequentie is buiten het aanbevolen bereik. Dit kan duiden op stress, oververhitting of onvoldoende ademhalingstechniek.`;
+    else breathInterpretation += ` Deze frequentie is buiten het aanbevolen bereik. Dit kan duiden op stress, angst of onvoldoende ademhalingstechniek.`;
 
     let intensityInterpretation = `Je RPE (Rate of Perceived Exertion) was ${session.rpe || '--'}.`;
     if (userMaxHR > 0 && avgHr > 0) {
@@ -200,15 +208,6 @@ async function generateTrainingReport(session) {
                         pointRadius: 0,
                         fill: false,
                         yAxisID: 'y-rr',
-                        hidden: false // Standaard zichtbaar
-                    },
-                    {
-                        label: 'Ademhaling (Gesimuleerd)', // OPMERKING: Ademhaling is nog gesimuleerd in live meting, hier ook
-                        data: session.rawBreathData || [],
-                        borderColor: '#4ade80',
-                        tension: 0.4,
-                        fill: false,
-                        yAxisID: 'y-hr'
                     }
                 ]
             },
@@ -220,7 +219,7 @@ async function generateTrainingReport(session) {
                         type: 'linear',
                         position: 'left',
                         beginAtZero: false,
-                        title: { display: true, text: 'Hartslag / Ademhaling' }
+                        title: { display: true, text: 'Hartslag' }
                     },
                     'y-rr': {
                         type: 'linear',
@@ -244,7 +243,7 @@ async function generateTrainingReport(session) {
                 labels: ['RMSSD', 'SDNN', 'pNN50'],
                 datasets: [{
                     label: 'HRV Metrics',
-                    data: [rmssd, sdnn, session.pnn50 || 0],
+                    data: [rmssd, sdnn, pnn50],
                     backgroundColor: ['#4ade80', '#2dd4bf', '#a78bfa'],
                 }]
             },
@@ -284,89 +283,108 @@ async function generateTrainingReport(session) {
             }
         });
     }
+
+    // OPMERKING: Poincaré Plot en Power Spectrum Charts voor gedetailleerd rapport
+    // Deze grafieken vereisen specifieke data (freqs, psd) die momenteel niet in `session` objecten worden opgeslagen.
+    // Om deze te renderen, moet de volledige HRVAnalyzer logica opnieuw worden uitgevoerd op `session.rawRrData`
+    // of de berekende frequentiedomein data moet worden opgeslagen in de sessie.
+    // Voor nu worden ze niet geïnitialiseerd.
+    const sessionRestPoincarePlotChartCtx = document.getElementById('sessionRestPoincarePlotChart')?.getContext('2d');
+    if (sessionRestPoincarePlotChartCtx) {
+        // OPMERKING: Implementeer hier de Poincaré Plot initialisatie met session.rawRrData
+        // Voorbeeld: new Chart(sessionRestPoincarePlotChartCtx, { type: 'scatter', ... });
+    }
+
+    const sessionRestPowerSpectrumChartCtx = document.getElementById('sessionRestPowerSpectrumChart')?.getContext('2d');
+    if (sessionRestPowerSpectrumChartCtx) {
+        // OPMERKING: Implementeer hier de Power Spectrum Chart initialisatie met session.vlfPower, lfPower, hfPower
+        // Voorbeeld: new Chart(sessionRestPowerSpectrumChartCtx, { type: 'bar', ... });
+    }
 }
 
-export async function initTrainingReportsView() {
-    console.log("Training Rapporten View geïnitialiseerd.");
+export async function initRestReportsView() {
+    console.log("Rust Rapporten View geïnitialiseerd.");
 
-    const sessionReportsList = document.getElementById('sessionReportsList');
-    const downloadTrainingPdfBtn = document.getElementById('downloadTrainingPdfBtn');
-    const detailedReportContainer = document.getElementById('detailedReportContainer');
+    const restSessionReportsList = document.getElementById('restSessionReportsList');
+    const downloadRestPdfBtn = document.getElementById('downloadRestPdfBtn');
+    const detailedRestReportContainer = document.getElementById('detailedRestReportContainer'); // Get the detailed report container
 
-    // Functie om sessierapporten te laden en weer te geven
-    async function loadSessionReports() {
-        const trainingSessions = await getAllData('trainingSessions');
-        sessionReportsList.innerHTML = '';
+    async function loadRestSessionReports() {
+        const freeSessions = await getAllData('restSessionsFree');
+        const advancedSessions = await getAllData('restSessionsAdvanced');
 
-        if (trainingSessions.length === 0) {
-            sessionReportsList.innerHTML = '<p class="text-gray-400">Geen training sessies gevonden.</p>';
+        // Combine and deduplicate sessions based on date (assuming date is unique enough for a session)
+        const allRestSessionsMap = new Map();
+        freeSessions.forEach(session => allRestSessionsMap.set(session.date, { ...session, type: 'Free' }));
+        advancedSessions.forEach(session => allRestSessionsMap.set(session.date, { ...allRestSessionsMap.get(session.date), ...session, type: 'Advanced' }));
+
+        const allRestSessions = Array.from(allRestSessionsMap.values());
+
+        restSessionReportsList.innerHTML = '';
+
+        if (allRestSessions.length === 0) {
+            restSessionReportsList.innerHTML = '<p class="text-gray-400">Geen rustmeting rapporten gevonden.</p>';
             return;
         }
 
-        trainingSessions.sort((a, b) => new Date(b.date) - new Date(a.date));
+        allRestSessions.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-        trainingSessions.forEach(session => {
+        allRestSessions.forEach(session => {
             const rmssdValue = (typeof session.rmssd === 'number' && !isNaN(session.rmssd)) ? session.rmssd.toFixed(2) : '--';
             const reportCard = document.createElement('div');
             reportCard.className = 'data-card bg-gray-700 rounded-lg p-4 shadow-md';
             reportCard.innerHTML = `
-                <div class="card-header mb-2"><h3>Sessie van ${session.date || 'Onbekend'}</h3></div>
+                <div class="card-header mb-2"><h3>Rustmeting van ${session.date || 'Onbekend'} (${session.type || 'N/A'})</h3></div>
                 <div class="sub-value text-gray-300">Duur: ${session.duration || '--'} min</div>
                 <div class="sub-value text-gray-300">Gem. HR: ${session.avgHr || '--'} BPM</div>
                 <div class="sub-value text-gray-300">RMSSD: ${rmssdValue} MS</div>
                 <div class="flex justify-end mt-4">
-                    <button class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200 text-sm" data-action="view-detailed-report" data-id="${session.id}">Bekijk Rapport</button>
+                    <button class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200 text-sm" data-action="view-detailed-rest-report" data-date="${session.date}">Bekijk Rapport</button>
                 </div>
             `;
-            sessionReportsList.appendChild(reportCard);
+            restSessionReportsList.appendChild(reportCard);
         });
 
-        sessionReportsList.querySelectorAll('[data-action="view-detailed-report"]').forEach(button => {
+        restSessionReportsList.querySelectorAll('[data-action="view-detailed-rest-report"]').forEach(button => {
             button.addEventListener('click', async (event) => {
-                const sessionId = parseInt(event.target.dataset.id);
-                const trainingSessions = await getAllData('trainingSessions'); // Re-fetch to ensure latest data
-                const session = trainingSessions.find(s => s.id === sessionId);
+                const sessionDate = event.target.dataset.date;
+                const session = allRestSessions.find(s => s.date === sessionDate);
                 if (session) {
-                    await generateTrainingReport(session);
+                    await generateRestReport(session);
                 } else {
-                    showNotification(`Sessie met ID ${sessionId} niet gevonden.`, 'error');
+                    showNotification(`Sessie van ${sessionDate} niet gevonden.`, "error");
                 }
             });
         });
     }
 
-    if (downloadTrainingPdfBtn) {
+    if (downloadRestPdfBtn) {
         if (typeof window.jspdf === 'undefined' || typeof window.html2canvas === 'undefined') {
-            console.error("jsPDF of html2canvas is niet geladen.");
-            showNotification("Fout: PDF-export bibliotheken niet geladen.", "error");
-            downloadTrainingPdfBtn.disabled = true;
+            downloadRestPdfBtn.disabled = true;
         } else {
-            downloadTrainingPdfBtn.addEventListener('click', async () => {
+            downloadRestPdfBtn.addEventListener('click', async () => {
                 showNotification("Rapport wordt voorbereid voor PDF-export...", "info", 3000);
-                const a4Container = document.querySelector('.a4-container'); // Select the main A4 container
+                const a4Container = document.querySelector('.a4-container');
                 if (!a4Container) {
                     showNotification("Fout: A4-container niet gevonden.", "error");
                     return;
                 }
 
                 // Temporarily hide the session list and only show the detailed report if it's active
-                const originalSessionListDisplay = sessionReportsList.style.display;
+                const originalSessionListDisplay = restSessionReportsList.style.display;
                 const originalDetailedReportDisplay = detailedReportContainer.style.display;
-                sessionReportsList.style.display = 'none';
+                restSessionReportsList.style.display = 'none';
                 detailedReportContainer.style.display = 'block'; // Ensure it's visible for capture
 
                 try {
                     // Re-render charts to ensure they are up-to-date and correctly rendered for capture
-                    // This assumes that generateTrainingReport was called just before this,
+                    // This assumes that generateRestReport was called just before this,
                     // and the charts are already populated with the correct session data.
-                    // If not, you might need to call generateTrainingReport(currentSession) again here
-                    // with the session data you want to export.
                     
                     const canvas = await html2canvas(a4Container, {
                         scale: 2, // Increase scale for better quality
                         useCORS: true,
                         logging: false,
-                        // Fix for chart rendering issues: explicitly set width/height for canvas elements
                         onclone: (clonedDoc) => {
                             clonedDoc.querySelectorAll('canvas').forEach(canvasEl => {
                                 const rect = canvasEl.getBoundingClientRect();
@@ -395,7 +413,7 @@ export async function initTrainingReportsView() {
                         heightLeft -= pdf.internal.pageSize.getHeight();
                     }
 
-                    pdf.save(`training_rapport_${new Date().toISOString().split('T')[0]}.pdf`);
+                    pdf.save(`rust_rapport_${new Date().toISOString().split('T')[0]}.pdf`);
                     showNotification("Rapport succesvol geëxporteerd als PDF!", "success");
 
                 } catch (error) {
@@ -403,7 +421,7 @@ export async function initTrainingReportsView() {
                     showNotification("Fout bij het genereren van de PDF. Controleer de console voor details.", "error");
                 } finally {
                     // Restore original display styles
-                    sessionReportsList.style.display = originalSessionListDisplay;
+                    restSessionReportsList.style.display = originalSessionListDisplay;
                     detailedReportContainer.style.display = originalDetailedReportDisplay;
                 }
             });
@@ -411,5 +429,5 @@ export async function initTrainingReportsView() {
     }
 
     // Roep alle laadfuncties aan bij initialisatie
-    await loadSessionReports();
+    await loadRestSessionReports();
 }

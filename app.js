@@ -18,7 +18,7 @@ import { initTestingView } from './js/testingView.js';
 import { initTrainingView } from './js/trainingView.js';
 import { initNutritionView } from './js/nutritionView.js';
 import { initSleepView } from './js/sleepView.js';
-import { initTrainingReportsView } from './js/trainingReportsView.js';
+
 import { initDashboardReportsView } from './js/dashboardReportsView.js';
 import { initSchedulesView } from './js/schedulesView.js';
 import { initLessonSchedulerView } from './js/lessonSchedulerView.js';
@@ -44,7 +44,6 @@ import { initActivitiesView } from './js/activitiesView.js';
 import { initPermissionsView } from './js/permissionsView.js';
 import { initNotesView } from './js/notesView.js';
 import { initActionCenterView } from './js/actionCenterView.js';
-import { initRestReportsView } from './js/restReportsView.js';
 
 // Importeer het nieuwe notificatiesysteem
 import { showNotification } from './js/notifications.js';
@@ -92,6 +91,7 @@ const viewConfig = {
     'nutritionView': { html: './views/nutritionView.html', init: initNutritionView },
     'sleepView': { html: './views/sleepView.html', init: initSleepView },
     'trainingReportsView': { html: 'views/trainingReportsView.html', init: initTrainingReportsView },
+    'restReportsView': { html: 'views/restReportsView.html', init: initRestReportsView }, // NIEUW: Voeg de rustrapporten view toe
     'dashboardReportsView': { html: 'views/dashboardReportsView.html', init: initDashboardReportsView },
     'schedulesView': { html: 'views/schedulesView.html', init: initSchedulesView },
     'lessonSchedulerView': { html: 'views/lessonSchedulerView.html', init: initLessonSchedulerView },
@@ -118,7 +118,6 @@ const viewConfig = {
     'permissionsView': { html: './views/permissionsView.html', init: initPermissionsView },
     'notesView': { html: './views/notesView.html', init: initNotesView },
     'actionCenterView': { html: './views/actionCenterView.html', init: initActionCenterView },
-    'restReportsView': { html: './views/restReportsView.html', init: initRestReportsView },
 };
 
 
