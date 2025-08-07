@@ -1,5 +1,5 @@
 const DB_NAME = 'SportsCRMDB';
-const DB_VERSION = 2; // VERSIE VERHOOGD NAAR 2
+const DB_VERSION = 10; // VERSIE VERHOOGD NAAR 10
 
 const USER_PROFILE_STORE = 'userProfile';
 const TRAINING_SESSIONS_STORE = 'trainingSessions';
@@ -88,8 +88,8 @@ export async function openDatabase() {
         };
 
         request.onerror = (event) => {
-            console.error("IndexedDB error:", event.target.errorCode);
-            reject("IndexedDB error: " + event.target.errorCode);
+            console.error("IndexedDB error:", event.target.error);
+            reject(event.target.error);
         };
     });
 }

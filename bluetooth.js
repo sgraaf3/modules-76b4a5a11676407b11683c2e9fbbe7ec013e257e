@@ -145,4 +145,8 @@ export class BluetoothController {
             this._handleDisconnect();
         }
     }
+
+    isConnected() {
+        return this.device && this.device.gatt.connected;
+    }
 }

@@ -4,6 +4,56 @@
 import { BluetoothController } from '../bluetooth.js';
 import { putData, getData, getOrCreateUserId } from '../database.js';
 import { showNotification } from './notifications.js';
+import { Bodystandard, VO2, RuntimesVo2 } from '../rr_hr_hrv_engine.js';
+
+function generateReport(sessionData, measurementType, bodystandardAnalysis, vo2Analysis, runtimesVo2Analysis, hrChartDataUrl, rrChartDataUrl) {
+    let reportContent = `--- Measurement Report ---\n`;
+    reportContent += `Measurement Type: ${measurementType}\n`;
+    reportContent += `Duration: ${sessionData.totalDuration} seconds\n`;
+    reportContent += `Average Heart Rate: ${sessionData.avgHr.toFixed(0)} BPM\n`;
+    reportContent += `RMSSD: ${sessionData.rmssd.toFixed(2)} MS\n`;
+    reportContent += `Calories Burned: ${sessionData.caloriesBurned} kcal\n`;
+    reportContent += `\nRaw HR Data Points: ${sessionData.heartRates.length}\n`;
+    reportContent += `Raw RR Data Points: ${sessionData.rrIntervals.length}\n`;
+
+    if (bodystandardAnalysis && Object.keys(bodystandardAnalysis).length > 0) {
+        reportContent += `\n--- Body Standard Analysis ---\n`;
+        reportContent += `LBM: ${bodystandardAnalysis.LBM} kg\n`;
+        reportContent += `Fat Mass: ${bodystandardAnalysis.fatMass} kg\n`;
+        reportContent += `Muscle Mass: ${bodystandardAnalysis.muscleMass} kg\n`;
+        reportContent += `BMI: ${bodystandardAnalysis.bmi}\n`;
+        reportContent += `Ideal Weight (BMI): ${bodystandardAnalysis.idealWeightBMI} kg\n`;
+        reportContent += `Metabolic Age: ${bodystandardAnalysis.metabolicAge} years\n`;
+        reportContent += `BMR: ${bodystandardAnalysis.bmr} kcal/day\n`;
+    }
+
+    if (vo2Analysis && Object.keys(vo2Analysis).length > 0) {
+        reportContent += `\n--- VO2 Analysis ---\n`;
+        reportContent += `Maximal Oxygen Uptake: ${vo2Analysis.maximalOxygenUptake}\n`;
+        reportContent += `VO2 Standard: ${vo2Analysis.vo2Standard}\n`;
+        reportContent += `VO2 Max Potential: ${vo2Analysis.vo2MaxPotential}\n`;
+        reportContent += `Theoretical Max: ${vo2Analysis.theoreticalMax}\n`;
+        reportContent += `Warming Up HR: ${vo2Analysis.warmingUp} BPM\n`;
+        reportContent += `Cooling Down HR: ${vo2Analysis.coolingDown} BPM\n`;
+        reportContent += `Endurance 1 HR: ${vo2Analysis.endurance1} BPM\n`;
+        reportContent += `Endurance 2 HR: ${vo2Analysis.endurance2} BPM\n`;
+        reportContent += `Endurance 3 HR: ${vo2Analysis.endurance3} BPM\n`;
+        reportContent += `Intensive 1 HR: ${vo2Analysis.intensive1} BPM\n`;
+        reportContent += `Intensive 2 HR: ${vo2Analysis.intensive2} BPM\n`;
+    }
+
+    if (runtimesVo2Analysis && Object.keys(runtimesVo2Analysis).length > 0 && runtimesVo2Analysis.times) {
+        reportContent += `\n--- Estimated Run Times (based on VO2 Max) ---\n`;
+        for (const [distance, time] of Object.entries(runtimesVo2Analysis.times)) {
+            const minutes = Math.floor(time / 60);
+            const seconds = time % 60;
+            reportContent += `${distance}: ${minutes}m ${seconds}s\n`;
+        }
+    }
+
+    reportContent += `\n--- End of Report ---`;
+    return reportContent;
+}
 
 // Globale variabelen voor de grafiek en data
 let hrChart;
@@ -277,14 +327,22 @@ export async function initRestMeasurementLiveView(showViewCallback) {
             if (liveTimerDisplay) liveTimerDisplay.textContent = '00:00';
             if (saveMeasurementBtn) saveMeasurementBtn.style.display = 'none'; // Verberg opslagknop
 
-            bluetoothController.setPreset(selectedMeasurementType); // Gebruik het geselecteerde metingstype
-            bluetoothController.connect();
+            if (!bluetoothController.isConnected()) {
+                bluetoothController.setPreset(selectedMeasurementType); // Gebruik het geselecteerde metingstype
+                bluetoothController.connect();
+            } else {
+                // If already connected, directly start the measurement process
+                bluetoothController.onStateChange('STREAMING', bluetoothController.device.name); // Simulate streaming state
+            }
         });
     }
 
     if (stopMeasurementBtnLive) {
-        stopMeasurementBtnLive.addEventListener('click', () => {
+        stopMeasurementBtnLive.addEventListener('click', async () => {
             bluetoothController.disconnect();
+            // Bereken gemiddelde HR en calorieën na stoppen
+            console.log("Stop button clicked. currentSessionData:", currentSessionData);
+            console.log("Heart Rates Length:", currentSessionData.heartRates.length);
             // Bereken gemiddelde HR en calorieën na stoppen
             if (currentSessionData.heartRates.length > 0) {
                 const totalHr = currentSessionData.heartRates.reduce((sum, hr) => sum + hr, 0);
@@ -292,9 +350,90 @@ export async function initRestMeasurementLiveView(showViewCallback) {
                 // Calorieën (voorbeeld berekening, kan complexer zijn)
                 // Aanname: 10 kcal per minuut per 100 BPM gemiddelde HR
                 currentSessionData.caloriesBurned = (currentSessionData.avgHr * currentSessionData.totalDuration / 60 / 10).toFixed(0);
+
+                console.log("Heart rates available, proceeding with report generation.");
+                // Fetch user profile for analysis
+                const userProfile = await getData('userProfile', currentAppUserId);
+                let bodystandardAnalysis = {};
+                let vo2Analysis = {};
+                let runtimesVo2Analysis = {};
+                if (userProfile) {
+                    const { gender, age, weight, height, fatPercentage, maxWatt, userBaseAtHR } = userProfile;
+                    if (gender && age && weight && height && fatPercentage) {
+                        bodystandardAnalysis = new Bodystandard({ gender, age, weight, height, fatPercentage });
+                    }
+                    if (age && height && weight && maxWatt && userBaseAtHR && fatPercentage && gender) {
+                        vo2Analysis = new VO2({ age, height, weight, maxWatt, at: userBaseAtHR, fatPercentage, gender });
+                    }
+                    if (vo2Analysis.maximalOxygenUptake) {
+                        runtimesVo2Analysis = new RuntimesVo2(vo2Analysis.maximalOxygenUptake);
+                    }
+                }
+                console.log("Attempting to capture charts with html2canvas.");
+                const hrChartCanvas = document.getElementById('hrChart');
+                const rrChartCanvas = document.getElementById('rrChart');
+                // Temporarily make charts visible for html2canvas
+                if (hrChartCanvas) hrChartCanvas.style.display = 'block';
+                if (rrChartCanvas) rrChartCanvas.style.display = 'block';
+                const hrChartImg = hrChartCanvas ? await html2canvas(hrChartCanvas) : null;
+                const rrChartImg = rrChartCanvas ? await html2canvas(rrChartCanvas) : null;
+                console.log("html2canvas capture complete. hrChartImg:", !!hrChartImg, "rrChartImg:", !!rrChartImg);
+                // Hide charts again
+                if (hrChartCanvas) hrChartCanvas.style.display = 'none';
+                if (rrChartCanvas) rrChartCanvas.style.display = 'none';
+                const hrChartDataUrl = hrChartImg ? hrChartImg.toDataURL('image/png') : null;
+                const rrChartDataUrl = rrChartImg ? rrChartImg.toDataURL('image/png') : null;
+
+                const report = generateReport(currentSessionData, selectedMeasurementType, bodystandardAnalysis, vo2Analysis, runtimesVo2Analysis, hrChartDataUrl, rrChartDataUrl);
+                console.log("Generated Report:\n", report); // Log for debugging
+
+                console.log("Attempting to generate PDF with jspdf.");
+                // Generate PDF
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                let yPos = 10;
+
+                doc.text(report, 10, yPos);
+                yPos += report.split('\n').length * 5; // Estimate line height;
+
+                if (hrChartDataUrl) {
+                    doc.addImage(hrChartDataUrl, 'PNG', 10, yPos, 180, 90);
+                    yPos += 100;
+                }
+                if (rrChartDataUrl) {
+                    doc.addImage(rrChartDataUrl, 'PNG', 10, yPos, 180, 90);
+                }
+
+                doc.save(`measurement_report_${new Date().toISOString().split('T')[0]}.pdf`);
+                console.log("PDF saved.");
+
+                // Print the report (opens print dialog)
+                const printWindow = window.open('', '_blank');
+                printWindow.document.write('<pre>' + report + '</pre>');
+                if (hrChartDataUrl) {
+                    printWindow.document.write('<img src="' + hrChartDataUrl + '" style="width:100%;">');
+                }
+                if (rrChartDataUrl) {
+                    printWindow.document.write('<img src="' + rrChartDataUrl + '" style="width:100%;">');
+                }
+                printWindow.document.close();
+                printWindow.print();
+                console.log("Print dialog opened.");
+
+                // Download the text report as a fallback/alternative
+                const blob = new Blob([report], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `measurement_report_${new Date().toISOString().split('T')[0]}.txt`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                console.log("Text report downloaded.");
+            } else {
+                console.log("No heart rate data available to generate report.");
             }
-        });
-    }
 
     if (saveMeasurementBtn) {
         saveMeasurementBtn.addEventListener('click', async () => {
@@ -342,4 +481,5 @@ export async function initRestMeasurementLiveView(showViewCallback) {
         if (currentHR >= at * 0.7) return 'Warmup';
         return 'Resting';
     }
-}
+
+        })}}
