@@ -1,139 +1,1514 @@
-js/views/dashboardView.js
-Bestanden
+ // Inlined from OutputDataCalculation.js
+        function smooth(data, windowSize = 5) {
+            const smoothed = [];
+            for (let i = 0; i < data.length; i++) {
+                const start = Math.max(0, i - windowSize + 1);
+                const window = data.slice(start, i + 1);
+                const avg = window.reduce((sum, val) => sum + val, 0) / window.length;
+                smoothed.push(avg);
+            }
+            return smoothed;
+        }
 
-Gemaakt
-index.html
-aug. 6, 4:29 a.m.
-views/dashboardView.html
-aug. 6, 4:29 a.m.
-js/views/dashboardView.js
-aug. 6, 4:29 a.m.
-views/userProfileView.html
-aug. 6, 4:37 a.m.
-js/views/userProfileView.js
-aug. 6, 4:37 a.m.
-app.js
-aug. 6, 4:37 a.m.
-database.js
-aug. 6, 4:37 a.m.
-bluetooth.js
-aug. 6, 4:37 a.m.
-modules.js
-aug. 6, 4:37 a.m.
-style.css
-aug. 6, 4:37 a.m.
-views/restMeasurementLiveView.html
-aug. 6, 4:37 a.m.
-js/views/restMeasurementLiveView.js
-aug. 6, 4:37 a.m.
-views/liveTrainingView.html
-aug. 6, 4:37 a.m.
-js/views/liveTrainingView.js
-aug. 6, 4:37 a.m.
-views/hrDataView.html
-aug. 6, 4:37 a.m.
-js/views/hrDataView.js
-aug. 6, 4:37 a.m.
-views/testingView.html
-aug. 6, 4:37 a.m.
-js/views/testingView.js
-aug. 6, 4:37 a.m.
-views/trainingView.html
-aug. 6, 4:37 a.m.
-js/views/trainingView.js
-aug. 6, 4:37 a.m.
-views/nutritionView.html
-aug. 6, 4:37 a.m.
-js/views/nutritionView.js
-aug. 6, 4:37 a.m.
-views/sleepView.html
-aug. 6, 4:37 a.m.
-js/views/sleepView.js
-aug. 6, 4:37 a.m.
-views/reportsView.html
-aug. 6, 4:37 a.m.
-js/views/reportsView.js
-aug. 6, 4:37 a.m.
-views/schedulesView.html
-aug. 6, 4:37 a.m.
-js/views/schedulesView.js
-aug. 6, 4:37 a.m.
-views/lessonSchedulerView.html
-aug. 6, 4:37 a.m.
-js/views/lessonSchedulerView.js
-aug. 6, 4:37 a.m.
-views/scheduleBuilderView.html
-aug. 6, 4:37 a.m.
-js/views/scheduleBuilderView.js
-aug. 6, 4:37 a.m.
-views/lessonScheduleBuilderView.html
-aug. 6, 4:37 a.m.
-js/views/lessonScheduleBuilderView.js
-aug. 6, 4:37 a.m.
-views/meetingPlannerView.html
-aug. 6, 4:37 a.m.
-js/views/meetingPlannerView.js
-aug. 6, 4:37 a.m.
-views/messagesView.html
-aug. 6, 4:37 a.m.
-js/views/messagesView.js
-aug. 6, 4:37 a.m.
-views/memberSpecificprogressView.html
-aug. 6, 4:37 a.m.
-js/views/memberSpecificprogressView.js
-aug. 6, 4:37 a.m.
-views/webGraphsView.html
-aug. 6, 4:37 a.m.
-views/memberActivityView.html
-aug. 6, 4:40 a.m.
-js/views/memberActivityView.js
-aug. 6, 4:40 a.m.
-views/popularityView.html
-aug. 6, 4:40 a.m.
-js/views/popularityView.js
-aug. 6, 4:40 a.m.
-views/memberSettingsView.html
-aug. 6, 4:40 a.m.
-js/views/memberSettingsView.js
-aug. 6, 4:40 a.m.
-views/subscriptionsView.html
-aug. 6, 4:41 a.m.
-js/views/subscriptionsView.js
-aug. 6, 4:41 a.m.
-views/logsView.html
-aug. 6, 4:46 a.m.
-js/views/logsView.js
-aug. 6, 4:46 a.m.
-views/registryView.html
-aug. 6, 4:42 a.m.
-js/views/registryView.js
-aug. 6, 4:42 a.m.
-views/memberMembershipView.html
-aug. 6, 4:43 a.m.
-js/views/memberMembershipView.js
-aug. 6, 4:43 a.m.
-views/financeView.html
-aug. 6, 4:44 a.m.
-js/views/financeView.js
-aug. 6, 4:44 a.m.
-views/docsView.html
-aug. 6, 4:45 a.m.
-js/views/docsView.js
-aug. 6, 4:45 a.m.
-views/adminOnlyView.html
-aug. 6, 4:37 a.m.
-js/views/adminOnlyView.js
-aug. 6, 4:37 a.m.
-views/toggleFunctionalityView.html
-aug. 6, 4:37 a.m.
-js/views/toggleFunctionalityView.js
-aug. 6, 4:37 a.m.
-views/dashboardOverviewView.html
-aug. 6, 4:40 a.m.
-js/views/dashboardOverviewView.js
-aug. 6, 4:40 a.m.
+        function getPredictedRunTimes(vo2max) {
+            const vo2ToRunTimesMap = new Map([
+                [36,{"3k":1143,"5k":2039,"10k":4514,"21k":10785,"42k":24674}],
+                [40,{"3k":1026,"5k":1819,"10k":3988,"21k":9399,"42k":21133}],
+                [50,{"3k":810,"5k":1420,"10k":3058,"21k":7036,"42k":15380}],
+                [60,{"3k":662,"5k":1152,"10k":2451,"21k":5555,"42k":11938}],
+                [70,{"3k":555,"5k":961,"10k":2027,"21k":4545,"42k":9656}],
+                [85,{"3k":441,"5k":759,"10k":1587,"21k":3521,"42k":7397}]
+            ]);
+            const vo2Keys = Array.from(vo2ToRunTimesMap.keys());
+            const closestVo2 = vo2Keys.reduce((prev, curr) => Math.abs(curr - vo2max) < Math.abs(prev - vo2max) ? curr : prev);
+            return vo2ToRunTimesMap.get(closestVo2) || { note: "No data for this VO2max level." };
+        }
+
+        function estimateVo2max(hr) {
+            if (!hr || hr < 40) return null;
+            const vo2max = 30 + (hr - 60) * (30 / 130);
+            return Math.max(30, Math.min(60, vo2max));
+        }
+
+        function calculateFitnessScore(currentVo2, potentialVo2, theoreticalMaxVo2) {
+            if (!currentVo2 || !potentialVo2 || !theoreticalMaxVo2 || potentialVo2 <= 0 || theoreticalMaxVo2 <= 0) return null;
+            const ratio1 = currentVo2 / potentialVo2;
+            const ratio2 = potentialVo2 / theoreticalMaxVo2;
+            return (ratio1 + ratio2) / 2;
+        }
+
+        function getVo2maxRating(vo2max, age, gender) {
+            const scoreData = {
+                male: { "20-29": [[31,"Poor"],[35,"Fair"],[42,"Average"],[48,"Good"],[53,"Excellent"]], "30-39": [[29,"Poor"],[34,"Fair"],[40,"Average"],[45,"Good"],[51,"Excellent"]], "40-49": [[26,"Poor"],[31,"Fair"],[36,"Average"],[41,"Good"],[48,"Excellent"]], "50-99": [[24,"Poor"],[29,"Fair"],[34,"Average"],[39,"Good"],[45,"Excellent"]] },
+                female: { "20-29": [[26,"Poor"],[30,"Fair"],[35,"Average"],[40,"Good"],[44,"Excellent"]], "30-39": [[24,"Poor"],[28,"Fair"],[33,"Average"],[37,"Good"],[41,"Excellent"]], "40-49": [[21,"Poor"],[25,"Fair"],[30,"Average"],[34,"Good"],[38,"Excellent"]], "50-99": [[19,"Poor"],[23,"Fair"],[28,"Average"],[32,"Good"],[36,"Excellent"]] }
+            };
+            const genderKey = gender.toLowerCase();
+            const ageBrackets = Object.keys(scoreData[genderKey]);
+            let selectedBracketKey = ageBrackets[ageBrackets.length - 1];
+            for (const bracket of ageBrackets) {
+                const [minAge, maxAge] = bracket.split('-').map(Number);
+                if (age >= minAge && age <= maxAge) {
+                    selectedBracketKey = bracket;
+                    break;
+                }
+            }
+            const standards = scoreData[genderKey][selectedBracketKey];
+            for (const [maxScore, rating] of standards) {
+                if (vo2max <= maxScore) return rating;
+            }
+            return "Superior";
+        }
+
+        function getFitnessNote(score) {
+            if (score < 0.50) return "Not fit at all. Start training.";
+            if (score < 0.65) return "The minimum is there. Go/continue training.";
+            if (score < 0.75) return "You are pretty fit!";
+            if (score < 0.85) return "You are better than just fit!";
+            if (score < 0.95) return "You are an advanced athlete!";
+            return "You are the best you can be!";
+        }
+
+        function calculateVo2MaxPotential({ maxOxygenUptake, weightKg, fatPercentage }) {
+            if (weightKg <= 0) return 0;
+            return (2 * maxOxygenUptake * 1000 / weightKg) * (1 - (fatPercentage / 100));
+        }
+
+        function calculateVo2TheoreticalMax({ maxOxygenUptake, heightCm, gender }) {
+            const idealBmi = gender === 'male' ? 20.5 : 22.5;
+            const idealWeight = idealBmi * Math.pow(heightCm / 100, 2);
+            if (idealWeight <= 0) return 0;
+            return (2 * maxOxygenUptake * 1000) / idealWeight;
+        }
+
+        function calculateRmssd(rrIntervalsMs) {
+            if (rrIntervalsMs.length < 2) return 0;
+            let sumOfSquares = 0;
+            for (let i = 0; i < rrIntervalsMs.length - 1; i++) {
+                sumOfSquares += Math.pow(rrIntervalsMs[i + 1] - rrIntervalsMs[i], 2);
+            }
+            return Math.sqrt(sumOfSquares / (rrIntervalsMs.length - 1));
+        }
+
+        function calculateSdnn(rrIntervalsMs) {
+            const n = rrIntervalsMs.length;
+            if (n < 2) return 0;
+            const mean = rrIntervalsMs.reduce((a, b) => a + b) / n;
+            const variance = rrIntervalsMs.map(x => Math.pow(x - mean, 2)).reduce((a, b) => a + b) / n;
+            return Math.sqrt(variance);
+        }
+
+        function getAirDensity(temperatureCelsius) {
+            const tempMap = new Map([
+                [-15, 1367], [-10, 1341], [-5, 1336], [0, 1331], [5, 1326],
+                [10, 1321], [15, 1316], [20, 1311], [25, 1306], [30, 1301],
+                [35, 1296], [40, 1127], [45, 1093]
+            ]);
+            let closestTemp = -Infinity;
+            let minDiff = Infinity;
+            for (const temp of tempMap.keys()) {
+                const diff = Math.abs(temperatureCelsius - temp);
+                if (diff < minDiff) {
+                    minDiff = diff;
+                    closestTemp = temp;
+                }
+            }
+            return tempMap.get(closestTemp) || 1296;
+        }
+
+        function calculateHrZonesFromAt(anaerobicThresholdHR) {
+            return {
+                warmup: Math.round(anaerobicThresholdHR * 0.7),
+                cooldown: Math.round(anaerobicThresholdHR * 0.7 + 5),
+                endurance1: Math.round(anaerobicThresholdHR * 0.75),
+                endurance2: Math.round(anaerobicThresholdHR * 0.85),
+                endurance3: Math.round(anaerobicThresholdHR * 0.95),
+                intensive1: Math.round(anaerobicThresholdHR * 1.05),
+                intensive2: Math.round(anaerobicThresholdHR * 1.1),
+            };
+        }
+
+        function calculateRespiratoryRate(durationSeconds, breaths) {
+            if (durationSeconds <= 0) {
+                return { bpm: 0, interpretation: 'Invalid duration' };
+            }
+            const bpm = (breaths / durationSeconds) * 60;
+            let interpretation = 'N/A';
+            if (bpm > 20) interpretation = 'Fast (potential stress/exertion)';
+            else if (bpm >= 12) interpretation = 'Normal (12-20 breaths/min)';
+            else if (bpm >= 8) interpretation = 'Slow (relaxed/trained)';
+            else interpretation = 'Very Slow (may indicate sleep/deep relaxation)';
+            return { bpm, interpretation };
+        }
+
+        function simulateBreathingFromRr(rrIntervals) {
+            if (!rrIntervals || rrIntervals.length === 0) {
+                return [];
+            }
+            const breathingWave = [];
+            for (const rr of rrIntervals) {
+                const hr = 60000 / rr;
+                let amplitude = hr * 4 - 200;
+                amplitude = Math.min(Math.max(amplitude, 20), 120);
+                breathingWave.push(amplitude);
+            }
+            return smooth(breathingWave, 5);
+        }
+
+        function calculateCyclingSpeedFromWatts(watts) {
+            if (!watts || watts <= 0) {
+                return null;
+            }
+            const speedKmh = Math.sqrt(watts) * 3;
+            return parseFloat(speedKmh.toFixed(2));
+        }
+
+        function calculateWalkingWatts({ distanceMeters, trainingTimeMinutes, weightKg, windDraftWatts }) {
+            if (trainingTimeMinutes <= 0) return 0;
+            const mechanicalPower = (distanceMeters / (trainingTimeMinutes * 60)) * weightKg;
+            return mechanicalPower + windDraftWatts;
+        }
+
+        function estimateCaloriesFromPowerLegacy({ estimatedPower, averageHr, weightKg }) {
+            if (averageHr <= 0) return 0;
+            const secondsPerBeat = 1 / (averageHr / 60);
+            return Math.round(((((estimatedPower * 0.08) / 60) / secondsPerBeat * 30)) * weightKg / 8 * 60);
+        }
+
+        function calculateVo2StandardFromWatts(maxWatt, weightKg) {
+            if (weightKg <= 0) return 0;
+            return maxWatt / (0.072 * weightKg);
+        }
+
+        function calculateMaximalOxygenUptake(age, heightCm) {
+            return (((260 - age) * heightCm / 190) * 0.0113) + 0.395;
+        }
+
+        function estimateVo2maxFromCooper(distanceMeters) {
+            return (distanceMeters - 504.9) / 44.73;
+        }
+
+        function estimateVo2maxFromHrRatio(maxHR, restingHR) {
+            if (restingHR <= 0) return 0;
+            return 15.3 * (maxHR / restingHR);
+        }
+
+        function estimateVo2maxFromWater(bodyWaterKg, weightKg) {
+            if (!bodyWaterKg || !weightKg || bodyWaterKg <= 0 || weightKg <= 0) {
+                return null;
+            }
+            return 15.3 * (bodyWaterKg / weightKg);
+        }
+
+        function estimateVo2maxRockport({ timeMin, hr, weightKg, age, gender }) {
+            if ([timeMin, hr, weightKg, age].some(v => v === undefined || isNaN(v)) || !gender) {
+                return null;
+            }
+            const genderVal = gender.toLowerCase() === 'male' ? 1 : 0;
+            const weightLbs = weightKg * 2.20462;
+            const vo2max = 132.853 - (0.0769 * weightLbs) - (0.3877 * age) + (6.315 * genderVal) - (3.2649 * timeMin) - (0.1565 * hr);
+            return parseFloat(vo2max.toFixed(1));
+        }
+
+        function estimateRpe({ currentHR, anaerobicThresholdHR, durationMinutes }) {
+            if (!currentHR || !anaerobicThresholdHR || !durationMinutes || anaerobicThresholdHR <= 0) {
+                return { rpe: null, intensity: 'Invalid input', percentAT: null };
+            }
+            const percentAT = (currentHR / anaerobicThresholdHR) * 100;
+            let baseRPE = 0, intensity = '';
+            if (percentAT < 50) { baseRPE = 1; intensity = "Very Light"; }
+            else if (percentAT < 60) { baseRPE = 2; intensity = "Light"; }
+            else if (percentAT < 70) { baseRPE = 4; intensity = "Moderate"; }
+            else if (percentAT < 80) { baseRPE = 6; intensity = "Vigorous"; }
+            else if (percentAT < 90) { baseRPE = 8; intensity = "Hard"; }
+            else { baseRPE = 10; intensity = "Maximal Effort"; }
+            let timeAdjustment = 0;
+            if (percentAT >= 90 && durationMinutes > 10) timeAdjustment = 2;
+            else if (percentAT >= 80 && durationMinutes > 20) timeAdjustment = 1;
+            else if (percentAT >= 70 && durationMinutes > 30) timeAdjustment = 1;
+            const rpe = Math.min(baseRPE + timeAdjustment, 10);
+            return { rpe, intensity, percentAT: parseFloat(percentAT.toFixed(1)) };
+        }
+
+        // Inlined from modules/BreathManager.js
+        class BreathManager {
+            constructor() {
+                this.lastHR = null;
+                this.lastTimestamp = null;
+                this.phase = 'Inspiration';
+                this.cycles = [];
+                this.currentCycle = { timeIn: 0, timeOut: 0, start: null };
+                this.lastCompletedCycle = { inhaleTime: 0, exhaleTime: 0, tiTeRatio: 0, breathDepth: 'N/A' };
+                this.breathRate = 0;
+            }
+
+            reset() {
+                this.lastHR = null;
+                this.lastTimestamp = null;
+                this.phase = 'Inspiration';
+                this.cycles = [];
+                this.currentCycle = { timeIn: 0, timeOut: 0, start: null };
+                this.lastCompletedCycle = { inhaleTime: 0, exhaleTime: 0, tiTeRatio: 0, breathDepth: 'N/A' };
+                this.breathRate = 0;
+                console.log('[BreathManager] State has been reset.');
+            }
+
+            update(avgHR) {
+                if (typeof avgHR !== 'number' || isNaN(avgHR)) {
+                    return this.lastCompletedCycle;
+                }
+
+                const now = Date.now();
+                if (this.lastHR !== null) {
+                    const dt = now - this.lastTimestamp;
+                    if (avgHR > this.lastHR) { // HR rising -> Inspiration
+                        if (this.phase !== 'Inspiration') {
+                            if (this.currentCycle.timeOut > 0) {
+                                this.cycles.push({ ...this.currentCycle });
+                                this.lastCompletedCycle = this.getCurrentMetrics(this.currentCycle);
+                            }
+                            if (this.cycles.length > 100) this.cycles.shift();
+                            this.currentCycle = { timeIn: 0, timeOut: 0, start: now };
+                            this.phase = 'Inspiration';
+                        }
+                        this.currentCycle.timeIn += dt;
+                    } else if (avgHR < this.lastHR) { // HR falling -> Expiration
+                        if (this.phase !== 'Expiration') {
+                            this.phase = 'Expiration';
+                            // When phase changes from Inspiration to Expiration, a cycle is completed
+                            if (this.currentCycle.timeIn > 0) { // Ensure there was an inhale part
+                                this.cycles.push({ ...this.currentCycle });
+                                this.lastCompletedCycle = this.getCurrentMetrics(this.currentCycle);
+                            }
+                            if (this.cycles.length > 100) this.cycles.shift(); // Keep buffer size manageable
+                            this.currentCycle = { timeIn: 0, timeOut: 0, start: now }; // Reset for next cycle
+                        }
+                        this.currentCycle.timeOut += dt;
+                    } else { // HR is flat
+                        if (this.phase === 'Inspiration') this.currentCycle.timeIn += dt;
+                        else this.currentCycle.timeOut += dt;
+                    }
+                } else {
+                    this.currentCycle.start = now;
+                }
+
+                this.lastHR = avgHR;
+                this.lastTimestamp = now;
+                this.calculateBreathRate(now);
+                
+                return this.lastCompletedCycle;
+            }
+
+            calculateBreathRate(now) {
+                const oneMinuteAgo = now - 60000;
+                const recentCycles = this.cycles.filter(c => c.start > oneMinuteAgo);
+                if (recentCycles.length > 0) {
+                    this.breathRate = recentCycles.length;
+                }
+            }
+
+            getCurrentMetrics(cycle = this.currentCycle) {
+                const { timeIn, timeOut } = cycle;
+                const tiTeRatio = timeOut > 0 ? (timeIn / timeOut).toFixed(2) : 0;
+                
+                let breathDepth = 'Shallow';
+                if (timeIn > 4000) breathDepth = 'Deep';
+                else if (timeIn > 2000) breathDepth = 'Good';
+
+                return {
+                    phase: this.phase,
+                    breathRate: this.breathRate,
+                    inhaleTime: timeIn,
+                    exhaleTime: timeOut,
+                    tiTeRatio: tiTeRatio,
+                    breathDepth: breathDepth
+                };
+            }
+
+            getAveragedMetrics() {
+                if (this.cycles.length === 0) {
+                    return { avgInhale: 0, avgExhale: 0 };
+                }
+                const totalInhale = this.cycles.reduce((sum, c) => sum + c.timeIn, 0);
+                const totalExhale = this.cycles.reduce((sum, c) => sum + c.timeOut, 0);
+                return {
+                    avgInhale: totalInhale / this.cycles.length,
+                    avgExhale: totalExhale / this.cycles.length
+                };
+            }
+        }
+
+        // Inlined from modules/HrvCalculations.js
+        /**
+         * A comprehensive HRV analysis class that calculates time-domain, geometric,
+         * and frequency-domain metrics from a series of RR intervals.
+         */
+        class HRVAnalyzer {
+            constructor(rrIntervals) {
+                this.rrIntervals = rrIntervals.filter(n => typeof n === 'number' && !isNaN(n) && n > 0);
+                this.n = this.rrIntervals.length;
+
+                if (this.n < 30) { // Need more data for stable advanced metrics
+                    this.setDefaultValues();
+                    return;
+                }
+
+                // --- Basic Time-Domain ---
+                this.meanRR = this.average(this.rrIntervals);
+                this.avgHR = 60000 / this.meanRR;
+                this.sdnn = this.standardDeviation(this.rrIntervals);
+                const rmssdValues = this.rrIntervals.slice(1).map((val, i) => Math.pow(val - this.rrIntervals[i], 2));
+                this.rmssd = Math.sqrt(rmssdValues.reduce((a, b) => a + b, 0) / (this.n - 1));
+                const nn50Array = this.rrIntervals.slice(1).map((val, i) => Math.abs(val - this.rrIntervals[i]));
+                this.nn50 = nn50Array.filter(diff => diff > 50).length;
+                this.pnn50 = (this.nn50 / (this.n - 1)) * 100;
+
+                // --- Frequency Domain ---
+                this.frequency = this.analyzeFrequencyDomain(this.rrIntervals);
+
+                // --- Poincaré Plot ---
+                this.sd1 = this.rmssd / Math.sqrt(2);
+                const sd2_val = 2 * Math.pow(this.sdnn, 2) - 0.5 * Math.pow(this.rmssd, 2);
+                this.sd2 = Math.sqrt(Math.max(0, sd2_val));
+                this.sd2_sd1_ratio = this.sd1 > 0 ? this.sd2 / this.sd1 : 0;
+
+                // --- Geometric ---
+                this.rrHistogram = this.calculateRRHistogram(30);
+                
+                // --- Entropy (Nonlinear) ---
+                this.apEn = this.approximateEntropy(this.rrIntervals);
+                this.sampEn = this.sampleEntropy(this.rrIntervals);
+
+                // --- Derived Wellness & Sleep Scores ---
+                this.conditioningScore = this.normalize(this.sdnn, 20, 100) * 50 + this.normalize(this.rmssd, 10, 80) * 50;
+                this.recoveryScore = this.normalize(this.rmssd, 10, 100) * 60 + this.normalize(this.pnn50, 2, 30) * 40;
+                this.sleepQualityScore = this.normalize(this.rmssd, 10, 80) * 60 + this.normalize(this.frequency.hfPower, 100, 5000) * 40;
+                const normRmssd = 1 - this.normalize(this.rmssd, 10, 80);
+                const normLfHf = this.normalize(this.frequency.lfHfRatio, 0.5, 3);
+                this.strainScore = normRmssd * 60 + normLfHf * 40;
+                this.sleepAnalysis = this.calculateSleepAnalysis();
+                this.state = this.calculateState();
+                this.breathingWave = this.rrIntervals.map(rr => rr > 0 ? -(60000 / rr) : 0);
+            }
+
+            setDefaultValues() {
+                this.avgHR = 0; this.meanRR = 0; this.sdnn = 0; this.rmssd = 0; this.nn50 = 0; this.pnn50 = 0;
+                this.frequency = { vlfPower: 0, lfPower: 0, hfPower: 0, lfHfRatio: 0, freqs: [], psd: [] };
+                this.sd1 = 0; this.sd2 = 0; this.sd2_sd1_ratio = 0;
+                this.rrHistogram = { labels: [], counts: [] };
+                this.apEn = 0; this.sampEn = 0;
+                this.conditioningScore = 0; this.recoveryScore = 0; this.sleepQualityScore = 0; this.strainScore = 0;
+                this.sleepAnalysis = { lightSleep: 0, deepSleep: 0, remSleep: 0 };
+                this.state = 'Calculating...'; this.breathingWave = [];
+            }
+
+            average(arr) { return arr.reduce((a, b) => a + b, 0) / arr.length; }
+            standardDeviation(arr) {
+                const avg = this.average(arr);
+                return Math.sqrt(arr.reduce((sum, val) => sum + Math.pow(val - avg, 2), 0) / (arr.length - 1));
+            }
+            normalize(value, min, max) { return Math.max(0, Math.min(1, (value - min) / (max - min))); }
+            
+            calculateState() {
+                if (this.rmssd > 50 && this.sdnn > 100) return 'Optimal';
+                if (this.rmssd > 30 && this.sdnn > 50) return 'Good';
+                if (this.rmssd > 15 && this.sdnn > 25) return 'Moderate';
+                return 'Suboptimal';
+            }
+
+            calculateRRHistogram(numBins = 30) {
+                const minRR = Math.min(...this.rrIntervals);
+                const maxRR = Math.max(...this.rrIntervals);
+                const binWidth = (maxRR - minRR) / numBins || 1;
+                const counts = Array(numBins).fill(0);
+                this.rrIntervals.forEach(val => {
+                    let binIndex = Math.floor((val - minRR) / binWidth);
+                    if (binIndex >= numBins) binIndex = numBins - 1;
+                    counts[binIndex]++;
+                });
+                const labels = Array.from({length: numBins}, (_, i) => `${(minRR + i * binWidth).toFixed(0)}`);
+                return { labels, counts };
+            }
+
+            analyzeFrequencyDomain(rr) {
+                const fs = 4;
+                const rrTimes = rr.reduce((acc, val) => [...acc, acc.length > 0 ? acc[acc.length - 1] + val / 1000 : val / 1000], []);
+                const duration = rrTimes[rrTimes.length - 1];
+                const uniformTimes = Array.from({ length: Math.floor(duration * fs) }, (_, i) => i / fs);
+                const interpRRs = uniformTimes.map(t => {
+                    const i = rrTimes.findIndex(rt => rt >= t);
+                    if (i <= 0) return rr[0];
+                    if (i >= rrTimes.length) return rr[rr.length - 1];
+                    const t1 = rrTimes[i - 1], t2 = rrTimes[i], v1 = rr[i - 1], v2 = rr[i];
+                    return v1 + (v2 - v1) * (t - t1) / (t2 - t1);
+                });
+                const meanRR = this.average(interpRRs);
+                const detrended = interpRRs.map(x => x - meanRR);
+                const N = Math.pow(2, Math.ceil(Math.log2(detrended.length)));
+                while (detrended.length < N) detrended.push(0);
+                const X = Array.from({ length: N / 2 }, (_, k) => {
+                    let re = 0, im = 0;
+                    for (let n = 0; n < N; n++) {
+                        const angle = 2 * Math.PI * k * n / N;
+                        re += detrended[n] * Math.cos(angle);
+                        im -= detrended[n] * Math.sin(angle);
+                    }
+                    return { re, im };
+                });
+                const freqs = X.map((_, k) => k * fs / N);
+                const psd = X.map(c => (c.re * c.re + c.im * c.im) / N);
+                const bandPower = (band) => freqs.reduce((power, f, i) => (f >= band[0] && f < band[1]) ? power + psd[i] : power, 0);
+                const vlfPower = bandPower([0.0033, 0.04]);
+                const lfPower = bandPower([0.04, 0.15]);
+                const hfPower = bandPower([0.15, 0.4]);
+                return { vlfPower, lfPower, hfPower, lfHfRatio: hfPower > 0 ? lfPower / hfPower : 0, freqs, psd };
+            }
+
+            calculateSleepAnalysis() {
+                const { vlfPower, lfPower, hfPower } = this.frequency;
+                const totalPower = vlfPower + lfPower + hfPower;
+                if (totalPower === 0) return { lightSleep: 0, deepSleep: 0, remSleep: 0 };
+                return { lightSleep: (lfPower / totalPower) * 100, deepSleep: (hfPower / totalPower) * 100, remSleep: (vlfPower / totalPower) * 100 };
+            }
+            
+            // --- Entropy Methods ---
+            approximateEntropy(rr, m = 2, rRatio = 0.2) {
+              const r = rRatio * this.standardDeviation(rr);
+              const phi = (m_val) => {
+                const N = rr.length - m_val + 1;
+                const C = Array.from({ length: N }, (_, i) => {
+                  let count = 0;
+                  for (let j = 0; j < N; j++) {
+                    let dist = 0;
+                    for (let k = 0; k < m_val; k++) {
+                      dist = Math.max(dist, Math.abs(rr[i + k] - rr[j + k]));
+                    }
+                    if (dist <= r) count++;
+                  }
+                  return count / N;
+                });
+                return Math.log(this.average(C));
+              };
+              return Math.abs(phi(m) - phi(m + 1));
+            }
+
+            sampleEntropy(rr, m = 2, rRatio = 0.2) {
+              const r = rRatio * this.standardDeviation(rr);
+              const N = rr.length;
+              const countMatches = (m_val) => {
+                let count = 0;
+                for (let i = 0; i < N - m_val; i++) {
+                  for (let j = i + 1; j < N - m_val; j++) {
+                    let dist = 0;
+                    for (let k = 0; k < m_val; k++) {
+                      dist = Math.max(dist, Math.abs(rr[i + k] - rr[j + k]));
+                    }
+                    if (dist <= r) count++;
+                  }
+                }
+                return count;
+              };
+              const A = countMatches(m + 1);
+              const B = countMatches(m);
+              if (B === 0) return 0;
+              return -Math.log(A / B || 1);
+            }
+        }
+
+        // Inlined from modules/ChartManager.js
+        const chartInstances = {};
+
+        // --- Chart Configuration Helpers ---
+        const createBaseOptions = (title, showLegend = false) => ({
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: showLegend, position: 'top', labels: { color: '#e0e0e0' } },
+                title: { display: !showLegend, text: title, font: { size: 16 }, color: '#e0e0e0' }
+            },
+            animation: { duration: 200 }
+        });
+
+        const createLineConfig = (title, label, color) => ({ type: 'line', data: { labels: [], datasets: [{ label, data: [], borderColor: color, backgroundColor: `${color}33`, fill: true, tension: 0.4, pointRadius: 0 }] }, options: { ...createBaseOptions(title), scales: { x: { ticks: { display: false } }, y: { beginAtZero: false } } } });
+        const createScatterConfig = (title) => ({ type: 'scatter', data: { datasets: [{ label: 'RRn vs RRn+1', data: [], backgroundColor: '#8b5cf666', pointRadius: 2 }] }, options: { ...createBaseOptions(title), scales: { x: { type: 'linear', title: { display: true, text: 'RRn (ms)' } }, y: { title: { display: true, text: 'RRn+1 (ms)' }, afterDataLimits: (axis) => { const xMax = axis.chart.scales.x.max; axis.max = xMax; axis.min = axis.chart.scales.x.min; } } }, animation: false } });
+        const createBarConfig = (title, label, colors) => ({ type: 'bar', data: { labels: [], datasets: [{ label, data: [], backgroundColor: colors, borderWidth: 1 }] }, options: { ...createBaseOptions(title), scales: { y: { beginAtZero: true } } } });
+        const createPieConfig = (title) => ({ type: 'pie', data: { labels: ['Light Sleep', 'Deep Sleep', 'REM Sleep'], datasets: [{ label: 'Sleep Stages', data: [], backgroundColor: ['#3b82f6', '#1e40af', '#6d28d9'] }] }, options: createBaseOptions(title) });
+
+        // --- Summary Chart ---
+        function initSummaryChart() {
+            const ctx = document.getElementById('summaryChart')?.getContext('2d');
+            if (!ctx) return;
+            if (chartInstances.summaryChart) chartInstances.summaryChart.destroy();
+            chartInstances.summaryChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [
+                        { type: 'line', label: 'RR Interval (ms)', data: [], borderColor: '#06b6d4', yAxisID: 'yRR', pointRadius: 0, tension: 0.2 },
+                        { type: 'line', label: 'Heart Rate (bpm)', data: [], borderColor: '#22c55e', yAxisID: 'yHR', pointRadius: 0, tension: 0.2 },
+                        { type: 'line', label: 'RMSSD', data: [], borderColor: '#d946ef', yAxisID: 'yHRV', pointRadius: 0, tension: 0.2 },
+                        { type: 'line', label: 'SDNN', data: [], borderColor: '#f97316', yAxisID: 'yHRV', pointRadius: 0, tension: 0.2 }
+                    ]
+                },
+                options: {
+                    ...createBaseOptions('Heart Rhythm Stats', true),
+                    scales: {
+                        x: { ticks: { display: false } },
+                        yRR: { type: 'linear', position: 'left', title: { display: true, text: 'RR (ms)', color: '#06b6d4' } },
+                        yHR: { type: 'linear', position: 'right', title: { display: true, text: 'HR (bpm)', color: '#22c55e' }, grid: { drawOnChartArea: false } },
+                        yHRV: { type: 'linear', position: 'right', title: { display: true, text: 'HRV (ms)', color: '#d946ef' }, grid: { drawOnChartArea: false }, suggestedMin: 0 }
+                    }
+                }
+            });
+        }
+
+        function updateSummaryChart(data) {
+            const chart = chartInstances.summaryChart;
+            if (!chart) return;
+            chart.data.labels = data.labels;
+            chart.data.datasets[0].data = data.rr;
+            chart.data.datasets[1].data = data.hr;
+            chart.data.datasets[2].data = data.rmssd;
+            chart.data.datasets[3].data = data.sdnn;
+            chart.update('none');
+        }
+
+        /** Initializes all other charts. */
+        function initCharts(chartIds) {
+            const chartConfigs = {
+                hrChart: createLineConfig('Real-time Heart Rate', 'HR (bpm)', '#ef4444'),
+                rmssdChart: createLineConfig('RMSSD', 'RMSSD (ms)', '#8b5cf6'),
+                sdnnChart: createLineConfig('SDNN', 'SDNN (ms)', '#f59e0b'),
+                rpeChart: createLineConfig('RPE', 'RPE', '#14b8a6'),
+                breathChart: createLineConfig('Breath Rate', 'Breaths/min', '#3b82f6'),
+                recoveryChart: createLineConfig('Recovery Score', 'Score (%)', '#22c55e'),
+                strainChart: createLineConfig('Strain Score', 'Score', '#e11d48'),
+                rrIntervalsChart: createLineConfig('RR Intervals', 'RR (ms)', '#eab308'),
+                poincareChart: createScatterConfig('Poincaré Plot'),
+                rrHistogramChart: createBarConfig('RR Interval Histogram', 'Count', '#22c55e'),
+                frequencySpectrumChart: createBarConfig('Frequency Power Spectrum', 'Power (ms²)', ['#6366f1', '#8b5cf6', '#ec4899']),
+                breathingWaveChart: createLineConfig('Simulated Breathing Wave', 'Amplitude', '#14b8a6'),
+                hrvScoreChart: createBarConfig('Wellness Scores', 'Score (%)', ['#0ea5e9', '#22c55e', '#a855f7']),
+                sleepChart: createPieConfig('Estimated Sleep Stages')
+            };
+            chartIds.forEach(id => {
+                const ctx = document.getElementById(id)?.getContext('2d');
+                if (ctx && chartConfigs[id]) {
+                    if (chartInstances[id]) chartInstances[id].destroy();
+                    chartInstances[id] = new Chart(ctx, chartConfigs[id]);
+                }
+            });
+
+            // Special HR & Breath Chart (HrDataScreen)
+            const hrBreathCtx = document.getElementById('hrBreathChart')?.getContext('2d');
+            if (hrBreathCtx) {
+                if (chartInstances.hrBreathChart) chartInstances.hrBreathChart.destroy();
+                chartInstances.hrBreathChart = new Chart(hrBreathCtx, {
+                    type: 'line',
+                    data: {
+                        labels: [],
+                        datasets: [
+                            { label: 'Heart Rate (bpm)', data: [], borderColor: '#ef4444', fill: false, tension: 0.4, pointRadius: 0, yAxisID: 'yHR' },
+                            { label: 'Breath Rate (breaths/min)', data: [], borderColor: '#3b82f6', fill: false, tension: 0.4, pointRadius: 0, yAxisID: 'yBreath' }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: true, position: 'top', labels: { color: '#e0e0e0' } },
+                            title: { display: true, text: 'Heart Rate & Breath Rate Over Time', font: { size: 16 }, color: '#e0e0e0' },
+                            annotation: {
+                                annotations: {
+                                    // HR Zones as background bands (simplified for clarity)
+                                    warmupZone: { type: 'box', yMin: 60, yMax: 0, backgroundColor: 'rgba(255, 255, 0, 0.1)', borderWidth: 0, label: { content: 'Warmup', display: true, position: 'start' } },
+                                    endurance1Zone: { type: 'box', yMin: 0, yMax: 0, backgroundColor: 'rgba(0, 255, 0, 0.1)', borderWidth: 0, label: { content: 'Endurance 1', display: true, position: 'start' } },
+                                    endurance2Zone: { type: 'box', yMin: 0, yMax: 0, backgroundColor: 'rgba(0, 200, 0, 0.1)', borderWidth: 0, label: { content: 'Endurance 2', display: true, position: 'start' } },
+                                    endurance3Zone: { type: 'box', yMin: 0, yMax: 0, backgroundColor: 'rgba(0, 150, 0, 0.1)', borderWidth: 0, label: { content: 'Endurance 3', display: true, position: 'start' } },
+                                    intensive1Zone: { type: 'box', yMin: 0, yMax: 0, backgroundColor: 'rgba(255, 165, 0, 0.1)', borderWidth: 0, label: { content: 'Intensive 1', display: true, position: 'start' } },
+                                    intensive2Zone: { type: 'box', yMin: 0, yMax: 0, backgroundColor: 'rgba(255, 0, 0, 0.1)', borderWidth: 0, label: { content: 'Intensive 2', display: true, position: 'start' } },
+                                }
+                            }
+                        },
+                        scales: {
+                            x: { ticks: { display: false } },
+                            yHR: { 
+                                type: 'linear', 
+                                position: 'left', 
+                                title: { display: true, text: 'Heart Rate (bpm)', color: '#e0e0e0' },
+                                min: 60, // Fixed scale
+                                max: 220, // Fixed scale
+                                grid: { color: '#333' }
+                            },
+                            yBreath: {
+                                type: 'linear',
+                                position: 'right',
+                                title: { display: true, text: 'Breath Rate (breaths/min)', color: '#e0e0e0' },
+                                grid: { drawOnChartArea: false, color: '#333' },
+                                min: 0,
+                                max: 30 // Example max breath rate
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        /** Updates charts with new data. */
+        function updateCharts(data) {
+            const updateChartData = (id, data, labels) => {
+                const chart = chartInstances[id];
+                if (!chart) return;
+                chart.data.datasets[0].data = data;
+                if (labels) chart.data.labels = labels;
+                chart.update('none');
+            };
+
+            const appendLineData = (id, value) => {
+                const chart = chartInstances[id];
+                if (!chart || typeof value !== 'number' || isNaN(value)) return;
+                const now = new Date().toLocaleTimeString();
+                chart.data.labels.push(now);
+                chart.data.datasets[0].data.push(value);
+                if (chart.data.labels.length > 60) {
+                    chart.data.labels.shift();
+                    chart.data.datasets[0].data.shift();
+                }
+                chart.update('none');
+            };
+
+            // Update all charts, but only visible ones will render
+            appendLineData('hrChart', data.hr);
+            appendLineData('rmssdChart', data.hrv?.rmssd);
+            appendLineData('sdnnChart', data.hrv?.sdnn);
+            appendLineData('rpeChart', data.rpe);
+            appendLineData('breathChart', data.breath?.breathRate);
+            appendLineData('recoveryChart', data.hrv?.recoveryScore);
+            appendLineData('strainChart', data.hrv?.strainScore);
+
+            if (data.hrv) {
+                updateChartData('rrIntervalsChart', data.hrv.rrIntervals, data.hrv.rrIntervals.map((_, i) => i + 1));
+                const poincareData = data.hrv.rrIntervals.slice(0, -1).map((val, i) => ({ x: val, y: data.hrv.rrIntervals[i + 1] }));
+                updateChartData('poincareChart', poincareData);
+                updateChartData('rrHistogramChart', data.hrv.rrHistogram.counts, data.hrv.rrHistogram.labels);
+                updateChartData('frequencySpectrumChart', [data.hrv.frequency.vlfPower, data.hrv.frequency.lfPower, data.hrv.frequency.hfPower], ['VLF', 'LF', 'HF']);
+                updateChartData('breathingWaveChart', data.hrv.breathingWave, data.hrv.breathingWave.map((_, i) => i + 1));
+                const scores = [data.hrv.conditioningScore, data.hrv.recoveryScore, data.hrv.sleepQualityScore];
+                updateChartData('hrvScoreChart', scores, ['Conditioning', 'Recovery', 'Sleep']);
+                const { lightSleep, deepSleep, remSleep } = data.hrv.sleepAnalysis;
+                updateChartData('sleepChart', [lightSleep, deepSleep, remSleep]);
+            }
+
+            // Update HR & Breath Chart
+            const hrBreathChart = chartInstances.hrBreathChart;
+            if (hrBreathChart && typeof data.hr === 'number' && !isNaN(data.hr) && typeof data.breath?.breathRate === 'number' && !isNaN(data.breath.breathRate)) {
+                const now = new Date().toLocaleTimeString();
+                hrBreathChart.data.labels.push(now);
+                hrBreathChart.data.datasets[0].data.push(data.hr);
+                hrBreathChart.data.datasets[1].data.push(data.breath.breathRate);
+
+                if (hrBreathChart.data.labels.length > 60) { // Keep last 60 data points
+                    hrBreathChart.data.labels.shift();
+                    hrBreathChart.data.datasets[0].data.shift();
+                    hrBreathChart.data.datasets[1].data.shift();
+                }
+                hrBreathChart.update('none');
+            }
+        }
+
+        // Inlined from modules/BluetoothManager.js
+        // A class for processing raw RR intervals to filter out artifacts.
+        // This is a helper class for the main BluetoothController and is not exported.
+        class RRIntervalProcessor {
+            constructor(options = {}) {
+                this.setOptions(options);
+                this.reset();
+            }
+            setOptions(options = {}) {
+                const defaults = { artifactThreshold: 1.4, replacementStrategy: 'replaceWithLastGood' };
+                this.options = { ...defaults, ...options };
+                this.isFilteringDisabled = false;
+            }
+            reset() {
+                this.filteredIntervals = [];
+                this.lastGoodInterval = null;
+            }
+            addInterval(newInterval) {
+                if (this.isFilteringDisabled) {
+                    this.filteredIntervals.push(newInterval);
+                    return;
+                }
+                if (!this.lastGoodInterval) {
+                    this.lastGoodInterval = newInterval;
+                    this.filteredIntervals.push(newInterval);
+                    return;
+                }
+                const ratio = newInterval / this.lastGoodInterval;
+                if (ratio > this.options.artifactThreshold || ratio < (1 / this.options.artifactThreshold)) {
+                    this._handleArtifact(newInterval);
+                } else {
+                    this.lastGoodInterval = newInterval;
+                    this.filteredIntervals.push(newInterval);
+                }
+            }
+            _handleArtifact(artifactInterval) {
+                if (this.options.replacementStrategy === 'replaceWithLastGood') {
+                    this.filteredIntervals.push(this.lastGoodInterval);
+                }
+                // Other strategies could be implemented here.
+            }
+        }
+
+        // An object for parsing raw data from the Bluetooth characteristic.
+        // This is a helper and is not exported.
+        const bleDataParser = {
+            parseHr(value) {
+                const flags = value.getUint8(0);
+                const hrFormat = (flags & 0x01); // 0 = UINT8, 1 = UINT16
+                return (hrFormat === 1) ? value.getUint16(1, true) : value.getUint8(1);
+            },
+            parseRr(value) {
+                const flags = value.getUint8(0);
+                const rrPresent = (flags & 0x10);
+                if (!rrPresent) return [];
+
+                const intervals = [];
+                const hrFormat = (flags & 0x01);
+                let startIndex = (hrFormat === 1) ? 3 : 2;
+
+                for (let i = startIndex; i + 1 < value.byteLength; i += 2) {
+                    // RR-Interval is Uint16 in 1/1024 s format. Convert to ms.
+                    intervals.push((value.getUint16(i, true) / 1024) * 1000);
+                }
+                return intervals;
+            }
+        };
+
+        // The main class for managing the Bluetooth connection lifecycle.
+        // This is the default export of the module.
+        class BluetoothController {
+            constructor() {
+                this.device = null;
+                this.state = 'IDLE'; // IDLE, SEARCHING, CONNECTING, STREAMING, ERROR, STOPPED
+                this.rrProcessor = new RRIntervalProcessor();
+                this.onStateChange = () => {}; // Callback for state changes
+                this.onData = () => {}; // Callback for new data
+            }
+
+            _setState(newState, deviceName = '') {
+                this.state = newState;
+                this.onStateChange(this.state, deviceName);
+                console.log(`[BT] State changed to: ${this.state}`);
+            }
+
+            setPreset(presetName) {
+                console.log(`[BT] Setting preset to: ${presetName}`);
+                this.rrProcessor.isFilteringDisabled = (presetName === 'raw');
+                let threshold = 1.4; // Default threshold for 'live_workout'
+                switch (presetName) {
+                    case 'high_fidelity': threshold = 1.2; break;
+                    case 'resting': threshold = 1.3; break;
+                    case 'live_workout': threshold = 1.5; break;
+                }
+                this.rrProcessor.setOptions({ ...this.rrProcessor.options, artifactThreshold: threshold });
+            }
+
+            async connect() {
+                if (!navigator.bluetooth) {
+                    this._setState('ERROR');
+                    alert('Web Bluetooth is not supported on this browser.');
+                    return;
+                }
+                try {
+                    this._setState('SEARCHING');
+                    const device = await navigator.bluetooth.requestDevice({ filters: [{ services: ['heart_rate'] }] });
+                    this.device = device;
+                    device.addEventListener('gattserverdisconnected', () => this._handleDisconnect());
+
+                    this._setState('CONNECTING');
+                    const server = await device.gatt.connect();
+                    const service = await server.getPrimaryService('heart_rate');
+                    const characteristic = await service.getCharacteristic('heart_rate_measurement');
+
+                    await characteristic.startNotifications();
+                    characteristic.addEventListener('characteristicvaluechanged', (event) => this._handleData(event));
+                    this._setState('STREAMING', device.name);
+                } catch (error) {
+                    console.error("Bluetooth connection failed:", error);
+                    this._setState('ERROR');
+                }
+            }
+
+            _handleData(event) {
+                const value = event.target.value;
+                const heartRate = bleDataParser.parseHr(value);
+                const rrIntervals = bleDataParser.parseRr(value);
+
+                const dataPacket = {
+                    heartRate: heartRate,
+                    rawRrIntervals: rrIntervals,
+                    filteredRrIntervals: []
+                };
+
+                if (rrIntervals.length > 0) {
+                    this.rrProcessor.reset();
+                    rrIntervals.forEach(rr => this.rrProcessor.addInterval(rr));
+                    dataPacket.filteredRrIntervals = this.rrProcessor.filteredIntervals;
+                }
+                this.onData(dataPacket);
+            }
+
+            _handleDisconnect() {
+                this._setState('STOPPED');
+                this.rrProcessor.reset();
+            }
+
+            async disconnect() {
+                if (this.device && this.device.gatt.connected) {
+                    await this.device.gatt.disconnect();
+                } else {
+                    this._handleDisconnect();
+                }
+            }
+        }
+
+        // Inlined from modules/BodyCalculations.js
+        class Bodystandard {
+            constructor({ gender, age, weight, height, fatPercentage }) {
+                this.LBM = Math.round(weight - (weight * (fatPercentage / 100)));
+                this.fatMass = Math.round(weight * fatPercentage / 100);
+                this.muscleMass = Math.round(this.LBM * 0.45);
+                this.bmi = Math.round(weight / ((height / 100) * (height / 100)));
+                this.idealWeightBMI = Math.round((height / 100) * (height / 100) * 22.5);
+
+                if (gender === "male") {
+                    this.metabolicAge = Math.round(((10 * weight) + (6.25 * height) - (5 * age) + 5) / 100);
+                    this.bmr = Math.round(66.4730 + (13.7516 * weight) + (5.0033 * height) - (6.7550 * age));
+                } else if (gender === "female") {
+                    this.metabolicAge = Math.round(((10 * weight) + (6.25 * height) - (5 * age) - 161) / 100);
+                    this.bmr = Math.round(655.0955 + (9.5634 * weight) + (1.8496 * height) - (4.6756 * age));
+                } else {
+                    this.metabolicAge = 0;
+                    this.bmr = 0;
+                }
+            }
+        }
+
+        class VO2 {
+            constructor({ age, height, weight, maxWatt, at, fatPercentage, gender }) {
+                this.maximalOxygenUptake = Math.round((((260 - age) * height / 190) * 0.0113) + 0.395);
+                this.vo2Standard = Math.round(maxWatt / (0.072 * weight));
+                this.vo2MaxPotential = Math.round(2 * this.maximalOxygenUptake * 1000 / weight * (1 - (fatPercentage / 100)));
+
+                if (gender === "male") {
+                    this.theoreticalMax = Math.round(2 * this.maximalOxygenUptake * 1000 / (20.5 * Math.pow(height / 100, 2)));
+                } else {
+                    this.theoreticalMax = Math.round(2 * this.maximalOxygenUptake * 1000 / (22.5 * Math.pow(height / 100, 2)));
+                }
+
+                this.warmingUp = Math.round(at * 0.7);
+                this.coolingDown = Math.round(at * 0.7 + 5);
+                this.endurance1 = Math.round(at * 0.75);
+                this.endurance2 = Math.round(at * 0.85);
+                this.endurance3 = Math.round(at * 0.95);
+                this.intensive1 = Math.round(at * 1.05);
+                this.intensive2 = Math.round(at * 1.1);
+            }
+        }
+
+        class RuntimesVo2 {
+            constructor(vo2max) {
+                // This is a very large switch statement, it should be replaced with a Map for better performance and readability.
+                // For now, returning a simplified version. A full implementation would use the large switch you provided.
+                const vo2ToRunTimesMap = new Map([
+                    [36, { "3k": 1143, "5k": 2039, "10k": 4514, "21k": 10785, "42k": 24674 }],
+                    [40, { "3k": 1026, "5k": 1819, "10k": 3988, "21k": 9399, "42k": 21133 }],
+                    [50, { "3k": 810, "5k": 1420, "10k": 3058, "21k": 7036, "42k": 15380 }],
+                    [60, { "3k": 662, "5k": 1152, "10k": 2451, "21k": 5555, "42k": 11938 }],
+                    [70, { "3k": 555, "5k": 961, "10k": 2027, "21k": 4545, "42k": 9656 }],
+                    [85, { "3k": 441, "5k": 759, "10k": 1587, "21k": 3521, "42k": 7397 }]
+                ]);
+                const vo2Keys = Array.from(vo2ToRunTimesMap.keys());
+                const closestVo2 = vo2Keys.reduce((prev, curr) => Math.abs(curr - vo2max) < Math.abs(prev - vo2max) ? curr : prev);
+                this.times = vo2ToRunTimesMap.get(closestVo2) || {};
+            }
+        }
 
 
+        document.addEventListener('DOMContentLoaded', () => {
+            const config = {
+                userData: { 
+                    age: 35, gender: 'male', weightKg: 75, heightCm: 180, anaerobicThresholdHR: 165, restingHR: 60, maxHR: 190, fatPercentage: 15, 
+                    baselineRmssd: 45, // Baseline RMSSD for comparison
+                    targetHr: 120, // Example target HR for training
+                    targetRmssdMin: 40, // Example target min RMSSD
+                    targetRmssdMax: 60, // Example target max RMSSD
+                    targetBreathRateMin: 10, // Example target min Breath Rate
+                    targetBreathRateMax: 16, // Example target max Breath Rate
+                },
+                initialScreenConfig: {
+                    'DashboardScreen': { name: 'Live Dashboard', default: true },
+                },
+                chartConfig: {
+                    'summaryChart': { name: 'Summary Chart', default: true },
+                    'hrBreathChart': { name: 'HR & Breath Chart', default: true }, // New chart
+                    'rrIntervalsChart': { name: 'RR Intervals Plot', default: true },
+                    'poincareChart': { name: 'Poincaré Plot', default: true },
+                    'rrHistogramChart': { name: 'RR Histogram', default: true },
+                    'frequencySpectrumChart': { name: 'Frequency Spectrum', default: true },
+                    'breathingWaveChart': { name: 'Breathing Wave', default: true },
+                    // These are the "first four" trends that user wants visible by default
+                    'hrChart': { name: 'Heart Rate Trend', default: true }, // Changed to true
+                    'rmssdChart': { name: 'RMSSD Trend', default: true }, // Changed to true
+                    'sdnnChart': { name: 'SDNN Trend', default: true }, // Changed to true
+                    'breathChart': { name: 'Breath Rate Trend', default: true }, // Changed to true
+                    'rpeChart': { name: 'RPE Trend', default: false },
+                    'recoveryChart': { name: 'Recovery Score Trend', default: false },
+                    'strainChart': { name: 'Strain Score Trend', default: false },
+                    'hrvScoreChart': { name: 'Wellness Scores Bars', default: false },
+                    'sleepChart': { name: 'Sleep Stages Pie', default: false },
+                },
+                activeScreenOrder: [],
+                displaySettings: { visibleGraphs: [] },
+                selectors: {
+                    settingsView: 'settingsView', trainingView: 'trainingView', saveAndContinueBtn: 'saveAndContinueBtn', screenOptionsContainer: 'screenOptionsContainer', chartOptionsContainer: 'chartOptionsContainer',
+                    userAge: 'userAge', userGender: 'userGender', userWeight: 'userWeight', userHeight: 'userHeight', userFatPercentage: 'userFatPercentage', userMaxHR: 'userMaxHR', userRestingHR: 'userRestingHR', userAtHR: 'userAtHR', userMaxWatt: 'userMaxWatt', userBaselineRmssd: 'userBaselineRmssd',
+                    presetSelect: 'presetSelect', startBtn: 'startTrainingBtn', stopBtn: 'stopTrainingBtn', backBtn: 'backBtn',
+                    status: 'statusDisplay', timer: 'timerDisplay', hr: 'hrDisplay', rmssd: 'rmssdDisplay', sdnn: 'sdnnDisplay', avgRrDisplay: 'avgRrDisplay', hrZone: 'hrZoneDisplay',
+                    rpeDisplay: 'rpeDisplay', intensityDisplay: 'intensityDisplay',
+                    conditioningScoreDisplay: 'conditioningScoreDisplay', recoveryScoreDisplay: 'recoveryScoreDisplay', sleepQualityScoreDisplay: 'sleepQualityScoreDisplay', strainScoreDisplay: 'strainScoreDisplay', hrvStateDisplay: 'hrvStateDisplay',
+                    nn50Display: 'nn50Display', pnn50Display: 'pnn50Display', sd1Display: 'sd1Display', sd2Display: 'sd2Display', sd2sd1RatioDisplay: 'sd2sd1RatioDisplay', vlfPowerDisplay: 'vlfPowerDisplay', lfPowerDisplay: 'lfPowerDisplay', hfPowerDisplay: 'hfPowerDisplay', lfhfRatioDisplay: 'lfhfRatioDisplay',
+                    apEnDisplay: 'apEnDisplay', sampEnDisplay: 'sampEnDisplay',
+                    inhaleTimeDisplay: 'inhaleTimeDisplay', exhaleTimeDisplay: 'exhaleTimeDisplay', tiTeRatioDisplay: 'tiTeRatioDisplay', breathDepthDisplay: 'breathDepthDisplay',
+                    avgInhaleTimeDisplay: 'avgInhaleTimeDisplay', avgExhaleTimeDisplay: 'avgExhaleTimeDisplay',
+                    rawRrDataDisplay: 'rawRrDataDisplay',
+                    rawHrvExplanationHeader: 'rawHrvExplanationHeader',
+                    rawHrvExplanationContent: 'rawHrvExplanationContent',
+                    allScreens: '.training-screen', // Still needed for querySelectorAll
+                    
+                    // Dashboard specific selectors for flickering
+                    hrDashboardBox: 'hrDashboardBox',
+                    rmssdDashboardBox: 'rmssdDashboardBox',
+                    sdnnDashboardBox: 'sdnnDashboardBox',
+                    breathRateDashboardBox: 'breathRateDashboardBox',
+
+                    // HR Data (now part of Dashboard)
+                    hrBreathChartContainer: 'hrBreathChartContainer',
+                    hrZoneTimesDisplay: 'hrZoneTimesDisplay',
+
+                    // HRV Raw Data (now part of Dashboard)
+                    // rmssdRawDisplay and sdnnRawDisplay are now the same as rmssdDisplay and sdnnDisplay
+                    
+                    // Data Summary (now part of Dashboard)
+                    minuteSummaryContainer: 'minuteSummaryContainer',
+
+                    // Coaching (now part of Dashboard)
+                    hrvScoreCoachingDisplay: 'hrvScoreCoachingDisplay',
+                    hrCoachingDisplay: 'hrCoachingDisplay',
+                    breathRateCoachingDisplay: 'breathRateCoachingDisplay',
+                    tiTeRatioCoachingDisplay: 'tiTeRatioCoachingDisplay',
+                    goalComparisonDisplay: 'goalComparisonDisplay',
+                    trainingEffectivenessDisplay: 'trainingEffectivenessDisplay',
+                    recoveryScoreCoachingDisplay: 'recoveryScoreCoachingDisplay',
+                    strainScoreCoachingDisplay: 'strainScoreCoachingDisplay',
+                }
+            };
+
+            Object.keys(config.chartConfig).forEach(key => { config.selectors[`${key}Container`] = `${key}Container`; });
+
+            const UIManipulator = {
+                elements: {},
+                init(selectors) {
+                    for (const key in selectors) {
+                        if (selectors[key].startsWith('.')) this.elements[key] = document.querySelectorAll(selectors[key]);
+                        else this.elements[key] = document.getElementById(selectors[key]);
+                    }
+                },
+                updateText(key, text) { if (this.elements[key]) this.elements[key].textContent = text; },
+                toggleElement(key, show) { const el = this.elements[key]; if (el) el.style.display = show ? 'block' : 'none'; },
+                toggleFlexElement(key, show) { const el = this.elements[key]; if (el) el.style.display = show ? 'flex' : 'none'; },
+                resetDisplayFields() { Object.keys(config.selectors).forEach(key => { if (key.endsWith('Display')) this.updateText(key, '--'); }); },
+                showScreen(index) {
+                    this.elements.allScreens.forEach(s => s.classList.remove('active'));
+                    const screenId = config.activeScreenOrder[index]; // Should always be 'DashboardScreen'
+                    if (screenId) document.getElementById(screenId)?.classList.add('active');
+                },
+                showView(viewName) {
+                    this.toggleElement('settingsView', viewName === 'settings');
+                    this.toggleFlexElement('trainingView', viewName === 'training');
+                },
+                toggleCollapsible(headerId, contentId) {
+                    const header = this.elements[headerId];
+                    const content = this.elements[contentId];
+                    if (header && content) {
+                        header.addEventListener('click', () => {
+                            content.classList.toggle('active');
+                            const arrow = header.querySelector('.arrow');
+                            if (arrow) {
+                                arrow.textContent = content.classList.contains('active') ? '▼' : '▶';
+                            }
+                        });
+                    }
+                },
+                updateStatusBoxColor(elementId, trend) {
+                    const el = this.elements[elementId];
+                    if (el) {
+                        el.classList.remove('red', 'green', 'orange');
+                        if (trend === 'good') {
+                            el.classList.add('green');
+                        } else if (trend === 'bad') {
+                            el.classList.add('red');
+                        } else {
+                            el.classList.add('orange');
+                        }
+                    }
+                },
+                // Function to update HR Zone times display
+                updateHrZoneTimes(hrZoneTimes) {
+                    const container = this.elements.hrZoneTimesDisplay;
+                    if (!container) return;
+                    container.innerHTML = '';
+                    for (const zone in hrZoneTimes) {
+                        const timeInSeconds = hrZoneTimes[zone];
+                        if (timeInSeconds > 0) {
+                            const minutes = Math.floor(timeInSeconds / 60);
+                            const seconds = timeInSeconds % 60;
+                            container.innerHTML += `
+                                <div class="status-box">
+                                    <h4>${zone}</h4>
+                                    <p>${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}</p>
+                                </div>
+                            `;
+                        }
+                    }
+                },
+                // Function to add minute summary to display
+                addMinuteSummary(minuteData) {
+                    const container = this.elements.minuteSummaryContainer;
+                    if (!container) return;
+                    const summaryDiv = document.createElement('div');
+                    summaryDiv.className = 'status-box';
+                    summaryDiv.innerHTML = `
+                        <h4>Min ${minuteData.minute}</h4>
+                        <p>HR: ${minuteData.avgHR.toFixed(0)}</p>
+                        <p>RMSSD: ${minuteData.avgRMSSD.toFixed(0)}</p>
+                        <p>Breath: ${minuteData.avgBreathRate.toFixed(0)}</p>
+                        <p>State: ${minuteData.hrvState}</p>
+                    `;
+                    container.appendChild(summaryDiv);
+                    container.scrollTop = container.scrollHeight; // Scroll to bottom
+                },
+                // Toggle chart visibility on widget click
+                toggleChartVisibility(chartId) {
+                    const chartContainer = document.getElementById(chartId);
+                    if (chartContainer) {
+                        chartContainer.classList.toggle('active');
+                        // If chart is shown, ensure it updates its size correctly
+                        if (chartContainer.classList.contains('active')) {
+                            const chartInstance = chartInstances[chartId.replace('Container', '')];
+                            if (chartInstance) {
+                                chartInstance.resize();
+                            }
+                        }
+                    }
+                }
+            };
+
+            const AppManager = {
+                btController: new BluetoothController(),
+                breathManager: new BreathManager(),
+                rrIntervalBuffer: [],
+                summaryChartData: { labels: [], rr: [], hr: [], rmssd: [], sdnn: [] },
+                hrZoneTimes: { 'Warmup': 0, 'Cooldown': 0, 'Endurance 1': 0, 'Endurance 2': 0, 'Endurance 3': 0, 'Intensive 1': 0, 'Intensive 2': 0, 'Resting': 0 },
+                minuteSummaries: [],
+                currentScreenIndex: 0,
+                trainingTimerInterval: null,
+                trainingSeconds: 0,
+                lastFiveSecondUpdate: 0,
+                lastMinuteUpdate: 0,
+                cumulativeHr: 0,
+                cumulativeRmssd: 0,
+                cumulativeSdnn: 0,
+                cumulativeBreathRate: 0,
+                dataPointsInLastMinute: 0,
+
+                finalHrvMetrics: null,
+                finalBreathMetrics: null,
+                finalAvgBreathMetrics: null,
+
+                init() {
+                    UIManipulator.init(config.selectors);
+                    this.setupEventListeners();
+                    this.generateSettingsOptions();
+                    UIManipulator.showView('settings');
+                    this.btController.onStateChange = this.handleBtStateChange.bind(this);
+                    this.btController.onData = this.handleBtData.bind(this);
+
+                    UIManipulator.toggleCollapsible('rawHrvExplanationHeader', 'rawHrvExplanationContent');
+                },
+
+                setupEventListeners() {
+                    UIManipulator.elements.saveAndContinueBtn.addEventListener('click', () => this.saveSettingsAndContinue());
+                    UIManipulator.elements.backBtn.addEventListener('click', () => UIManipulator.showView('settings'));
+                    UIManipulator.elements.startBtn.addEventListener('click', () => this.btController.connect());
+                    UIManipulator.elements.stopBtn.addEventListener('click', () => this.btController.disconnect());
+                    
+                    // Add click listeners to status boxes to toggle charts
+                    document.querySelectorAll('.status-box[data-chart-id]').forEach(box => {
+                        box.addEventListener('click', (event) => {
+                            const chartId = event.currentTarget.dataset.chartId;
+                            UIManipulator.toggleChartVisibility(chartId);
+                        });
+                    });
+                },
+
+                generateSettingsOptions() {
+                    const createOptions = (container, configObject) => {
+                        container.innerHTML = '';
+                        for (const id in configObject) {
+                            const item = configObject[id];
+                            // Only add DashboardScreen option, others are removed from config.initialScreenConfig
+                            if (id === 'DashboardScreen') {
+                                container.innerHTML += `<div class="screen-options-group"><label for="check-${id}">${item.name}</label><input type="checkbox" id="check-${id}" data-id="${id}" ${item.default ? 'checked' : ''}></div>`;
+                            }
+                        }
+                    };
+                    createOptions(UIManipulator.elements.screenOptionsContainer, config.initialScreenConfig);
+                    // Chart options remain relevant for which charts to display within the single dashboard
+                    const createChartOptions = (container, configObject) => {
+                        container.innerHTML = '';
+                        for (const id in configObject) {
+                            const item = configObject[id];
+                            container.innerHTML += `<div class="screen-options-group"><label for="check-${id}">${item.name}</label><input type="checkbox" id="check-${id}" data-id="${id}" ${item.default ? 'checked' : ''}></div>`;
+                        }
+                    };
+                    createChartOptions(UIManipulator.elements.chartOptionsContainer, config.chartConfig);
+                },
+
+                saveSettingsAndContinue() {
+                    Object.keys(config.userData).forEach(key => {
+                        const el = UIManipulator.elements[`user${key.charAt(0).toUpperCase() + key.slice(1)}`];
+                        if (el) config.userData[key] = (el.type === 'number') ? parseFloat(el.value) : el.value;
+                    });
+                    this.btController.setPreset(UIManipulator.elements.presetSelect.value);
+                    // Ensure only DashboardScreen is active
+                    config.activeScreenOrder = ['DashboardScreen']; 
+                    config.displaySettings.visibleGraphs = Array.from(UIManipulator.elements.chartOptionsContainer.querySelectorAll('input:checked')).map(el => el.dataset.id);
+                    this.rebuildTrainingUI();
+                    UIManipulator.showView('training');
+                },
+
+                rebuildTrainingUI() {
+                    // Hide all screens initially and then show only the DashboardScreen
+                    document.querySelectorAll('.training-screen').forEach(s => s.style.display = 'none');
+                    const dashboardScreen = document.getElementById('DashboardScreen');
+                    if (dashboardScreen) {
+                        dashboardScreen.style.display = 'block';
+                        dashboardScreen.classList.add('active');
+                    }
+
+                    // Toggle visibility of chart containers based on settings
+                    Object.keys(config.chartConfig).forEach(chartId => {
+                        const container = UIManipulator.elements[`${chartId}Container`];
+                        if (container) {
+                            // Charts are initially hidden. They will be shown on widget click.
+                            // The 'default: true' in chartConfig only means they are available as options.
+                            if (config.displaySettings.visibleGraphs.includes(chartId)) {
+                                container.classList.add('active'); // Add 'active' class to show
+                            } else {
+                                container.classList.remove('active'); // Ensure hidden if not selected
+                            }
+                        }
+                    });
+
+                    // No screen navigation needed, so footerNav is not toggled
+                    initCharts(Object.keys(config.chartConfig)); // Initialize all charts, regardless of initial visibility
+                    initSummaryChart();
+                },
+                
+                getHrZone(currentHR, at) {
+                    if (currentHR >= at * 1.1) return 'Intensive 2';
+                    if (currentHR >= at * 1.05) return 'Intensive 1';
+                    if (currentHR >= at * 0.95) return 'Endurance 3';
+                    if (currentHR >= at * 0.85) return 'Endurance 2';
+                    if (currentHR >= at * 0.75) return 'Endurance 1';
+                    if (currentHR >= at * 0.7 + 5) return 'Cooldown';
+                    if (currentHR >= at * 0.7) return 'Warmup';
+                    return 'Resting';
+                },
+
+                handleBtData({ heartRate, filteredRrIntervals }) {
+                    if (filteredRrIntervals.length > 0) {
+                        this.rrIntervalBuffer.push(...filteredRrIntervals);
+                        // Keep buffer size manageable, e.g., last 5 minutes of data (approx 300 RR intervals/min * 5 min = 1500)
+                        if (this.rrIntervalBuffer.length > 1500) this.rrIntervalBuffer.splice(0, this.rrIntervalBuffer.length - 1500);
+                    }
+                    if (this.rrIntervalBuffer.length < 30) {
+                        UIManipulator.updateText('rawRrDataDisplay', `Collecting data... (${this.rrIntervalBuffer.length}/30 required for HRV analysis)`);
+                        return;
+                    }
+
+                    const hrv = new HRVAnalyzer(this.rrIntervalBuffer);
+                    const breath = this.breathManager.update(hrv.avgHR); // This returns the LAST completed cycle's metrics
+                    const avgBreathMetrics = this.breathManager.getAveragedMetrics(); // This returns averaged metrics
+
+                    // Store the latest HRV and Breath metrics for potential report
+                    this.finalHrvMetrics = hrv;
+                    this.finalBreathMetrics = breath; // This is the last completed cycle's data
+                    this.finalAvgBreathMetrics = avgBreathMetrics; // This is the averaged data
+
+                    const { rpe, intensity } = estimateRpe({ currentHR: heartRate, anaerobicThresholdHR: config.userData.anaerobicThresholdHR, durationMinutes: this.trainingSeconds / 60 });
+
+                    // Update cumulative data for minute averages
+                    this.cumulativeHr += heartRate;
+                    this.cumulativeRmssd += hrv.rmssd;
+                    this.cumulativeSdnn += hrv.sdnn;
+                    this.cumulativeBreathRate += breath.breathRate;
+                    this.dataPointsInLastMinute++;
+
+                    // Update summary chart data (always live)
+                    this.summaryChartData.labels.push(this.trainingSeconds); // Use seconds for labels
+                    this.summaryChartData.rr.push(hrv.meanRR);
+                    this.summaryChartData.hr.push(hrv.avgHR);
+                    this.summaryChartData.rmssd.push(hrv.rmssd);
+                    this.summaryChartData.sdnn.push(hrv.sdnn);
+                    if (this.summaryChartData.labels.length > 150) { // Keep last 150 data points for summary chart
+                        Object.keys(this.summaryChartData).forEach(key => this.summaryChartData[key].shift());
+                    }
+
+                    // Update HR Zone times
+                    const currentHrZone = this.getHrZone(heartRate, config.userData.anaerobicThresholdHR);
+                    this.hrZoneTimes[currentHrZone]++; // Increment time spent in current zone (per data point, approx 1 second)
+
+                    // Update UI elements
+                    UIManipulator.updateText('hr', heartRate.toFixed(0));
+                    UIManipulator.updateText('avgRrDisplay', hrv.meanRR.toFixed(2));
+                    UIManipulator.updateText('rmssd', hrv.rmssd.toFixed(2));
+                    UIManipulator.updateText('sdnn', hrv.sdnn.toFixed(2));
+                    UIManipulator.updateText('breathRateDisplay', breath.breathRate.toFixed(1)); // For dashboard
+                    UIManipulator.updateText('hrZone', currentHrZone);
+                    UIManipulator.updateText('rpeDisplay', rpe !== null ? rpe : '--');
+                    UIManipulator.updateText('intensityDisplay', intensity);
+                    UIManipulator.updateText('conditioningScoreDisplay', `${hrv.conditioningScore.toFixed(1)}%`);
+                    UIManipulator.updateText('recoveryScoreDisplay', `${hrv.recoveryScore.toFixed(1)}%`);
+                    UIManipulator.updateText('sleepQualityScoreDisplay', `${hrv.sleepQualityScore.toFixed(1)}%`);
+                    UIManipulator.updateText('strainScoreDisplay', `${hrv.strainScore.toFixed(1)}%`);
+                    UIManipulator.updateText('hrvStateDisplay', hrv.state);
+                    
+                    // HRV Raw Data Modal specific updates (now on main dashboard)
+                    // These are now just updating the main rmssd/sdnn displays, as the 'Raw' ones were redundant
+                    UIManipulator.updateText('nn50Display', hrv.nn50);
+                    UIManipulator.updateText('pnn50Display', `${hrv.pnn50.toFixed(2)}%`);
+                    UIManipulator.updateText('sd1Display', hrv.sd1.toFixed(2));
+                    UIManipulator.updateText('sd2Display', hrv.sd2.toFixed(2));
+                    UIManipulator.updateText('sd2sd1RatioDisplay', hrv.sd2_sd1_ratio.toFixed(2));
+                    UIManipulator.updateText('vlfPowerDisplay', hrv.frequency.vlfPower.toFixed(2));
+                    UIManipulator.updateText('lfPowerDisplay', hrv.frequency.lfPower.toFixed(2));
+                    UIManipulator.updateText('hfPowerDisplay', hrv.frequency.hfPower.toFixed(2));
+                    UIManipulator.updateText('lfhfRatioDisplay', hrv.frequency.lfHfRatio.toFixed(2));
+                    UIManipulator.updateText('apEnDisplay', hrv.apEn.toFixed(3));
+                    UIManipulator.updateText('sampEnDisplay', hrv.sampEn.toFixed(3));
+                    
+                    // Display last completed cycle's Ti/Te
+                    UIManipulator.updateText('inhaleTimeDisplay', breath.inhaleTime > 0 ? breath.inhaleTime.toFixed(0) : '--');
+                    UIManipulator.updateText('exhaleTimeDisplay', breath.exhaleTime > 0 ? breath.exhaleTime.toFixed(0) : '--');
+                    UIManipulator.updateText('tiTeRatioDisplay', breath.tiTeRatio);
+                    UIManipulator.updateText('breathDepthDisplay', breath.breathDepth);
+
+                    // Display averaged Ti/Te
+                    UIManipulator.updateText('avgInhaleTimeDisplay', avgBreathMetrics.avgInhale > 0 ? avgBreathMetrics.avgInhale.toFixed(0) : '--');
+                    UIManipulator.updateText('avgExhaleTimeDisplay', avgBreathMetrics.avgExhale > 0 ? avgBreathMetrics.avgExhale.toFixed(0) : '--');
+
+                    // Display raw RR data (last 100)
+                    UIManipulator.updateText('rawRrDataDisplay', JSON.stringify(this.rrIntervalBuffer.slice(-100), null, 2));
+
+                    // Coaching Updates (now on main dashboard)
+                    UIManipulator.updateText('hrvScoreCoachingDisplay', `${hrv.recoveryScore.toFixed(1)}%`); // Using recovery score as a general HRV score
+                    UIManipulator.updateText('hrCoachingDisplay', heartRate.toFixed(0));
+                    UIManipulator.updateText('breathRateCoachingDisplay', breath.breathRate.toFixed(1));
+                    UIManipulator.updateText('tiTeRatioCoachingDisplay', breath.tiTeRatio);
+                    UIManipulator.updateText('recoveryScoreCoachingDisplay', `${hrv.recoveryScore.toFixed(1)}%`);
+                    UIManipulator.updateText('strainScoreCoachingDisplay', `${hrv.strainScore.toFixed(1)}%`);
+                    
+                    // Calculate and display Goal Comparison and Training Effectiveness
+                    const goalRmssd = config.userData.baselineRmssd;
+                    const rmssdComparison = hrv.rmssd - goalRmssd;
+                    let goalComparisonText = '';
+                    if (rmssdComparison > 5) goalComparisonText = `Above baseline (+${rmssdComparison.toFixed(1)} ms)`;
+                    else if (rmssdComparison < -5) goalComparisonText = `Below baseline (${rmssdComparison.toFixed(1)} ms)`;
+                    else goalComparisonText = `Near baseline (${rmssdComparison.toFixed(1)} ms)`;
+                    UIManipulator.updateText('goalComparisonDisplay', goalComparisonText);
+
+                    // Simple training effectiveness: high recovery score and good breath depth
+                    let trainingEffectiveness = 'Neutral';
+                    if (hrv.recoveryScore > 70 && breath.breathDepth === 'Deep') {
+                        trainingEffectiveness = 'Excellent: Good recovery & deep breathing!';
+                    } else if (hrv.recoveryScore > 50 || breath.breathDepth === 'Good') {
+                        trainingEffectiveness = 'Good: Steady effort.';
+                    } else if (hrv.recoveryScore < 30 || breath.breathDepth === 'Shallow') {
+                        trainingEffectiveness = 'Suboptimal: Consider rest or lighter intensity.';
+                    }
+                    UIManipulator.updateText('trainingEffectivenessDisplay', trainingEffectiveness);
 
 
+                    updateCharts({ hr: heartRate, hrv, rpe, breath });
+                    updateSummaryChart(this.summaryChartData);
+                    UIManipulator.updateHrZoneTimes(this.hrZoneTimes); // Update HR zone times display
+                },
+                
+                handleBtStateChange(state, deviceName) {
+                    UIManipulator.updateText('status', deviceName ? `Connected to: ${deviceName}` : state);
+                    const isStreaming = state === 'STREAMING';
+                    UIManipulator.toggleElement('startBtn', !isStreaming);
+                    UIManipulator.toggleFlexElement('stopBtn', isStreaming);
+                    UIManipulator.toggleElement('backBtn', !isStreaming);
+                    if (isStreaming) {
+                        this.rrIntervalBuffer = [];
+                        this.summaryChartData = { labels: [], rr: [], hr: [], rmssd: [], sdnn: [] };
+                        this.hrZoneTimes = { 'Warmup': 0, 'Cooldown': 0, 'Endurance 1': 0, 'Endurance 2': 0, 'Endurance 3': 0, 'Intensive 1': 0, 'Intensive 2': 0, 'Resting': 0 };
+                        this.minuteSummaries = [];
+                        this.breathManager.reset();
+                        this.startTimer();
+                        this.startFiveSecondUpdate(); // Start 5-second dashboard updates
+                    } else {
+                        this.stopTimer();
+                        this.stopFiveSecondUpdate(); // Stop 5-second dashboard updates
+                        UIManipulator.resetDisplayFields();
+                        // No redirect to report page as per request
+                    }
+                },
+                
+                startTimer() {
+                    if (this.trainingTimerInterval) clearInterval(this.trainingTimerInterval);
+                    this.trainingSeconds = 0;
+                    UIManipulator.updateText('timer', '00:00');
+                    this.trainingTimerInterval = setInterval(() => {
+                        this.trainingSeconds++;
+                        const m = String(Math.floor(this.trainingSeconds / 60)).padStart(2, '0');
+                        const s = String(this.trainingSeconds % 60).padStart(2, '0');
+                        UIManipulator.updateText('timer', `${m}:${s}`);
 
+                        // Check for minute boundary for summary
+                        if (this.trainingSeconds > 0 && this.trainingSeconds % 60 === 0) {
+                            this.captureMinuteSummary();
+                        }
+                    }, 1000);
+                },
+                stopTimer() { clearInterval(this.trainingTimerInterval); },
+
+                startFiveSecondUpdate() {
+                    if (this.fiveSecondInterval) clearInterval(this.fiveSecondInterval);
+                    this.fiveSecondInterval = setInterval(() => {
+                        this.updateDashboardColors();
+                    }, 5000); // Update every 5 seconds
+                },
+                stopFiveSecondUpdate() {
+                    clearInterval(this.fiveSecondInterval);
+                },
+
+                updateDashboardColors() {
+                    // Calculate averages for the last 5 seconds window
+                    const avgHR = this.dataPointsInLastMinute > 0 ? this.cumulativeHr / this.dataPointsInLastMinute : 0;
+                    const avgRMSSD = this.dataPointsInLastMinute > 0 ? this.cumulativeRmssd / this.dataPointsInLastMinute : 0;
+                    const avgSDNN = this.dataPointsInLastMinute > 0 ? this.cumulativeSdnn / this.dataPointsInLastMinute : 0;
+                    const avgBreathRate = this.dataPointsInLastMinute > 0 ? this.cumulativeBreathRate / this.dataPointsInLastMinute : 0;
+
+                    // Reset cumulative data for next 5-second window
+                    this.cumulativeHr = 0;
+                    this.cumulativeRmssd = 0;
+                    this.cumulativeSdnn = 0;
+                    this.cumulativeBreathRate = 0;
+                    this.dataPointsInLastMinute = 0;
+
+                    // Define target ranges/trends for color coding
+                    const targetHr = config.userData.targetHr;
+                    const targetRmssdMin = config.userData.targetRmssdMin;
+                    const targetRmssdMax = config.userData.targetRmssdMax;
+                    const targetBreathRateMin = config.userData.targetBreathRateMin;
+                    const targetBreathRateMax = config.userData.targetBreathRateMax;
+
+                    // HR color logic:
+                    if (avgHR > 0) {
+                        if (Math.abs(avgHR - targetHr) <= 5) { // Within 5 bpm of target
+                            UIManipulator.updateStatusBoxColor('hrDashboardBox', 'good');
+                        } else if (avgHR < targetHr - 10 || avgHR > targetHr + 10) { // Far from target
+                            UIManipulator.updateStatusBoxColor('hrDashboardBox', 'bad');
+                        } else { // Close but not exactly on target
+                            UIManipulator.updateStatusBoxColor('hrDashboardBox', 'orange');
+                        }
+                    } else { UIManipulator.updateStatusBoxColor('hrDashboardBox', 'orange'); }
+
+                    // RMSSD color logic:
+                    if (avgRMSSD > 0) {
+                        if (avgRMSSD >= targetRmssdMin && avgRMSSD <= targetRmssdMax) {
+                            UIManipulator.updateStatusBoxColor('rmssdDashboardBox', 'good');
+                        } else if (avgRMSSD < targetRmssdMin - 10 || avgRMSSD > targetRmssdMax + 10) { // Far outside range
+                            UIManipulator.updateStatusBoxColor('rmssdDashboardBox', 'bad');
+                        } else { // Outside range but not drastically
+                            UIManipulator.updateStatusBoxColor('rmssdDashboardBox', 'orange');
+                        }
+                    } else { UIManipulator.updateStatusBoxColor('rmssdDashboardBox', 'orange'); }
+
+                    // SDNN color logic: (using a general good range, could be refined with user data)
+                    if (avgSDNN > 0) {
+                        if (avgSDNN > 50) { // Generally considered good
+                            UIManipulator.updateStatusBoxColor('sdnnDashboardBox', 'good');
+                        } else if (avgSDNN < 25) { // Generally considered low
+                            UIManipulator.updateStatusBoxColor('sdnnDashboardBox', 'bad');
+                        } else {
+                            UIManipulator.updateStatusBoxColor('sdnnDashboardBox', 'orange');
+                        }
+                    } else { UIManipulator.updateStatusBoxColor('sdnnDashboardBox', 'orange'); }
+
+                    // Breath Rate color logic:
+                    if (avgBreathRate > 0) {
+                        if (avgBreathRate >= targetBreathRateMin && avgBreathRate <= targetBreathRateMax) {
+                            UIManipulator.updateStatusBoxColor('breathRateDashboardBox', 'good');
+                        } else if (avgBreathRate < targetBreathRateMin - 2 || avgBreathRate > targetBreathRateMax + 2) { // Far outside range
+                            UIManipulator.updateStatusBoxColor('breathRateDashboardBox', 'bad');
+                        } else { // Outside range but not drastically
+                            UIManipulator.updateStatusBoxColor('breathRateDashboardBox', 'orange');
+                        }
+                    } else { UIManipulator.updateStatusBoxColor('breathRateDashboardBox', 'orange'); }
+                },
+
+                captureMinuteSummary() {
+                    // Calculate current averages for the minute
+                    const currentMinute = Math.floor(this.trainingSeconds / 60);
+                    if (this.dataPointsInLastMinute === 0) return; // No data for this minute yet
+
+                    const avgHR = this.cumulativeHr / this.dataPointsInLastMinute;
+                    const avgRMSSD = this.cumulativeRmssd / this.dataPointsInLastMinute;
+                    const avgSdnn = this.cumulativeSdnn / this.dataPointsInLastMinute;
+                    const avgBreathRate = this.cumulativeBreathRate / this.dataPointsInLastMinute;
+
+                    // Create a temporary HRVAnalyzer for the minute's data to get state
+                    const tempHrv = new HRVAnalyzer(this.rrIntervalBuffer.slice(-this.dataPointsInLastMinute)); // Use relevant slice
+                    const hrvState = tempHrv.state;
+
+                    this.minuteSummaries.push({
+                        minute: currentMinute,
+                        avgHR: avgHR,
+                        avgRMSSD: avgRMSSD,
+                        avgSdnn: avgSdnn,
+                        avgBreathRate: avgBreathRate,
+                        hrvState: hrvState
+                    });
+
+                    UIManipulator.addMinuteSummary(this.minuteSummaries[this.minuteSummaries.length - 1]);
+
+                    // Reset cumulative data for the next minute
+                    this.cumulativeHr = 0;
+                    this.cumulativeRmssd = 0;
+                    this.cumulativeSdnn = 0;
+                    this.cumulativeBreathRate = 0;
+                    this.dataPointsInLastMinute = 0;
+                },
+                
+                // navigateScreens is no longer needed as there's only one screen
+            };
+            
+            AppManager.init();
+        });
+    </script>
+</body>
+</html>

@@ -271,6 +271,145 @@ export async function initReportsView() {
         }
     }
 
+    // Functie om de individuele hartslag trendgrafiek te initialiseren/updaten
+    async function initIndividualHrChart() {
+        if (individualHrChart) {
+            individualHrChart.destroy();
+        }
+        const individualHrChartCtx = document.getElementById('individualHrChart')?.getContext('2d');
+        if (individualHrChartCtx) {
+            const trainingSessions = await getAllData('trainingSessions');
+            const hrData = trainingSessions
+                .filter(session => typeof session.avgHr === 'number' && !isNaN(session.avgHr) && session.date)
+                .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+            const labels = hrData.map(session => new Date(session.date).toLocaleDateString());
+            const avgHrValues = hrData.map(session => session.avgHr);
+
+            individualHrChart = new Chart(individualHrChartCtx, {
+                type: 'line',
+                data: {
+                    labels: labels.length > 0 ? labels : ['Geen data'],
+                    datasets: [{
+                        label: 'Gemiddelde Hartslag (BPM)',
+                        data: avgHrValues.length > 0 ? avgHrValues : [0],
+                        borderColor: '#facc15',
+                        tension: 0.4,
+                        fill: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Hartslag (BPM)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: true
+                        }
+                    }
+                }
+            });
+        }
+    }
+
+    // Functie om de individuele HRV trendgrafiek te initialiseren/updaten
+    async function initIndividualHrvChart() {
+        if (individualHrvChart) {
+            individualHrvChart.destroy();
+        }
+        const individualHrvChartCtx = document.getElementById('individualHrvChart')?.getContext('2d');
+        if (individualHrvChartCtx) {
+            const trainingSessions = await getAllData('trainingSessions');
+            const hrvData = trainingSessions
+                .filter(session => typeof session.rmssd === 'number' && !isNaN(session.rmssd) && session.date)
+                .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+            const labels = hrvData.map(session => new Date(session.date).toLocaleDateString());
+            const rmssdValues = hrvData.map(session => session.rmssd);
+
+            individualHrvChart = new Chart(individualHrvChartCtx, {
+                type: 'line',
+                data: {
+                    labels: labels.length > 0 ? labels : ['Geen data'],
+                    datasets: [{
+                        label: 'RMSSD (MS)',
+                        data: rmssdValues.length > 0 ? rmssdValues : [0],
+                        borderColor: '#34d399',
+                        tension: 0.4,
+                        fill: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'RMSSD (MS)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: true
+                        }
+                    }
+                }
+            });
+        }
+    }
+
+    // Initialiseer checkboxes en hun event listeners voor individuele grafieken
+    if (toggleIndividualHrChartCheckbox) {
+        toggleIndividualHrChartCheckbox.addEventListener('change', async () => {
+            if (toggleIndividualHrChartCheckbox.checked) {
+                individualHrChartContainer.style.display = 'block';
+                await initIndividualHrChart();
+            } else {
+                individualHrChartContainer.style.display = 'none';
+                if (individualHrChart) {
+                    individualHrChart.destroy();
+                }
+            }
+        });
+        // Initial state
+        if (toggleIndividualHrChartCheckbox.checked) {
+            individualHrChartContainer.style.display = 'block';
+        } else {
+            individualHrChartContainer.style.display = 'none';
+        }
+    }
+
+    if (toggleIndividualHrvChartCheckbox) {
+        toggleIndividualHrvChartCheckbox.addEventListener('change', async () => {
+            if (toggleIndividualHrvChartCheckbox.checked) {
+                individualHrvChartContainer.style.display = 'block';
+                await initIndividualHrvChart();
+            } else {
+                individualHrvChartContainer.style.display = 'none';
+                if (individualHrvChart) {
+                    individualHrvChart.destroy();
+                }
+            }
+        });
+        // Initial state
+        if (toggleIndividualHrvChartCheckbox.checked) {
+            individualHrvChartContainer.style.display = 'block';
+        } else {
+            individualHrvChartContainer.style.display = 'none';
+        }
+    }
+
     // Roep algemene laadfuncties aan
     await loadSessionReports();
     await loadPerformanceOverview();
