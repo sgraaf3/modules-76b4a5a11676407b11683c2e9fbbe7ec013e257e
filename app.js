@@ -23,7 +23,6 @@ import { initRestReportsView } from './js/restReportsView.js'; // NIEUW: Importe
 import { initDashboardReportsView } from './js/dashboardReportsView.js';
 import { initSchedulesView } from './js/schedulesView.js';
 import { initLessonSchedulerView } from './js/lessonSchedulerView.js';
-import { initScheduleBuilderView } from './js/scheduleBuilderView.js';
 import { initLessonScheduleBuilderView } from './js/lessonScheduleBuilderView.js';
 import { initMeetingPlannerView } from './js/meetingPlannerView.js';
 import { initMessagesView } from './js/messagesView.js';
@@ -45,6 +44,7 @@ import { initActivitiesView } from './js/activitiesView.js';
 import { initPermissionsView } from './js/permissionsView.js';
 import { initNotesView } from './js/notesView.js';
 import { initActionCenterView } from './js/actionCenterView.js';
+import { initScheduleBuilderView } from './js/scheduleBuilderView.js';
 
 // Importeer het nieuwe notificatiesysteem
 import { showNotification } from './js/notifications.js';
@@ -96,7 +96,7 @@ const viewConfig = {
     'dashboardReportsView': { html: 'views/dashboardReportsView.html', init: initDashboardReportsView },
     'schedulesView': { html: 'views/schedulesView.html', init: initSchedulesView },
     'lessonSchedulerView': { html: 'views/lessonSchedulerView.html', init: initLessonSchedulerView },
-    'scheduleBuilderView': { html: './views/scheduleBuilderView.html', init: initScheduleBuilderView },
+    'scheduleBuilderView': { html: 'views/scheduleBuilderView.html', init: initScheduleBuilderView }, 
     'lessonScheduleBuilderView': { html: './views/lessonScheduleBuilderView.html', init: initLessonScheduleBuilderView },
     'meetingPlannerView': { html: './views/meetingPlannerView.html', init: initMeetingPlannerView },
     'messagesView': { html: './views/messagesView.html', init: initMessagesView },
