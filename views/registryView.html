@@ -1,0 +1,43 @@
+<div class="top-nav">
+    <button class="icon-button" data-action="backToDashboard"><i class="fas fa-chevron-left"></i></button>
+    <span>Register Beheer</span>
+    <button class="icon-button"><i class="fas fa-ellipsis-v"></i></button>
+</div>
+<div class="p-4">
+    <h2 class="text-xl font-bold text-gray-100 border-b border-gray-700 pb-2 mb-4">Leden Overzicht</h2>
+    <div id="membersList" class="flex flex-col gap-3 mb-4">
+        <!-- Leden worden hier dynamisch geladen -->
+        <p class="text-gray-400">Geen leden gevonden.</p>
+    </div>
+
+    <h2 class="text-xl font-bold text-gray-100 border-b border-gray-700 pb-2 mb-4 mt-6">Nieuw/Bewerk Lid</h2>
+    <form id="memberForm" class="flex flex-col gap-3">
+        <input type="hidden" id="memberId">
+        <div class="flex flex-col">
+            <label for="memberName" class="text-sm font-medium text-gray-400 mb-1">Naam Lid:</label>
+            <input type="text" id="memberName" required class="p-2 rounded-md bg-gray-700 border border-gray-600 text-gray-200">
+        </div>
+        <div class="flex flex-col">
+            <label for="memberEmail" class="text-sm font-medium text-gray-400 mb-1">E-mail:</label>
+            <input type="email" id="memberEmail" required class="p-2 rounded-md bg-gray-700 border border-gray-600 text-gray-200">
+        </div>
+        <div class="flex flex-col">
+            <label for="memberPhone" class="text-sm font-medium text-gray-400 mb-1">Telefoonnummer:</label>
+            <input type="tel" id="memberPhone" class="p-2 rounded-md bg-gray-700 border border-gray-600 text-gray-200">
+        </div>
+        <div class="flex flex-col">
+            <label for="memberJoinDate" class="text-sm font-medium text-gray-400 mb-1">Lid sinds (JJJJ-MM-DD):</label>
+            <input type="date" id="memberJoinDate" class="p-2 rounded-md bg-gray-700 border border-gray-600 text-gray-200">
+        </div>
+        <div class="flex flex-col">
+            <label for="memberStatus" class="text-sm font-medium text-gray-400 mb-1">Status:</label>
+            <select id="memberStatus" class="p-2 rounded-md bg-gray-700 border border-gray-600 text-gray-200">
+                <option value="Active">Actief</option>
+                <option value="Inactive">Inactief</option>
+                <option value="Pending">In afwachting</option>
+            </select>
+        </div>
+        <button type="submit" id="saveMemberBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200">Opslaan</button>
+        <button type="button" id="clearMemberFormBtn" class="bg-gray-600 hover:bg-gray-700 text-gray-200 font-bold py-2 px-4 rounded-md transition-colors duration-200">Formulier Leegmaken</button>
+    </form>
+</div>

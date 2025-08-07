@@ -1,0 +1,52 @@
+<div class="top-nav">
+    <button class="icon-button" data-action="backToDashboard"><i class="fas fa-chevron-left"></i></button>
+    <span>Lidmaatschap Beheer</span>
+    <button class="icon-button"><i class="fas fa-ellipsis-v"></i></button>
+</div>
+<div class="p-4">
+    <h2 class="text-xl font-bold text-gray-100 border-b border-gray-700 pb-2 mb-4">Lidmaatschapsdetails</h2>
+    <div id="membershipDetailsContainer" class="flex flex-col gap-3 mb-4">
+        <!-- Individuele lidmaatschapsdetails worden hier geladen -->
+        <p class="text-gray-400">Selecteer een lid om de lidmaatschapsdetails te bekijken of voeg een nieuw lidmaatschap toe.</p>
+    </div>
+
+    <h2 class="text-xl font-bold text-gray-100 border-b border-gray-700 pb-2 mb-4 mt-6">Nieuw/Bewerk Lidmaatschap</h2>
+    <form id="memberMembershipForm" class="flex flex-col gap-3">
+        <input type="hidden" id="memberMembershipId">
+        <div class="flex flex-col">
+            <label for="memberIdForMembership" class="text-sm font-medium text-gray-400 mb-1">Lid ID (koppelen aan bestaand lid):</label>
+            <input type="text" id="memberIdForMembership" required class="p-2 rounded-md bg-gray-700 border border-gray-600 text-gray-200" placeholder="Bijv. UUID van het lid">
+        </div>
+        <div class="flex flex-col">
+            <label for="membershipType" class="text-sm font-medium text-gray-400 mb-1">Type Lidmaatschap:</label>
+            <select id="membershipType" class="p-2 rounded-md bg-gray-700 border border-gray-600 text-gray-200">
+                <option value="Basic">Basis</option>
+                <option value="Premium">Premium</option>
+                <option value="Family">Familie</option>
+                <option value="Trial">Proef</option>
+            </select>
+        </div>
+        <div class="flex flex-col">
+            <label for="membershipStartDate" class="text-sm font-medium text-gray-400 mb-1">Startdatum:</label>
+            <input type="date" id="membershipStartDate" required class="p-2 rounded-md bg-gray-700 border border-gray-600 text-gray-200">
+        </div>
+        <div class="flex flex-col">
+            <label for="membershipEndDate" class="text-sm font-medium text-gray-400 mb-1">Einddatum:</label>
+            <input type="date" id="membershipEndDate" class="p-2 rounded-md bg-gray-700 border border-gray-600 text-gray-200">
+        </div>
+        <div class="flex flex-col">
+            <label for="membershipStatus" class="text-sm font-medium text-gray-400 mb-1">Status Lidmaatschap:</label>
+            <select id="membershipStatus" class="p-2 rounded-md bg-gray-700 border border-gray-600 text-gray-200">
+                <option value="Active">Actief</option>
+                <option value="Expired">Verlopen</option>
+                <option value="Cancelled">Geannuleerd</option>
+            </select>
+        </div>
+        <div class="flex flex-col">
+            <label for="membershipNotes" class="text-sm font-medium text-gray-400 mb-1">Notities:</label>
+            <textarea id="membershipNotes" rows="3" class="p-2 rounded-md bg-gray-700 border border-gray-600 text-gray-200"></textarea>
+        </div>
+        <button type="submit" id="saveMemberMembershipBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200">Opslaan</button>
+        <button type="button" id="clearMemberMembershipFormBtn" class="bg-gray-600 hover:bg-gray-700 text-gray-200 font-bold py-2 px-4 rounded-md transition-colors duration-200">Formulier Leegmaken</button>
+    </form>
+</div>

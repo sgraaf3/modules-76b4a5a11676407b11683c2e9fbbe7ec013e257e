@@ -1,0 +1,27 @@
+<div class="top-nav">
+    <button class="icon-button" data-action="backToDashboard"><i class="fas fa-chevron-left"></i></button>
+    <span>Testen</span>
+    <button class="icon-button"><i class="fas fa-ellipsis-v"></i></button>
+</div>
+<div class="p-4">
+    <h2 class="text-xl font-bold text-gray-100 border-b border-gray-700 pb-2 mb-4">Test Uitvoering</h2>
+    <div class="bg-gray-700 p-4 rounded-lg shadow-md mb-4">
+        <p class="text-lg text-gray-300 mb-4">Selecteer een testprotocol en start de meting.</p>
+        <div class="flex flex-col gap-4">
+            <select id="testProtocolSelect" class="p-2 rounded-md bg-gray-800 border border-gray-600 text-gray-200">
+                <option value="protocol1">Basis Conditietest</option>
+                <option value="protocol2">Maximale Krachttest</option>
+                <option value="protocol3">Flexibiliteitstest</option>
+            </select>
+            <button id="startTestBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200">Start Test</button>
+            <button id="stopTestBtn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200" style="display:none;">Stop Test</button>
+        </div>
+        <div class="mt-4 p-2 bg-gray-800 rounded-md text-gray-200" id="testStatusDisplay">Status: Idle</div>
+    </div>
+
+    <h2 class="text-xl font-bold text-gray-100 border-b border-gray-700 pb-2 mb-4">Test Resultaten</h2>
+    <div class="bg-gray-700 p-4 rounded-lg shadow-md mb-4" id="testResultsDisplay">
+        <p class="text-lg text-gray-300">Geen resultaten beschikbaar.</p>
+    </div>
+    <button id="generateReportBtn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200" style="display:none;">Genereer Rapport</button>
+</div>

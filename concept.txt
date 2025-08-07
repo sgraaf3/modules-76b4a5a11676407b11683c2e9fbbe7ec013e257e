@@ -1,0 +1,139 @@
+js/views/dashboardView.js
+Bestanden
+
+Gemaakt
+index.html
+aug. 6, 4:29 a.m.
+views/dashboardView.html
+aug. 6, 4:29 a.m.
+js/views/dashboardView.js
+aug. 6, 4:29 a.m.
+views/userProfileView.html
+aug. 6, 4:37 a.m.
+js/views/userProfileView.js
+aug. 6, 4:37 a.m.
+app.js
+aug. 6, 4:37 a.m.
+database.js
+aug. 6, 4:37 a.m.
+bluetooth.js
+aug. 6, 4:37 a.m.
+modules.js
+aug. 6, 4:37 a.m.
+style.css
+aug. 6, 4:37 a.m.
+views/restMeasurementLiveView.html
+aug. 6, 4:37 a.m.
+js/views/restMeasurementLiveView.js
+aug. 6, 4:37 a.m.
+views/liveTrainingView.html
+aug. 6, 4:37 a.m.
+js/views/liveTrainingView.js
+aug. 6, 4:37 a.m.
+views/hrDataView.html
+aug. 6, 4:37 a.m.
+js/views/hrDataView.js
+aug. 6, 4:37 a.m.
+views/testingView.html
+aug. 6, 4:37 a.m.
+js/views/testingView.js
+aug. 6, 4:37 a.m.
+views/trainingView.html
+aug. 6, 4:37 a.m.
+js/views/trainingView.js
+aug. 6, 4:37 a.m.
+views/nutritionView.html
+aug. 6, 4:37 a.m.
+js/views/nutritionView.js
+aug. 6, 4:37 a.m.
+views/sleepView.html
+aug. 6, 4:37 a.m.
+js/views/sleepView.js
+aug. 6, 4:37 a.m.
+views/reportsView.html
+aug. 6, 4:37 a.m.
+js/views/reportsView.js
+aug. 6, 4:37 a.m.
+views/schedulesView.html
+aug. 6, 4:37 a.m.
+js/views/schedulesView.js
+aug. 6, 4:37 a.m.
+views/lessonSchedulerView.html
+aug. 6, 4:37 a.m.
+js/views/lessonSchedulerView.js
+aug. 6, 4:37 a.m.
+views/scheduleBuilderView.html
+aug. 6, 4:37 a.m.
+js/views/scheduleBuilderView.js
+aug. 6, 4:37 a.m.
+views/lessonScheduleBuilderView.html
+aug. 6, 4:37 a.m.
+js/views/lessonScheduleBuilderView.js
+aug. 6, 4:37 a.m.
+views/meetingPlannerView.html
+aug. 6, 4:37 a.m.
+js/views/meetingPlannerView.js
+aug. 6, 4:37 a.m.
+views/messagesView.html
+aug. 6, 4:37 a.m.
+js/views/messagesView.js
+aug. 6, 4:37 a.m.
+views/memberSpecificprogressView.html
+aug. 6, 4:37 a.m.
+js/views/memberSpecificprogressView.js
+aug. 6, 4:37 a.m.
+views/webGraphsView.html
+aug. 6, 4:37 a.m.
+views/memberActivityView.html
+aug. 6, 4:40 a.m.
+js/views/memberActivityView.js
+aug. 6, 4:40 a.m.
+views/popularityView.html
+aug. 6, 4:40 a.m.
+js/views/popularityView.js
+aug. 6, 4:40 a.m.
+views/memberSettingsView.html
+aug. 6, 4:40 a.m.
+js/views/memberSettingsView.js
+aug. 6, 4:40 a.m.
+views/subscriptionsView.html
+aug. 6, 4:41 a.m.
+js/views/subscriptionsView.js
+aug. 6, 4:41 a.m.
+views/logsView.html
+aug. 6, 4:46 a.m.
+js/views/logsView.js
+aug. 6, 4:46 a.m.
+views/registryView.html
+aug. 6, 4:42 a.m.
+js/views/registryView.js
+aug. 6, 4:42 a.m.
+views/memberMembershipView.html
+aug. 6, 4:43 a.m.
+js/views/memberMembershipView.js
+aug. 6, 4:43 a.m.
+views/financeView.html
+aug. 6, 4:44 a.m.
+js/views/financeView.js
+aug. 6, 4:44 a.m.
+views/docsView.html
+aug. 6, 4:45 a.m.
+js/views/docsView.js
+aug. 6, 4:45 a.m.
+views/adminOnlyView.html
+aug. 6, 4:37 a.m.
+js/views/adminOnlyView.js
+aug. 6, 4:37 a.m.
+views/toggleFunctionalityView.html
+aug. 6, 4:37 a.m.
+js/views/toggleFunctionalityView.js
+aug. 6, 4:37 a.m.
+views/dashboardOverviewView.html
+aug. 6, 4:40 a.m.
+js/views/dashboardOverviewView.js
+aug. 6, 4:40 a.m.
+
+
+
+
+
