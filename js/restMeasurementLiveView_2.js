@@ -874,6 +874,50 @@ export async function initRestMeasurementLiveView_2(showViewCallback) {
                 }
                 const report = generateReport(currentSessionData, selectedMeasurementType, bodystandardAnalysis, vo2Analysis, runtimesVo2Analysis);
                 console.log("Generated Report:\n", report);
+
+                // Attempting to capture charts with html2canvas.
+                const chartsToCapture = [
+                    { id: 'hrChart', chart: hrChart },
+                    { id: 'rrHistogramChart', chart: rrHistogramChart },
+                    { id: 'poincarePlotChart', chart: poincarePlotChart },
+                    { id: 'powerSpectrumChart', chart: powerSpectrumChart }
+                ];
+
+                const capturedImages = {};
+                for (const { id, chart } of chartsToCapture) {
+                    const canvas = document.getElementById(id);
+                    if (canvas && chart) {
+                        // Temporarily make chart visible for html2canvas if it's hidden
+                        const originalDisplay = canvas.style.display;
+                        canvas.style.display = 'block';
+                        try {
+                            const img = await html2canvas(canvas);
+                            capturedImages[id] = img.toDataURL('image/png');
+                        } catch (error) {
+                            console.error(`Error capturing chart ${id}:`, error);
+                        } finally {
+                            canvas.style.display = originalDisplay; // Restore original display
+                        }
+                    }
+                }
+
+                // Generate PDF
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                let yPos = 10;
+
+                doc.text(report, 10, yPos);
+                yPos += report.split('\n').length * 5; // Estimate line height;
+
+                for (const { id } of chartsToCapture) {
+                    if (capturedImages[id]) {
+                        doc.addImage(capturedImages[id], 'PNG', 10, yPos, 180, 90);
+                        yPos += 100;
+                    }
+                }
+
+                doc.save(`rest_measurement_report_${new Date().toISOString().split('T')[0]}.pdf`);
+                showNotification('Rapport succesvol gedownload!', 'success');
             }
         });
     }

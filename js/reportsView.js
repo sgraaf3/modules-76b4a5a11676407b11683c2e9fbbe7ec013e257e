@@ -1,52 +1,24 @@
 // Bestand: js/views/reportsView.js
 // Bevat logica voor geavanceerde rapportagemogelijkheden en diepgaande analyses.
 
-import { getAllData } from '../database.js';
+import { getAllData, getData, getOrCreateUserId } from '../database.js';
 import { showNotification } from './notifications.js';
 
 import { initIndividualHrChart, initIndividualHrvChart, initBreathRateChart } from './reports/regularReports.js';
 import { initSleepTrendChart, initSportActivitiesTrendChart } from './reports/afterReports.js';
 
-// Functie om een gedetailleerd rapport te genereren en te downloaden
-async function generateTrainingReport(session) {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    let yPos = 10;
+let performanceTrendChart; // OPMERKING: Toegevoegd voor eventuele toekomstige implementatie
+let hrvRecoveryTrendChart; // OPMERKING: Toegevoegd voor eventuele toekomstige implementatie
+let biometricsTrendChart; // OPMERKING: Toegevoegd voor eventuele implementatie
+let financeTrendChart; // OPMERKING: Toegevoegd voor implementatie
 
-    let reportContent = `--- Training Report ---\n`;
-    reportContent += `Session Date: ${session.date || 'Unknown'}\n`;
-    reportContent += `Duration: ${session.duration || '--'} minutes\n`;
-    reportContent += `Average Heart Rate: ${session.avgHr || '--'} BPM\n`;
-    reportContent += `RMSSD: ${session.rmssd ? session.rmssd.toFixed(2) : '--'} MS\n`;
-    reportContent += `Calories Burned: ${session.caloriesBurned || '--'} kcal\n`;
-    reportContent += `\nRaw HR Data Points: ${session.rawHrData ? session.rawHrData.length : 0}\n`;
-    reportContent += `Raw RR Data Points: ${session.rawRrData ? session.rawRrData.length : 0}\n`;
-    reportContent += `\n--- End of Report ---`;
-
-    doc.text(reportContent, 10, yPos);
-    yPos += reportContent.split('\n').length * 5; // Estimate line height;
-
-    // Add charts if available (assuming they are generated dynamically or from raw data)
-    // For simplicity, we'll just add a placeholder for now, or you can integrate chart generation here
-    // Example: if you have a canvas element for a chart, you can convert it to an image
-    // const chartCanvas = document.getElementById('yourChartCanvasId');
-    // if (chartCanvas) {
-    //     const chartImg = await html2canvas(chartCanvas);
-    //     const chartDataUrl = chartImg.toDataURL('image/png');
-    //     doc.addImage(chartDataUrl, 'PNG', 10, yPos, 180, 90);
-    //     yPos += 100;
-    // }
-
-    doc.save(`training_report_${session.date || 'unknown'}.pdf`);
-    showNotification('Rapport succesvol gedownload!', 'success');
-}
-
-export async function initTrainingReportsView() {
-    console.log("Training Rapporten View geïnitialiseerd.");
+export async function initReportsView() {
+    console.log("Rapporten & Voortgang View geïnitialiseerd.");
 
     const sessionReportsList = document.getElementById('sessionReportsList');
     const downloadPdfBtn = document.getElementById('downloadPdfBtn');
     
+    // UI-elementen voor de samenvatting
     // Functie om sessierapporten te laden en weer te geven
     async function loadSessionReports() {
         const trainingSessions = await getAllData('trainingSessions');
@@ -75,17 +47,13 @@ export async function initTrainingReportsView() {
         });
 
         sessionReportsList.querySelectorAll('[data-action="view-detailed-report"]').forEach(button => {
-            button.addEventListener('click', async (event) => {
+            button.addEventListener('click', (event) => {
                 const sessionId = parseInt(event.target.dataset.id);
-                const session = trainingSessions.find(s => s.id === sessionId);
-                if (session) {
-                    await generateTrainingReport(session);
-                } else {
-                    showNotification(`Sessie met ID ${sessionId} niet gevonden.`, 'error');
-                }
+                showNotification(`Gedetailleerd rapport voor sessie ${sessionId} bekijken (functionaliteit nog te implementeren).`, 'info');
             });
         });
     }
+
 
     // Roep alle laadfuncties aan bij initialisatie
     await loadSessionReports();
