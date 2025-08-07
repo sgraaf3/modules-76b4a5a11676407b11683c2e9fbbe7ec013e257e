@@ -800,7 +800,7 @@ export async function initLiveTrainingView(showViewCallback) {
                     await putData('trainingSessions', currentSessionData);
                     showNotification('Meting succesvol opgeslagen!', 'success');
                     if (showViewCallback) {
-                        showViewCallback('reportsView'); // Navigate to reports page
+                        showViewCallback('trainingReportsView'); // Navigate to reports page
                     }
                 } catch (error) {
                     console.error("Fout bij opslaan meting:", error);

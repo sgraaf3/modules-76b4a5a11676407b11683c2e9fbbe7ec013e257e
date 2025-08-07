@@ -18,7 +18,8 @@ import { initTestingView } from './js/testingView.js';
 import { initTrainingView } from './js/trainingView.js';
 import { initNutritionView } from './js/nutritionView.js';
 import { initSleepView } from './js/sleepView.js';
-import { initReportsView } from './js/reportsView.js';
+import { initTrainingReportsView } from './js/trainingReportsView.js';
+import { initDashboardReportsView } from './js/dashboardReportsView.js';
 import { initSchedulesView } from './js/schedulesView.js';
 import { initLessonSchedulerView } from './js/lessonSchedulerView.js';
 import { initScheduleBuilderView } from './js/scheduleBuilderView.js';
@@ -89,7 +90,8 @@ const viewConfig = {
     // 'restMeasurementView' is vervangen door 'restMeasurementLiveView' en de oude content is verwijderd.
     'nutritionView': { html: './views/nutritionView.html', init: initNutritionView },
     'sleepView': { html: './views/sleepView.html', init: initSleepView },
-    'reportsView': { html: 'views/reportsView.html', init: initReportsView },
+    'trainingReportsView': { html: 'views/trainingReportsView.html', init: initTrainingReportsView },
+    'dashboardReportsView': { html: 'views/dashboardReportsView.html', init: initDashboardReportsView },
     'schedulesView': { html: 'views/schedulesView.html', init: initSchedulesView },
     'lessonSchedulerView': { html: 'views/lessonSchedulerView.html', init: initLessonSchedulerView },
     'scheduleBuilderView': { html: './views/scheduleBuilderView.html', init: initScheduleBuilderView },

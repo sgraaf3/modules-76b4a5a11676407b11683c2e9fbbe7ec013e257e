@@ -43,9 +43,11 @@ export function initTrainingView() {
         // Implement logic to calculate and display HR zone and average HR
     };
 
-    if (!bluetoothController.isConnected()) {
-        bluetoothController.connect();
-    }
+    // Removed automatic Bluetooth connection to prevent requestDevice() chooser error.
+    // Bluetooth connection should be initiated by a user gesture (e.g., a button click).
+    // if (!bluetoothController.isConnected()) {
+    //     bluetoothController.connect();
+    // }
 }
 
 export function resetTrainingHrChart() {

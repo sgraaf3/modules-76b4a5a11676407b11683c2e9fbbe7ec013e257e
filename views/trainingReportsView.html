@@ -1,0 +1,108 @@
+<div class="a4-container">
+    <div class="report-header">
+        <h1 class="text-3xl font-bold text-gray-100 mb-2">Prestatierapport</h1>
+        <p class="text-lg text-gray-400 mb-6">Voortgangs- en meetoverzicht van de afgelopen maand.</p>
+    </div>
+
+    <div class="report-section">
+        <h2 class="text-xl font-bold text-gray-100 border-b border-gray-700 pb-2 mb-4">Sessierapporten</h2>
+        <div id="sessionReportsList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <!-- Sessierapporten worden hier dynamisch geladen -->
+        </div>
+    </div>
+
+    <div class="report-section mt-8">
+        <h2 class="text-xl font-bold text-gray-100 border-b border-gray-700 pb-2 mb-4">HR & HRV Trends</h2>
+        <div class="report-content-grid">
+            <div class="col-span-2">
+                <div class="chart-container-full" style="height: 250px;">
+                    <canvas id="individualHrChart"></canvas>
+                </div>
+                <div class="chart-container-full mt-4" style="height: 250px;">
+                    <canvas id="individualHrvChart"></canvas>
+                </div>
+            </div>
+            <div class="flex flex-col gap-4">
+                <div class="data-card">
+                    <div class="card-header"><h3>HR Uitleg</h3></div>
+                    <div class="sub-value" id="hrExplanation"></div>
+                </div>
+                <div class="data-card">
+                    <div class="card-header"><h3>HRV Uitleg</h3></div>
+                    <div class="sub-value" id="hrvExplanation"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="report-section mt-8">
+        <h2 class="text-xl font-bold text-gray-100 border-b border-gray-700 pb-2 mb-4">Ademhaling & Intensiteit</h2>
+        <div class="report-content-grid">
+            <div class="col-span-2">
+                 <div class="chart-container-full" style="height: 250px;">
+                    <canvas id="breathRateChart"></canvas>
+                </div>
+            </div>
+            <div class="flex flex-col gap-4">
+                <div class="data-card">
+                    <div class="card-header"><h3>Ademhaling Uitleg</h3></div>
+                    <div class="sub-value" id="breathExplanation"></div>
+                </div>
+                <div class="data-card">
+                    <div class="card-header"><h3>Intensiteit Uitleg</h3></div>
+                    <div class="sub-value" id="intensityExplanation"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="report-section mt-8">
+        <h2 class="text-xl font-bold text-gray-100 border-b border-gray-700 pb-2 mb-4">Overige Metingen</h2>
+        <div class="report-content-grid">
+            <div class="col-span-2">
+                <div class="data-card">
+                    <div class="card-header"><h3>Biometrische Data</h3></div>
+                    <div class="grid grid-cols-2 gap-2 text-sm text-gray-300">
+                        <div>Gewicht: <span id="reportWeight">--</span> kg</div>
+                        <div>Vetpercentage: <span id="reportFat">--</span> %</div>
+                        <div>Spiermassa: <span id="reportMuscle">--</span> kg</div>
+                        <div>BMI: <span id="reportBMI">--</span></div>
+                    </div>
+                </div>
+                <div class="data-card mt-4">
+                    <div class="card-header"><h3>Vo2 Max & Geschatte Hardlooptijden</h3></div>
+                    <div class="grid grid-cols-2 gap-2 text-sm text-gray-300">
+                        <div>Vo2 Max: <span id="reportVo2Max">--</span></div>
+                        <div>3k: <span id="report3k">--</span></div>
+                        <div>5k: <span id="report5k">--</span></div>
+                        <div>10k: <span id="report10k">--</span></div>
+                    </div>
+                </div>
+            </div>
+            <div class="flex flex-col gap-4">
+                <div class="data-card">
+                    <div class="card-header"><h3>Biometrie Interpretatie</h3></div>
+                    <div class="sub-value" id="biometricsInterpretation"></div>
+                </div>
+                <div class="data-card">
+                    <div class="card-header"><h3>Vo2 Max Interpretatie</h3></div>
+                    <div class="sub-value" id="vo2Interpretation"></div>
+                </div>
+                <div class="data-card">
+                    <div class="card-header"><h3>Slaap Interpretatie</h3></div>
+                    <div class="sub-value" id="sleepExplanation"></div>
+                </div>
+                <div class="data-card">
+                    <div class="card-header"><h3>Sportactiviteiten Interpretatie</h3></div>
+                    <div class="sub-value" id="sportActivitiesExplanation"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="flex justify-end space-x-4 mt-6">
+        <button id="downloadPdfBtn" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200">
+            <i class="fas fa-file-pdf mr-2"></i>Rapport Downloaden als PDF
+        </button>
+    </div>
+</div>

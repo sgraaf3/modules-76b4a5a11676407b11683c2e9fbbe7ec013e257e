@@ -285,10 +285,7 @@ export async function initNutritionView() {
     }
 }
 
-export function initReportsView() {
-    console.log("Rapporten & Voortgang weergave geïnitialiseerd.");
-    // De UI-logica voor het laden van rapporten uit de database zou hier komen
-}
+
 
 export function initSchedulesView() {
     console.log("Schema Beheerder weergave geïnitialiseerd.");

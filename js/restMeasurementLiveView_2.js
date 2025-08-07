@@ -902,7 +902,7 @@ export async function initRestMeasurementLiveView_2(showViewCallback) {
                     await putData('trainingSessions', sessionToSave);
                     showNotification('Meting succesvol opgeslagen!', 'success');
                     if (showViewCallback) {
-                        showViewCallback('reportsView');
+                        showViewCallback('trainingReportsView');
                     }
                 } catch (error) {
                     console.error("Fout bij opslaan meting:", error);
