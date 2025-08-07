@@ -4,6 +4,11 @@
     <button class="icon-button"><i class="fas fa-ellipsis-v"></i></button>
 </div>
 <div class="p-4">
+    <!-- Nieuwe PDF export knop -->
+    <button id="downloadPdfBtn" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200 mb-4 w-full">
+        <i class="fas fa-file-pdf mr-2"></i>Rapport Downloaden als PDF
+    </button>
+
     <h2 class="text-xl font-bold text-gray-100 border-b border-gray-700 pb-2 mb-4">Sessie Rapporten</h2>
     <div id="sessionReportsList" class="flex flex-col gap-3 mb-4">
         <!-- Sessierapporten worden hier dynamisch geladen -->
@@ -30,12 +35,20 @@
     </div>
 
     <h2 class="text-xl font-bold text-gray-100 border-b border-gray-700 pb-2 mb-4 mt-6">Prestatie Trendanalyse</h2>
-    <div class="bg-gray-700 p-4 rounded-lg shadow-md h-96 mb-4">
+    <div class="flex items-center mb-4">
+        <input type="checkbox" id="togglePerformanceChart" class="h-4 w-4 text-blue-600 rounded border-gray-600 focus:ring-blue-500 mr-2" checked>
+        <label for="togglePerformanceChart" class="text-gray-300">Toon Prestatie Trendgrafiek</label>
+    </div>
+    <div id="performanceChartContainer" class="bg-gray-700 p-4 rounded-lg shadow-md h-96 mb-4">
         <canvas id="performanceTrendChart"></canvas>
     </div>
 
     <h2 class="text-xl font-bold text-gray-100 border-b border-gray-700 pb-2 mb-4 mt-6">HRV Herstel Trends</h2>
-    <div class="bg-gray-700 p-4 rounded-lg shadow-md h-96 mb-4">
+    <div class="flex items-center mb-4">
+        <input type="checkbox" id="toggleHrvChart" class="h-4 w-4 text-blue-600 rounded border-gray-600 focus:ring-blue-500 mr-2" checked>
+        <label for="toggleHrvChart" class="text-gray-300">Toon HRV Herstel Trendgrafiek</label>
+    </div>
+    <div id="hrvChartContainer" class="bg-gray-700 p-4 rounded-lg shadow-md h-96 mb-4">
         <canvas id="hrvRecoveryTrendChart"></canvas>
     </div>
 </div>

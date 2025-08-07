@@ -1,11 +1,28 @@
 <div class="top-nav">
     <button class="icon-button" data-action="backToDashboard"><i class="fas fa-chevron-left"></i></button>
-    <span>Permissies</span>
+    <span>Permissions</span>
     <button class="icon-button"><i class="fas fa-ellipsis-v"></i></button>
 </div>
 <div class="p-4">
-    <h2 class="text-xl font-bold text-gray-100 border-b border-gray-700 pb-2 mb-4">Gebruikersrollen en Rechten</h2>
-    <p class="text-lg text-gray-300 mb-4">Beheer gebruikersrollen en -rechten binnen het systeem.</p>
-    <p class="text-lg text-gray-300 mb-4">Wijs verschillende permissieniveaus toe aan leden en medewerkers.</p>
-    <!-- Hier komt de UI voor permissiebeheer, bijv. een tabel met gebruikers en hun rollen/rechten -->
+    <h2 class="text-xl font-bold text-gray-100 border-b border-gray-700 pb-2 mb-4">Role Management</h2>
+    <form id="roleForm" class="flex flex-col gap-3 mb-6">
+        <input type="hidden" id="roleId">
+        <div class="flex flex-col">
+            <label for="roleName" class="text-sm font-medium text-gray-400 mb-1">Role Name:</label>
+            <input type="text" id="roleName" required class="p-2 rounded-md bg-gray-700 border border-gray-600 text-gray-200">
+        </div>
+        <div class="flex flex-col">
+            <label class="text-sm font-medium text-gray-400 mb-1">Permissions:</label>
+            <div id="permissionsCheckboxes" class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                <!-- Permissions checkboxes will be loaded here -->
+            </div>
+        </div>
+        <button type="submit" id="saveRoleBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200">Save Role</button>
+        <button type="button" id="clearRoleFormBtn" class="bg-gray-600 hover:bg-gray-700 text-gray-200 font-bold py-2 px-4 rounded-md transition-colors duration-200">Clear Form</button>
+    </form>
+
+    <h2 class="text-xl font-bold text-gray-100 border-b border-gray-700 pb-2 mb-4">Existing Roles</h2>
+    <div id="rolesTableContainer">
+        <!-- Roles table will be loaded here -->
+    </div>
 </div>

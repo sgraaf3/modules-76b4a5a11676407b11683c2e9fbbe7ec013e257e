@@ -1,3 +1,6 @@
+// Bestand: js/views/subscriptionsView.js
+// Bevat logica voor het beheren van abonnementen (CRUD-operaties).
+
 import { getData, putData, deleteData, getAllData } from '../database.js';
 import { showNotification } from './notifications.js'; // Importeer notificatiesysteem
 
@@ -80,23 +83,28 @@ export async function initSubscriptionsView() {
         subscriptionForm.addEventListener('submit', async (event) => {
             event.preventDefault();
 
-            const subscription = {
-                name: subscriptionNameInput.value,
-                price: parseFloat(subscriptionPriceInput.value) || 0,
-                duration: parseInt(subscriptionDurationInput.value) || 0,
-                description: subscriptionDescriptionInput.value
-            };
-
+            // Robuuste ID-verwerking:
+            let subscriptionId = undefined;
             if (subscriptionIdInput.value) {
-                subscription.id = parseInt(subscriptionIdInput.value);
+                const parsedId = parseInt(subscriptionIdInput.value);
+                if (!isNaN(parsedId)) {
+                    subscriptionId = parsedId;
+                }
             }
 
+            const subscription = {
+                id: subscriptionId, // Dit zal of een geldig nummer zijn, of undefined (voor autoIncrement)
+                name: subscriptionNameInput.value,
+                price: parseFloat(subscriptionPriceInput.value) || 0, // Zorg voor een standaardwaarde als NaN
+                duration: parseInt(subscriptionDurationInput.value) || 0, // Zorg voor een standaardwaarde als NaN
+                description: subscriptionDescriptionInput.value
+            };
             try {
                 await putData('subscriptions', subscription);
                 showNotification('Abonnement opgeslagen!', 'success');
                 subscriptionForm.reset();
-                subscriptionIdInput.value = '';
-                loadSubscriptions();
+                subscriptionIdInput.value = ''; // Maak verborgen ID leeg
+                loadSubscriptions(); // Herlaad de lijst
             } catch (error) {
                 console.error("Fout bij opslaan abonnement:", error);
                 showNotification('Fout bij opslaan abonnement.', 'error');
@@ -113,7 +121,5 @@ export async function initSubscriptionsView() {
         });
     }
 
-    await loadSubscriptions();
+    await loadSubscriptions(); // Laad abonnementen bij initialisatie van de view
 }
-
-    

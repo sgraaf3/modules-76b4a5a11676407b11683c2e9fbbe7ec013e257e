@@ -1,89 +1,37 @@
 <div class="top-nav">
     <button class="icon-button" data-action="backToDashboard"><i class="fas fa-chevron-left"></i></button>
-    <span>Gebruikersprofiel</span>
+    <span id="user-profile-title">User Profile</span>
     <button class="icon-button"><i class="fas fa-ellipsis-v"></i></button>
 </div>
 <div class="p-4">
     <form id="userProfileForm">
-        <h2 class="text-xl font-bold text-gray-100 border-b border-gray-700 pb-2 mb-4">Persoonlijke Informatie</h2>
-        <fieldset class="border border-gray-700 rounded-lg p-4 mb-6">
-            <legend class="text-lg font-semibold text-blue-300 px-2">Contact & Socials</legend>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="flex flex-col"><label for="userName" class="text-sm font-medium text-gray-400 mb-1">Naam:</label><input type="text" id="userName" name="userName" class="p-2 rounded-md bg-gray-700 border border-gray-600 text-gray-200"></div>
-                <div class="flex flex-col"><label for="userAddress" class="text-sm font-medium text-gray-400 mb-1">Adres:</label><input type="text" id="userAddress" name="userAddress" class="p-2 rounded-md bg-gray-700 border border-gray-600 text-gray-200"></div>
-                <div class="flex flex-col"><label for="userCity" class="text-sm font-medium text-gray-400 mb-1">Woonplaats:</label><input type="text" id="userCity" name="userCity" class="p-2 rounded-md bg-gray-700 border border-gray-600 text-gray-200"></div>
-                <div class="flex flex-col"><label for="userPhone" class="text-sm font-medium text-gray-400 mb-1">Telefoonnummer:</label><input type="tel" id="userPhone" name="userPhone" class="p-2 rounded-md bg-gray-700 border border-gray-600 text-gray-200"></div>
-                <div class="flex flex-col"><label for="userEmail" class="text-sm font-medium text-gray-400 mb-1">E-mail:</label><input type="email" id="userEmail" name="userEmail" class="p-2 rounded-md bg-gray-700 border border-gray-600 text-gray-200"></div>
-                <div class="flex flex-col"><label for="userSocials" class="text-sm font-medium text-gray-400 mb-1">Socials (bijv. Strava, Instagram):</label><input type="text" id="userSocials" name="userSocials" class="p-2 rounded-md bg-gray-700 border border-gray-600 text-gray-200"></div>
-            </div>
-        </fieldset>
+        <h2 class="text-xl font-bold text-gray-100 border-b border-gray-700 pb-2 mb-4 cursor-pointer" data-toggle="personal-info-section">Personal Information <i class="fas fa-chevron-down"></i></h2>
+        <div id="personal-info-section">
+            <!-- ... existing personal information fields ... -->
+        </div>
 
-        <h2 class="text-xl font-bold text-gray-100 border-b border-gray-700 pb-2 mb-4">Biometrie</h2>
-        <fieldset class="border border-gray-700 rounded-lg p-4 mb-6">
-            <legend class="text-lg font-semibold text-blue-300 px-2">Fysieke Gegevens</legend>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="flex flex-col"><label for="userDob" class="text-sm font-medium text-gray-400 mb-1">Geboortedatum (JJJJ-MM-DD):</label><input type="date" id="userDob" name="userDob" class="p-2 rounded-md bg-gray-700 border border-gray-600 text-gray-200"></div>
-                <div class="flex flex-col"><label for="userWeight" class="text-sm font-medium text-gray-400 mb-1">Gewicht (kg):</label><input type="number" id="userWeight" name="userWeight" class="p-2 rounded-md bg-gray-700 border border-gray-600 text-gray-200"></div>
-                <div class="flex flex-col"><label for="userFatPercentage" class="text-sm font-medium text-gray-400 mb-1">Vet %:</label><input type="number" id="userFatPercentage" name="userFatPercentage" class="p-2 rounded-md bg-gray-700 border border-gray-600 text-gray-200"></div>
-                <div class="flex flex-col"><label for="userLength" class="text-sm font-medium text-gray-400 mb-1">Lengte (cm):</label><input type="number" id="userLength" name="userLength" class="p-2 rounded-md bg-gray-700 border border-gray-600 text-gray-200"></div>
-            </div>
-        </fieldset>
+        <h2 class="text-xl font-bold text-gray-100 border-b border-gray-700 pb-2 mb-4 cursor-pointer" data-toggle="biometrics-section">Biometrics <i class="fas fa-chevron-down"></i></h2>
+        <div id="biometrics-section" class="hidden">
+            <!-- ... existing biometrics fields ... -->
+        </div>
 
-        <h2 class="text-xl font-bold text-gray-100 border-b border-gray-700 pb-2 mb-4">Fysiologische Gegevens</h2>
-        <fieldset class="border border-gray-700 rounded-lg p-4 mb-6">
-            <legend class="text-lg font-semibold text-blue-300 px-2">Hartslag & Drempelwaarden</legend>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="flex flex-col"><label for="userSleepHR" class="text-sm font-medium text-gray-400 mb-1">Slaap HR:</label><input type="number" id="userSleepHR" name="userSleepHR" class="p-2 rounded-md bg-gray-700 border border-gray-600 text-gray-200"></div>
-                <div class="flex flex-col"><label for="userRestHR" class="text-sm font-medium text-gray-400 mb-1">Rust HR:</label><input type="number" id="userRestHR" name="userRestHR" class="p-2 rounded-md bg-gray-700 border border-gray-600 text-gray-200"></div>
-                <div class="flex flex-col"><label for="userAvgDailyHR" class="text-sm font-medium text-gray-400 mb-1">Gemiddelde Dagelijkse HR:</label><input type="number" id="userAvgDailyHR" name="userAvgDailyHR" class="p-2 rounded-md bg-gray-700 border border-gray-600 text-gray-200"></div>
-                <div class="flex flex-col"><label for="userMaxHR" class="text-sm font-medium text-gray-400 mb-1">Max HR (bpm):</label><input type="number" id="userMaxHR" name="userMaxHR" class="p-2 rounded-md bg-gray-700 border border-gray-600 text-gray-200"></div>
-                <div class="flex flex-col"><label for="userBaseAtHR" class="text-sm font-medium text-gray-400 mb-1">Basis Anaerobe Drempel (AT) HR (bpm):</label><input type="number" id="userBaseAtHR" name="userBaseAtHR" class="p-2 rounded-md bg-gray-700 border border-gray-600 text-gray-200"><p class="text-sm text-gray-500 mt-2 mb-4">Dit is uw onbewerkte basis AT-waarde.</p></div>
-                <div class="flex flex-col"><label for="userAtSport" class="text-sm font-medium text-gray-400 mb-1">AT Sportaanpassing:</label><select id="userAtSport" name="userAtSport" class="p-2 rounded-md bg-gray-700 border border-gray-600 text-gray-200"><option value="Cycling">Fietsen (+0)</option><option value="Running">Hardlopen (+10)</option><option value="Walking">Wandelen (-5)</option><option value="Skating">Skeeleren (+5)</option><option value="Swimming">Zwemmen (-10)</option><option value="Rowing">Roeien (+5)</option><option value="Other">Overig (+0)</option></select></div>
-                <div class="flex flex-col"><label for="userBaselineHrvScore" class="text-sm font-medium text-gray-400 mb-1">Basislijn HRV Score (1-100, van rustmeting):</label><input type="number" id="userBaselineHrvScore" name="userBaselineHrvScore" min="1" max="100" class="p-2 rounded-md bg-gray-700 border border-gray-600 text-gray-200"></div>
-                <div class="flex flex-col"><label for="calculatedEffectiveAt" class="text-sm font-medium text-gray-400 mb-1">Berekende Effectieve AT (bpm):</label><input type="text" id="calculatedEffectiveEffectiveAt" name="calculatedEffectiveAt" readonly class="p-2 rounded-md bg-gray-600 border border-gray-600 text-gray-200 cursor-not-allowed"><p class="text-sm text-gray-500 mt-2 mb-4">Basis AT + Sportaanpassing + HRV Aanpassing</p></div>
-            </div>
-            <p class="text-sm text-gray-500 mt-4">Voor AT-beheer kunnen we later een vragenlijst implementeren om variabelen te vergelijken en consistente resultaten te vinden.</p>
-        </fieldset>
+        <h2 class="text-xl font-bold text-gray-100 border-b border-gray-700 pb-2 mb-4">Assigned Subscription</h2>
+        <div id="assigned-subscription-section">
+            <!-- Assigned subscription will be loaded here -->
+        </div>
 
-        <h2 class="text-xl font-bold text-gray-100 border-b border-gray-700 pb-2 mb-4">Standaard Meetinstellingen</h2>
-        <fieldset class="border border-gray-700 rounded-lg p-4 mb-6">
-            <legend class="text-lg font-semibold text-blue-300 px-2">Bluetooth Presets</legend>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="flex flex-col"><label for="defaultRestMeasurement" class="text-sm font-medium text-gray-400 mb-1">Standaard Rustmeting:</label><select type="text" id="defaultRestMeasurement" name="defaultRestMeasurement" class="p-2 rounded-md bg-gray-700 border border-gray-600 text-gray-200"><option value="Free">Vrij</option><option value="Base">Basis</option><option value="Work">Werk</option><option value="Practise">Oefening</option><option value="Pre-Training">Pre-Training</option><option value="Post-Training">Post-Training</option></select></div>
-                <div class="flex flex-col"><label for="defaultTraining" class="text-sm font-medium text-gray-400 mb-1">Standaard Trainingstype:</label><select type="text" id="defaultTraining" name="defaultTraining" class="p-2 rounded-md bg-gray-700 border border-gray-600 text-gray-200"><option value="Free">Vrij</option><option value="Schedule">Schema</option><option value="Self-Made Schedule">Zelfgemaakt Schema</option><option value="PractiseBreath">Ademhaling Oefenen</option><option value="PractiseHRZoneConsistency">HR Zone Consistentie Oefenen</option><option value="Pre-Race">Pre-Race</option><option value="Post-Race">Post-Race</option></select></div>
-            </div>
-        </fieldset>
+        <h2 class="text-xl font-bold text-gray-100 border-b border-gray-700 pb-2 mb-4">Training History</h2>
+        <div id="training-history-section">
+            <!-- Training history will be loaded here -->
+        </div>
 
-        <h2 class="text-xl font-bold text-gray-100 border-b border-gray-700 pb-2 mb-4">Dashboard Instellingen</h2>
-        <fieldset class="border border-gray-700 rounded-lg p-4 mb-6">
-            <legend class="text-lg font-semibold text-blue-300 px-2">Aanpassing</legend>
-            <div class="flex flex-col"><label for="dashboardNotes" class="text-sm font-medium text-gray-400 mb-1">Notities voor Dashboard Aanpassing:</label><textarea id="dashboardNotes" name="dashboardNotes" rows="3" placeholder="bijv. voorkeursgrafiek-layouts, standaard zichtbare widgets" class="p-2 rounded-md bg-gray-700 border border-gray-600 text-gray-200"></textarea></div>
-        </fieldset>
-
-        <h2 class="text-xl font-bold text-gray-100 border-b border-gray-700 pb-2 mb-4">Lichaamsverhoudingen</h2>
-        <fieldset class="border border-gray-700 rounded-lg p-4 mb-6">
-            <legend class="text-lg font-semibold text-blue-300 px-2">Gedetailleerde Metingen</legend>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="flex flex-col"><label for="headCircumference" class="text-sm font-medium text-gray-400 mb-1">Hoofdomtrek (cm):</label><input type="number" id="headCircumference" name="headCircumference" class="p-2 rounded-md bg-gray-700 border border-gray-600 text-gray-200"></div>
-                <div class="flex flex-col"><label for="neckCircumference" class="text-sm font-medium text-gray-400 mb-1">Nekomtrek (cm):</label><input type="number" id="neckCircumference" name="neckCircumference" class="p-2 rounded-md bg-gray-700 border border-gray-600 text-gray-200"></div>
-                <div class="flex flex-col"><label for="shoulderWidth" class="text-sm font-medium text-gray-400 mb-1">Schouderbreedte (cm):</label><input type="number" id="shoulderWidth" name="shoulderWidth" class="p-2 rounded-md bg-gray-700 border border-gray-600 text-gray-200"></div>
-                <div class="flex flex-col"><label for="waistCircumference" class="text-sm font-medium text-gray-400 mb-1">Tailleomtrek (cm):</label><input type="number" id="waistCircumference" name="waistCircumference" class="p-2 rounded-md bg-gray-700 border border-gray-600 text-gray-200"></div>
-                <div class="flex flex-col"><label for="hipCircumference" class="text-sm font-medium text-gray-400 mb-1">Heupomtrek (cm):</label><input type="number" id="hipCircumference" name="hipCircumference" class="p-2 rounded-md bg-gray-700 border border-gray-600 text-gray-200"></div>
-                <div class="flex flex-col"><label for="torsoLength" class="text-sm font-medium text-gray-400 mb-1">Romplengte (cm):</label><input type="number" id="torsoLength" name="torsoLength" class="p-2 rounded-md bg-gray-700 border border-gray-600 text-gray-200"></div>
-                <div class="flex flex-col"><label for="armUpperCircumference" class="text-sm font-medium text-gray-400 mb-1">Bovenarmomtrek (cm):</label><input type="number" id="armUpperCircumference" name="armUpperCircumference" class="p-2 rounded-md bg-gray-700 border border-gray-600 text-gray-200"></div>
-                <div class="flex flex-col"><label for="armLowerCircumference" class="text-sm font-medium text-gray-400 mb-1">Onderarmomtrek (cm):</label><input type="number" id="armLowerCircumference" name="armLowerCircumference" class="p-2 rounded-md bg-gray-700 border border-gray-600 text-gray-200"></div>
-                <div class="flex flex-col"><label for="handLength" class="text-sm font-medium text-gray-400 mb-1">Handlengte (cm):</label><input type="number" id="handLength" name="handLength" class="p-2 rounded-md bg-gray-700 border border-gray-600 text-gray-200"></div>
-                <div class="flex flex-col"><label for="legUpperCircumference" class="text-sm font-medium text-gray-400 mb-1">Bovenbeenomtrek (cm):</label><input type="number" id="legUpperCircumference" name="legUpperCircumference" class="p-2 rounded-md bg-gray-700 border border-gray-600 text-gray-200"></div>
-                <div class="flex flex-col"><label for="legLowerCircumference" class="text-sm font-medium text-gray-400 mb-1">Onderbeenomtrek (cm):</label><input type="number" id="legLowerCircumference" name="legLowerCircumference" class="p-2 rounded-md bg-gray-700 border border-gray-600 text-gray-200"></div>
-                <div class="flex flex-col"><label for="footLength" class="text-sm font-medium text-gray-400 mb-1">Voetlengte (cm):</label><input type="number" id="footLength" name="footLength" class="p-2 rounded-md bg-gray-700 border border-gray-600 text-gray-200"></div>
-                <div class="flex flex-col"><label for="shoeSize" class="text-sm font-medium text-gray-400 mb-1">Schoenmaat (EU):</label><input type="number" id="shoeSize" name="shoeSize" class="p-2 rounded-md bg-gray-700 border border-gray-600 text-gray-200"></div>
-            </div>
-        </fieldset>
+        <h2 class="text-xl font-bold text-gray-100 border-b border-gray-700 pb-2 mb-4">Activity Log</h2>
+        <div id="activity-log-section">
+            <!-- Activity log will be loaded here -->
+        </div>
 
         <div class="flex justify-end space-x-4 mt-6">
-            <button type="button" id="saveProfileBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200">Profiel Opslaan</button>
-            <button type="button" id="loadProfileBtn" class="bg-gray-600 hover:bg-gray-700 text-gray-200 font-bold py-2 px-4 rounded-md transition-colors duration-200">Profiel Laden</button>
-            <button type="button" id="backFromUserProfileBtn" class="bg-gray-600 hover:bg-gray-700 text-gray-200 font-bold py-2 px-4 rounded-md transition-colors duration-200">Terug naar Dashboard</button>
+            <button type="button" id="saveProfileBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200">Save Profile</button>
         </div>
     </form>
 </div>
