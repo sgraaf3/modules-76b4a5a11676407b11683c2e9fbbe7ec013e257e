@@ -11,6 +11,7 @@ import { BluetoothController } from './bluetooth.js';
 import { initDashboardView } from './js/dashboardView.js';
 import { initUserProfileView } from './js/userProfileView.js';
 import { initRestMeasurementLiveView } from './js/restMeasurementLiveView.js';
+import { initRestMeasurementLiveView_2 } from './js/restMeasurementLiveView_2.js'; // NIEUW: Importeer de nieuwe module
 import { initLiveTrainingView } from './js/liveTrainingView.js';
 import { initHrDataView } from './js/hrDataView.js';
 import { initTestingView } from './js/testingView.js';
@@ -24,7 +25,7 @@ import { initScheduleBuilderView } from './js/scheduleBuilderView.js';
 import { initLessonScheduleBuilderView } from './js/lessonScheduleBuilderView.js';
 import { initMeetingPlannerView } from './js/meetingPlannerView.js';
 import { initMessagesView } from './js/messagesView.js';
-import { initMemberSpecificprogressView, showDetailedGraph } from './js/memberSpecificprogressView.js'; // showDetailedGraph is nu een export van deze module
+import { initMemberSpecificprogressView, showDetailedGraph } from './js/memberSpecificprogressView.js';
 import { initMemberActivityView } from './js/memberActivityView.js';
 import { initPopularityView } from './js/popularityView.js';
 import { initMemberSettingsView } from './js/memberSettingsView.js';
@@ -80,6 +81,7 @@ const viewConfig = {
     'dashboardView': { html: './views/dashboardView.html', init: initDashboardView },
     'userProfileView': { html: './views/userProfileView.html', init: initUserProfileView },
     'restMeasurementLiveView': { html: './views/restMeasurementLiveView.html', init: initRestMeasurementLiveView },
+    'restMeasurementLiveView_2': { html: './views/restMeasurementLiveView_2.html', init: initRestMeasurementLiveView_2 }, // NIEUW: Entry voor de tweede meting
     'liveTrainingView': { html: './views/liveTrainingView.html', init: initLiveTrainingView },
     'hrDataView': { html: './views/hrDataView.html', init: initHrDataView },
     'testingView': { html: './views/testingView.html', init: initTestingView },
@@ -95,7 +97,7 @@ const viewConfig = {
     'meetingPlannerView': { html: './views/meetingPlannerView.html', init: initMeetingPlannerView },
     'messagesView': { html: './views/messagesView.html', init: initMessagesView },
     'memberSpecificprogressView': { html: './views/memberSpecificprogressView.html', init: initMemberSpecificprogressView },
-    'webGraphsView': { html: './views/webGraphsView.html', init: showDetailedGraph }, // showDetailedGraph is de initialisatiefunctie voor deze view
+    'webGraphsView': { html: './views/webGraphsView.html', init: showDetailedGraph },
     'memberActivityView': { html: './views/memberActivityView.html', init: initMemberActivityView },
     'popularityView': { html: './views/popularityView.html', init: initPopularityView },
     'memberSettingsView': { html: 'views/memberSettingsView.html', init: initMemberSettingsView },
@@ -119,8 +121,6 @@ const viewConfig = {
 document.addEventListener('DOMContentLoaded', async () => {
     const mainContentArea = document.getElementById('main-content-area');
 
-    // Functie om de juiste view te laden en te initialiseren
-    // 'data' parameter kan gebruikt worden om specifieke data door te geven aan de view (bijv. graphType)
     async function showView(viewId, data = null) {
         const config = viewConfig[viewId];
         if (!config) {
@@ -130,12 +130,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         try {
-            // Laad de HTML-content van de view
             const response = await fetch(config.html);
             const htmlContent = await response.text();
             mainContentArea.innerHTML = htmlContent;
 
-            // Update de actieve staat voor de bottom navigatie
             document.querySelectorAll('.bottom-nav-item').forEach(item => {
                 item.classList.remove('active');
                 if (item.dataset.targetView === viewId) {
@@ -143,35 +141,28 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             });
 
-            // Roep de initialisatiefunctie van de view aan, en geef eventuele data mee
             if (config.init) {
-                await config.init(data);
+                await config.init(showView, data); // Geef showView en data door
             }
 
-            // BELANGRIJK: Herkoppel event listeners voor elementen die dynamisch geladen zijn.
-            // Dit is cruciaal omdat innerHTML de oude listeners verwijdert.
-            // Voor navigatieknoppen die teruggaan naar het dashboard:
             document.querySelectorAll('[data-action="backToDashboard"]').forEach(button => {
                 button.addEventListener('click', () => {
                     showView('dashboardView');
                 });
             });
 
-            // Voor dashboard widget cards die naar andere views navigeren:
-            // Deze listeners moeten opnieuw worden gekoppeld telkens als het dashboard wordt geladen.
             document.querySelectorAll('.dashboard-widget-card').forEach(card => {
                 card.addEventListener('click', (event) => {
                     const targetViewId = event.currentTarget.dataset.targetView;
-                    const graphType = event.currentTarget.dataset.graphType; // Voor showDetailedGraph
+                    const graphType = event.currentTarget.dataset.graphType;
                     if (targetViewId === 'webGraphsView' && graphType) {
-                        showView(targetViewId, { graphType: graphType }); // Geef graphType door als data
+                        showView(targetViewId, { graphType: graphType });
                     } else {
                         showView(targetViewId);
                     }
                 });
             });
 
-            // Voeg hier de event listeners voor de bottom-navigatiebalk toe
             document.querySelectorAll('.bottom-nav-item').forEach(item => {
                 item.addEventListener('click', (event) => {
                     const targetViewId = event.currentTarget.dataset.targetView;
@@ -188,7 +179,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // Initialiseer de dashboard-weergave bij het laden van de pagina
     showView('dashboardView');
 
     // --- Globale Bluetooth Widget Logica (blijft in app.js omdat het een zwevende widget is) ---
@@ -237,10 +227,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     bluetoothController.onData = (dataPacket) => {
         liveHrDisplay.textContent = `${dataPacket.heartRate} BPM`;
 
-        // Deze logica moet de userBaseAtHR ophalen uit de opgeslagen profiel data.
-        // Dit vereist dat het user profile geladen is, ongeacht de actieve view.
-        // Voor nu blijft het een placeholder die probeert het element op te halen.
-        const userBaseAtHR = parseFloat(document.getElementById('userBaseAtHR')?.value) || 0; // Dit element is alleen aanwezig als userProfileView actief is
+        const userBaseAtHR = parseFloat(document.getElementById('userBaseAtHR')?.value) || 0;
         if (userBaseAtHR > 0) {
             liveHrZoneDisplay.textContent = getHrZone(dataPacket.heartRate, userBaseAtHR);
         } else {
@@ -288,8 +275,4 @@ document.addEventListener('DOMContentLoaded', async () => {
         bluetoothWidget.classList.add('hidden');
         bluetoothWidget.classList.remove('active');
     });
-
-    // Opmerking: De logica voor het Actie Centrum (Verander User, Invite User, etc.)
-    // is verplaatst naar js/views/actionCenterView.js.
-    // De event listeners worden daar geïnitialiseerd wanneer die view wordt geladen.
 });

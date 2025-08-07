@@ -1,21 +1,21 @@
-import { getData, putData, getAllData } from '../database.js';
+// Bestand: js/userProfileView.js
+import { getData, putData, getAllData, getOrCreateUserId } from '../database.js';
 import { showNotification } from './notifications.js';
 
 export async function initUserProfileView(data) {
-    const userId = data.userId;
+    // Correctie: Haal de userId uit de meegegeven data of gebruik de globale ID.
+    const userId = data && data.userId ? data.userId : getOrCreateUserId();
     console.log(`Initializing User Profile View for user ${userId}`);
 
     const userProfileForm = document.getElementById('userProfileForm');
     const saveProfileBtn = document.getElementById('saveProfileBtn');
     const userProfileTitle = document.getElementById('user-profile-title');
 
-    // ... (rest of the function)
-
     async function loadUserProfile() {
         try {
             const profileData = await getData('userProfile', userId);
             if (profileData) {
-                userProfileTitle.textContent = `${profileData.userName}'s Profile`;
+                userProfileTitle.textContent = `${profileData.userName || 'Gebruiker'}'s Profiel`;
                 for (const key in profileData) {
                     const input = document.getElementById(key);
                     if (input) {
@@ -25,9 +25,11 @@ export async function initUserProfileView(data) {
             } else {
                 const registryData = await getData('registry', userId);
                 if(registryData) {
-                    userProfileTitle.textContent = `${registryData.name}'s Profile`;
+                    userProfileTitle.textContent = `${registryData.name || 'Gebruiker'}'s Profiel`;
                     document.getElementById('userName').value = registryData.name;
                     document.getElementById('userEmail').value = registryData.email;
+                } else {
+                    userProfileTitle.textContent = `Profiel`;
                 }
             }
         } catch (error) {
@@ -79,4 +81,3 @@ export async function initUserProfileView(data) {
     await loadTrainingHistory();
     await loadActivityLog();
 }
-

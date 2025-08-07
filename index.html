@@ -12,24 +12,18 @@
 </head>
 <body>
     <div class="app-container">
-        <!-- De hoofdcontainer waar de content van de views dynamisch geladen wordt -->
         <div id="main-content-area" class="app-section active">
-            <!-- Content wordt hier geladen door JavaScript -->
-        </div>
+            </div>
 
-        <!-- De modale overlay blijft globaal -->
         <div id="chartModalOverlay" class="modal-overlay">
             <div id="chartModalContent" class="modal-content">
                 <button id="chartModalCloseBtn" class="modal-close-btn">X</button>
             </div>
         </div>
 
-        <!-- Globale notificatiecontainer -->
         <div id="notificationContainer" class="fixed top-4 right-4 z-[9999] flex flex-col items-end space-y-2">
-            <!-- Notificaties worden hier dynamisch ingevoegd -->
-        </div>
+            </div>
 
-        <!-- De zwevende Bluetooth widget blijft globaal -->
         <div id="bluetoothWidget" class="bluetooth-widget hidden">
             <div class="bluetooth-widget-header">
                 <span>Bluetooth Meting</span>
@@ -68,7 +62,6 @@
         </div>
         <button id="openBluetoothWidget" class="floating-bluetooth-button"><i class="fas fa-bluetooth-b"></i></button>
 
-        <!-- Bottom Navigation blijft globaal -->
         <div class="bottom-nav">
             <div class="bottom-nav-item active" data-target-view="dashboardView">
                 <i class="fas fa-home"></i>
@@ -85,6 +78,10 @@
             <div class="bottom-nav-item" data-target-view="restMeasurementLiveView">
                 <i class="fas fa-circle"></i>
                 <span>Meting</span>
+            </div>
+            <div class="bottom-nav-item" data-target-view="restMeasurementLiveView_2">
+                <i class="fas fa-circle"></i>
+                <span>Meting 2</span>
             </div>
             <div class="bottom-nav-item" data-target-view="userProfileView">
                 <i class="fas fa-user"></i>
