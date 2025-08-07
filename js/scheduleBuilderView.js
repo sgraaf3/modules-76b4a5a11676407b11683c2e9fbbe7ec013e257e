@@ -1,4 +1,4 @@
-export default function initScheduleBuilderView() {
+export  function initScheduleBuilderView() {
 
 // Functie om een unieke ID te genereren
 function generateUniqueId() {
@@ -15,19 +15,6 @@ function showMessage(message, type = 'info') {
     }, 3000);
 }
 
-// Globale variabelen voor Form Builder elementen
-const customTrainingZonesDropZone = document.getElementById('custom-training-zones-drop-zone');
-const saveCustomTrainingBtn = document.getElementById('save-custom-training-btn');
-const customTrainingNameInput = document.getElementById('custom-training-name');
-
-const saveCustomRestBtn = document.getElementById('save-custom-rest-btn');
-const customRestNameInput = document.getElementById('custom-rest-name');
-const customRestDescriptionInput = document.getElementById('custom-rest-description');
-const customRestGoalsInput = document.getElementById('custom-rest-goals');
-
-const customMeasurementsList = document.getElementById('custom-measurements-list');
-
-
 // --- Tab Navigatie Logica ---
 document.querySelectorAll('.tab-button').forEach(button => {
     button.addEventListener('click', () => {
@@ -41,62 +28,41 @@ document.querySelectorAll('.tab-button').forEach(button => {
         loadSavedDays();
         loadSavedWeeks();
         loadSavedBloks();
-        loadCustomMeasurements();
+        loadCustomMeasurements(); 
     });
 });
 
 // --- Drag & Drop Logica ---
 let draggedItemData = null; // Slaat de data van het gesleepte item op
-let currentDraggedElement = null; // Slaat het DOM-element op dat wordt gesleept
 
 document.querySelectorAll('.drag-item').forEach(item => {
     item.addEventListener('dragstart', (e) => {
-        currentDraggedElement = e.target; // Sla het gesleepte element op
-        currentDraggedElement.classList.add('opacity-0', 'pointer-events-none'); // Maak onzichtbaar tijdens slepen
-
         draggedItemData = {
             type: e.target.dataset.type,
             name: e.target.dataset.name,
             icon: e.target.dataset.icon,
-            id: e.target.dataset.id || generateUniqueId(),
-            content: e.target.dataset.content ? JSON.parse(e.target.dataset.content) : null,
-            zoneColor: e.target.dataset.zoneColor || '',
-            duration: e.target.dataset.duration || null,
-            progressionEnabled: e.target.dataset.progressionEnabled === 'true',
-            progressionValue: e.target.dataset.progressionValue || null,
+            id: e.target.dataset.id || generateUniqueId(), // Gebruik bestaande ID of genereer een nieuwe
+            content: e.target.dataset.content ? JSON.parse(e.target.dataset.content) : null, // Voor geneste items
+            zoneColor: e.target.dataset.zoneColor || '', // Voor HR zone kleur
+            duration: e.target.dataset.duration || null, // Voor initiële duur bij kopiëren
+            progressionEnabled: e.target.dataset.progressionEnabled === 'true', // Voor initiële progressie bij kopiëren
+            progressionValue: e.target.dataset.progressionValue || null, // Voor initiële progressie waarde bij kopiëren
+            // Specifiek voor aangepaste metingen
             customMeasurementType: e.target.dataset.customMeasurementType || null,
             customMeasurementDefinition: e.target.dataset.customMeasurementDefinition ? JSON.parse(e.target.dataset.customMeasurementDefinition) : null,
             customMeasurementDescription: e.target.dataset.customMeasurementDescription || null,
-            customMeasurementGoals: e.target.dataset.customMeasurementGoals || null,
-            inputType: e.target.dataset.inputType || null,
-            reps: e.target.dataset.reps || null,
-            sets: e.target.dataset.sets || null,
-            minReps: e.target.dataset.minReps || null,
-            maxReps: e.target.dataset.maxReps || null,
-            minSets: e.target.dataset.minSets || null,
-            maxSets: e.target.dataset.maxSets || null,
-            minTime: e.target.dataset.minTime || null,
-            maxTime: e.target.dataset.maxTime || null,
-            notes: e.target.dataset.notes || null,
+            customMeasurementGoals: e.target.dataset.customMeasurementGoals || null
         };
         e.dataTransfer.setData('text/plain', JSON.stringify(draggedItemData));
-        e.dataTransfer.effectAllowed = 'copy'; // Altijd kopiëren, niet verplaatsen
-    });
-
-    item.addEventListener('dragend', (e) => {
-        // Maak het originele element weer zichtbaar, tenzij het permanent verwijderd is (wat hier niet gebeurt)
-        if (currentDraggedElement) {
-            currentDraggedElement.classList.remove('opacity-0', 'pointer-events-none');
-            currentDraggedElement = null;
-        }
+        e.dataTransfer.effectAllowed = 'move';
     });
 });
 
 document.querySelectorAll('.drop-zone').forEach(zone => {
     zone.addEventListener('dragover', (e) => {
-        e.preventDefault();
+        e.preventDefault(); 
         zone.classList.add('drag-over');
-        e.dataTransfer.dropEffect = 'copy'; // Belangrijke fix: Zorg dat dropEffect overeenkomt
+        e.dataTransfer.dropEffect = 'move';
     });
 
     zone.addEventListener('dragleave', (e) => {
@@ -108,15 +74,15 @@ document.querySelectorAll('.drop-zone').forEach(zone => {
         zone.classList.remove('drag-over');
 
         const data = JSON.parse(e.dataTransfer.getData('text/plain'));
-        const dropZoneId = zone.id;
-        const dropZoneClasses = zone.classList;
+        const dropZoneId = zone.id; 
+        const dropZoneClasses = zone.classList; 
 
         // Validatie van drop-actie
         let isValidDrop = false;
         let expectedTypes = [];
 
-        if (dropZoneId === 'day-drop-zone') {
-            expectedTypes = ['rest-day', 'training-measurement', 'rest-measurement-free', 'rest-measurement-base', 'document-link', 'custom-training-measurement', 'custom-rest-measurement'];
+        if (dropZoneId === 'day-drop-zone') { 
+            expectedTypes = ['hr-zone', 'rest-day', 'training-measurement', 'rest-measurement-free', 'rest-measurement-base', 'document-link', 'custom-training-measurement', 'custom-rest-measurement'];
             if (expectedTypes.includes(data.type)) {
                 isValidDrop = true;
             }
@@ -132,12 +98,12 @@ document.querySelectorAll('.drop-zone').forEach(zone => {
             }
         } else if (dropZoneId === 'blok-drop-zone') {
             expectedTypes = ['week'];
-            if (data.type === 'week') {
+            if (data.type === 'week') { 
                 isValidDrop = true;
             }
-        } else if (dropZoneId === 'custom-training-zones-drop-zone') {
-            expectedTypes = ['hr-zone', 'strength-exercise', 'recovery-activity', 'coordination-activity', 'flexibility-activity', 'speed-activity', 'nutrition-activity']; // Alle oefeningstypes
-            if (expectedTypes.includes(data.type)) {
+        } else if (dropZoneId === 'custom-training-zones-drop-zone') { 
+            expectedTypes = ['hr-zone'];
+            if (data.type === 'hr-zone') {
                 isValidDrop = true;
             }
         }
@@ -173,24 +139,12 @@ document.querySelectorAll('.drop-zone').forEach(zone => {
         if (data.customMeasurementDescription) droppedItem.dataset.customMeasurementDescription = data.customMeasurementDescription;
         if (data.customMeasurementGoals) droppedItem.dataset.customMeasurementGoals = data.customMeasurementGoals;
 
-        // Opslaan van nieuwe data attributes
-        if (data.inputType) droppedItem.dataset.inputType = data.inputType;
-        if (data.reps) droppedItem.dataset.reps = data.reps;
-        if (data.sets) droppedItem.dataset.sets = data.sets;
-        if (data.minReps) droppedItem.dataset.minReps = data.minReps;
-        if (data.maxReps) droppedItem.dataset.maxReps = data.maxReps;
-        if (data.minSets) droppedItem.dataset.minSets = data.minSets;
-        if (data.maxSets) droppedItem.dataset.maxSets = data.maxSets;
-        if (data.minTime) droppedItem.dataset.minTime = data.minTime;
-        if (data.maxTime) droppedItem.dataset.maxTime = data.maxTime;
-        if (data.notes) droppedItem.dataset.notes = data.notes;
-
 
         let innerHtmlContent = `<span><i class="${data.icon} mr-2 ${data.zoneColor || ''}"></i>${data.name}</span>`;
-
+        
         if (dropZoneId === 'day-drop-zone') { // Items gesleept naar de Dag tijdlijn
             droppedItem.className = `timeline-item flex items-center p-2 mb-1 rounded-md bg-gray-700`;
-
+            
             const rect = zone.getBoundingClientRect();
             const relativeY = e.clientY - rect.top;
             droppedItem.style.top = `${relativeY}px`;
@@ -207,12 +161,12 @@ document.querySelectorAll('.drop-zone').forEach(zone => {
                             <span class="ml-1">Wekelijks toenemen?</span>
                         </label>
                         <input type="number" placeholder="Minuten" class="w-16 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-progression-value-input value="${data.progressionValue || ''}" ${!data.progressionEnabled ? 'disabled' : ''}>
-                        <input type="text" placeholder="Notities" class="w-24 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-notes-input value="${data.notes || ''}">
+                            <input type="text" placeholder="Notities" class="w-24 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-notes-input value="${data.notes || ''}">
                     </div>
                 `;
                 droppedItem.classList.add('hr-zone-bar');
             } else if (data.type === 'document-link') {
-                if (!data.documentName) {
+                if (!data.documentName) { 
                     const docName = prompt('Voer de naam/ID van het document in:');
                     data.documentName = docName || 'Onbekend Document';
                 }
@@ -222,7 +176,7 @@ document.querySelectorAll('.drop-zone').forEach(zone => {
                 const totalDuration = data.customMeasurementDefinition.reduce((sum, item) => sum + (item.duration || 0), 0);
                 innerHtmlContent += `<span class="ml-2 text-gray-400">(${totalDuration} min)</span>`;
             } else if (data.type === 'custom-rest-measurement' && data.customMeasurementDescription) {
-                innerHtmlContent += `<span class="ml-2 text-gray-400">(${data.customMeasurementDescription.substring(0, 20)}...)</span>`;
+                 innerHtmlContent += `<span class="ml-2 text-gray-400">(${data.customMeasurementDescription.substring(0, 20)}...)</span>`;
             } else if (['strength-exercise', 'recovery-activity', 'coordination-activity', 'flexibility-activity', 'speed-activity', 'nutrition-activity'].includes(data.type)) {
                 // Determine initial display based on data.inputType
                 const timeDisplay = data.inputType === 'reps_sets' ? 'display:none;' : 'display:flex;';
@@ -290,8 +244,8 @@ document.querySelectorAll('.drop-zone').forEach(zone => {
 
 
         } else if (dropZoneId === 'custom-training-zones-drop-zone') { // Items gesleept naar Custom Training Builder
-            droppedItem.className = 'dropped-item flex items-center p-2 mb-1 rounded-md bg-gray-700';
-            innerHtmlContent += `
+             droppedItem.className = 'dropped-item flex items-center p-2 mb-1 rounded-md bg-gray-700';
+             innerHtmlContent += `
                 <div class="flex items-center space-x-2 ml-auto w-full md:w-auto flex-wrap">
                     <select class="p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm mt-1" data-input-type-select>
                         <option value="time" ${data.inputType === 'time' ? 'selected' : ''}>Tijd (min)</option>
@@ -358,15 +312,15 @@ document.querySelectorAll('.drop-zone').forEach(zone => {
                     <div class="flex items-center space-x-2 ml-auto">
                         <span class="text-sm text-gray-300">Herhalingen:</span>
                         <input type="number" value="1" min="1" class="w-16 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-repetitions-input>
-                    </div>
+                            </div>
                 `;
             }
             innerHtmlContent += `<button class="remove-btn"><i class="fas fa-times"></i></button>`;
             droppedItem.innerHTML = innerHtmlContent;
-            zone.innerHTML = '';
+            zone.innerHTML = ''; 
             zone.appendChild(droppedItem);
         }
-
+        
         // Voeg event listener toe voor verwijderen (voor alle dropped items)
         droppedItem.querySelector('.remove-btn').addEventListener('click', () => {
             droppedItem.remove();
@@ -374,7 +328,7 @@ document.querySelectorAll('.drop-zone').forEach(zone => {
             if (zone.children.length === 0) {
                 const newPlaceholder = document.createElement('p');
                 newPlaceholder.className = 'text-gray-400 text-center text-sm';
-                if (dropZoneId === 'day-drop-zone' || dropZoneId === 'custom-training-zones-drop-zone') {
+                if (dropZoneId === 'day-drop-zone' || dropZoneId === 'custom-training-zones-drop-zone') { 
                     newPlaceholder.textContent = 'Sleep HR zones of oefeningen hierheen om de training te definiëren.';
                 } else if (dropZoneClasses.contains('day-slot')) {
                     newPlaceholder.textContent = 'Sleep dag hier';
@@ -394,20 +348,20 @@ document.querySelectorAll('.drop-zone').forEach(zone => {
 // --- Hulpfunctie om dropzones te vullen bij kopiëren en laden ---
 function populateDropZone(dropZoneElement, contentData, targetType) {
     dropZoneElement.innerHTML = ''; // Maak de dropzone leeg
-    if (!contentData || (Array.isArray(contentData) && contentData.length === 0 && dropZoneElement.id !== 'blok-drop-zone')) {
-        const newPlaceholder = document.createElement('p');
-        newPlaceholder.className = 'text-gray-400 text-center text-sm';
-        if (dropZoneElement.id === 'day-drop-zone' || dropZoneElement.id === 'custom-training-zones-drop-zone') {
+    if (!contentData || (Array.isArray(contentData) && contentData.length === 0 && dropZoneElement.id !== 'blok-drop-zone')) { // targetType 'object' is for week/month slots
+         const newPlaceholder = document.createElement('p');
+         newPlaceholder.className = 'text-gray-400 text-center text-sm';
+         if (dropZoneElement.id === 'day-drop-zone' || dropZoneElement.id === 'custom-training-zones-drop-zone') {
             newPlaceholder.textContent = 'Sleep HR zones of oefeningen hierheen om de training te definiëren.';
-        } else if (dropZoneElement.classList.contains('day-slot')) {
+         } else if (dropZoneElement.classList.contains('day-slot')) {
             newPlaceholder.textContent = 'Sleep dag hier';
-        } else if (dropZoneElement.classList.contains('week-slot')) {
+         } else if (dropZoneElement.classList.contains('week-slot')) {
             newPlaceholder.textContent = 'Sleep week hier';
-        } else if (dropZoneElement.id === 'blok-drop-zone') {
+         } else if (dropZoneElement.id === 'blok-drop-zone') {
             newPlaceholder.textContent = 'Sleep weken hierheen om het blok te configureren.';
-        }
-        dropZoneElement.appendChild(newPlaceholder);
-        return;
+         }
+         dropZoneElement.appendChild(newPlaceholder);
+         return;
     }
 
     if (Array.isArray(contentData)) { // Voor Dag (array van activiteiten) of Custom Training (array van zones)
@@ -418,7 +372,7 @@ function populateDropZone(dropZoneElement, contentData, targetType) {
             droppedItem.dataset.name = item.name;
             droppedItem.dataset.icon = item.icon;
             if (item.zoneColor) droppedItem.dataset.zoneColor = item.zoneColor;
-            if (item.content) droppedItem.dataset.content = JSON.stringify(item.content);
+            if (item.content) droppedItem.dataset.content = JSON.stringify(item.content); 
             if (item.documentName) droppedItem.dataset.documentName = item.documentName;
             if (item.customMeasurementType) droppedItem.dataset.customMeasurementType = item.customMeasurementType;
             if (item.customMeasurementDefinition) droppedItem.dataset.customMeasurementDefinition = JSON.stringify(item.customMeasurementDefinition);
@@ -439,7 +393,7 @@ function populateDropZone(dropZoneElement, contentData, targetType) {
 
 
             let innerHtmlContent = `<span><i class="${item.icon} mr-2 ${item.zoneColor || ''}"></i>${item.name}</span>`;
-
+            
             if (item.type === 'hr-zone') {
                 droppedItem.className = `timeline-item flex items-center p-2 mb-1 rounded-md bg-gray-700 hr-zone-bar`;
                 innerHtmlContent += `
@@ -494,7 +448,7 @@ function populateDropZone(dropZoneElement, contentData, targetType) {
             }
             innerHtmlContent += `<button class="remove-btn"><i class="fas fa-times"></i></button>`;
             droppedItem.innerHTML = innerHtmlContent;
-
+            
             // Set position for loaded items in day-drop-zone
             if (dropZoneElement.id === 'day-drop-zone') {
                 droppedItem.style.top = `${item.topPosition || 0}px`;
@@ -544,59 +498,61 @@ function populateDropZone(dropZoneElement, contentData, targetType) {
                 }
             });
         });
-    } else if (contentData && typeof contentData === 'object') { // Voor Week (object met dagen) of Blok (array van weken)
-        // Ensure this only runs for week/block slots, not for general drop zones
-        if (dropZoneElement.classList.contains('day-slot') || dropZoneElement.id === 'blok-drop-zone') {
-            for (const key in contentData) {
-                const item = contentData[key];
-                if (item) { // Check if item is not null (for empty day slots in week)
-                    const slot = dropZoneElement.querySelector(`[data-${dropZoneElement.classList.contains('day-slot') ? 'day-of-week' : 'week-number'}="${key}"]`);
-                    if (slot) {
-                        slot.innerHTML = ''; // Clear placeholder
-                        const droppedItem = document.createElement('div');
-                        droppedItem.className = 'dropped-item flex flex-col p-2 mb-1 rounded-md bg-gray-700';
-                        droppedItem.dataset.id = item.id;
-                        droppedItem.dataset.type = item.type;
-                        droppedItem.dataset.name = item.name;
-                        droppedItem.dataset.icon = item.icon;
-                        droppedItem.dataset.content = JSON.stringify(item.content); // Recursief voor geneste content
+    } else if (contentData && typeof contentData === 'object' && targetType === 'object') { // Voor Week (object met dagen), Maand (object met weken)
+        for (const key in contentData) {
+            const slot = dropZoneElement.querySelector(`[data-${dropZoneElement.classList.contains('day-slot') ? 'day-of-week' : 'week-number'}="${key}"]`);
+            if (slot) {
+                slot.innerHTML = ''; // Clear placeholder
+                if (contentData[key]) {
+                    const item = contentData[key];
+                    const droppedItem = document.createElement('div');
+                    droppedItem.className = 'dropped-item flex flex-col p-2 mb-1 rounded-md bg-gray-700';
+                    droppedItem.dataset.id = item.id;
+                    droppedItem.dataset.type = item.type;
+                    droppedItem.dataset.name = item.name;
+                    droppedItem.dataset.icon = item.icon;
+                    droppedItem.dataset.content = JSON.stringify(item.content); // Recursief voor geneste content
 
-                        // Samenvatting voor dag/week in kalenderweergave
-                        let summaryHtml = '';
-                        if (item.type === 'day' && item.content && Array.isArray(item.content)) {
-                            const hrZonesSummary = item.content.filter(act => act.type === 'hr-zone').map(hrz => `${hrz.name} (${hrz.duration} min)`).join(', ');
-                            const otherActivities = item.content.filter(act => act.type !== 'hr-zone').map(act => act.name).join(', ');
-                            summaryHtml = `<div class="text-xs text-gray-400 mt-1">${hrZonesSummary}${otherActivities ? (hrZonesSummary ? '; ' : '') + otherActivities : ''}</div>`;
-                        } else if (item.type === 'week' && item.content && typeof item.content === 'object') {
-                            const daysCount = Object.values(item.content).filter(d => d !== null).length;
-                            summaryHtml = `<div class="text-xs text-gray-400 mt-1">${daysCount} dagen geconfigureerd</div>`;
-                        }
-
-                        droppedItem.innerHTML = `
-                            <span><i class="${item.icon} mr-2"></i>${item.name}</span>
-                            ${summaryHtml}
-                            <button class="remove-btn absolute top-1 right-1"><i class="fas fa-times"></i></button>
-                        `;
-                        slot.appendChild(droppedItem);
-
-                        droppedItem.querySelector('.remove-btn').addEventListener('click', () => {
-                            droppedItem.remove();
-                            const newPlaceholder = document.createElement('p');
-                            newPlaceholder.className = 'text-gray-400 text-center text-sm';
-                            newPlaceholder.textContent = slot.classList.contains('day-slot') ? 'Sleep dag hier' : 'Sleep week hier';
-                            slot.appendChild(newPlaceholder);
-                        });
+                    // Samenvatting voor dag/week in kalenderweergave
+                    let summaryHtml = '';
+                    if (item.type === 'day' && item.content && Array.isArray(item.content)) {
+                        const hrZonesSummary = item.content.filter(act => act.type === 'hr-zone').map(hrz => `${hrz.name} (${hrz.duration} min)`).join(', ');
+                        const otherActivities = item.content.filter(act => act.type !== 'hr-zone').map(act => act.name).join(', ');
+                        summaryHtml = `<div class="text-xs text-gray-400 mt-1">${hrZonesSummary}${otherActivities ? (hrZonesSummary ? '; ' : '') + otherActivities : ''}</div>`;
+                    } else if (item.type === 'week' && item.content && typeof item.content === 'object') {
+                        const daysCount = Object.values(item.content).filter(d => d !== null).length;
+                        summaryHtml = `<div class="text-xs text-gray-400 mt-1">${daysCount} dagen geconfigureerd</div>`;
                     }
+
+                    droppedItem.innerHTML = `
+                        <span><i class="${item.icon} mr-2"></i>${item.name}</span>
+                        ${summaryHtml}
+                        <button class="remove-btn absolute top-1 right-1"><i class="fas fa-times"></i></button>
+                    `;
+                    slot.appendChild(droppedItem);
+
+                    droppedItem.querySelector('.remove-btn').addEventListener('click', () => {
+                        droppedItem.remove();
+                        const newPlaceholder = document.createElement('p');
+                        newPlaceholder.className = 'text-gray-400 text-center text-sm';
+                        newPlaceholder.textContent = slot.classList.contains('day-slot') ? 'Sleep dag hier' : 'Sleep week hier';
+                        slot.appendChild(newPlaceholder);
+                    });
+                } else {
+                    const newPlaceholder = document.createElement('p');
+                    newPlaceholder.className = 'text-gray-400 text-center text-sm';
+                    newPlaceholder.textContent = slot.classList.contains('day-slot') ? 'Sleep dag hier' : 'Sleep week hier';
+                    slot.appendChild(newPlaceholder);
                 }
             }
         }
-    } else if (dropZoneElement.id === 'blok-drop-zone') { // Voor Blok (array van weken)
-        if (contentData.length === 0) {
-            const newPlaceholder = document.createElement('p');
-            newPlaceholder.className = 'text-gray-400 text-center';
-            newPlaceholder.textContent = 'Sleep weken hierheen om het blok te configureren.';
-            dropZoneElement.appendChild(newPlaceholder);
-            return;
+    } else if (dropZoneElement.id === 'blok-drop-zone') { // Voor Blok (array van maanden)
+         if (contentData.length === 0) {
+             const newPlaceholder = document.createElement('p');
+             newPlaceholder.className = 'text-gray-400 text-center';
+             newPlaceholder.textContent = 'Sleep weken hierheen om het blok te configureren.';
+             dropZoneElement.appendChild(newPlaceholder);
+             return;
         }
         contentData.forEach(item => {
             const droppedItem = document.createElement('div');
@@ -653,37 +609,34 @@ saveDayBtn.addEventListener('click', () => {
     }
 
     const activities = [];
-    let hasError = false;
+    let hasError = false; 
     dayDropZone.querySelectorAll('.timeline-item').forEach(item => {
         const activity = {
             type: item.dataset.type,
             name: item.dataset.name,
             icon: item.querySelector('i').className,
             zoneColor: item.dataset.zoneColor || '',
-            topPosition: parseFloat(item.style.top) || 0
+            topPosition: parseFloat(item.style.top) || 0 
         };
-        // Collect all relevant data attributes based on item type
         if (item.dataset.type === 'hr-zone') {
             const durationInput = item.querySelector('[data-duration-input]');
             const progressionCheckbox = item.querySelector('[data-progression-checkbox]');
             const progressionValueInput = item.querySelector('[data-progression-value-input]');
-            const notesInput = item.querySelector('[data-notes-input]');
 
             const duration = parseInt(durationInput.value);
             if (isNaN(duration) || duration <= 0) {
                 hasError = true;
                 showMessage('Vul een geldige duur (in minuten) in voor alle hartslagzones.', 'error');
-                return;
+                return; 
             }
             activity.duration = duration;
             activity.progressionEnabled = progressionCheckbox.checked;
-            activity.progressionValue = progressionCheckbox.checked ? parseInt(progressionValueInput.value) : null;
+            activity.progressionValue = progressionCheckbox.checked ? parseInt(progressionValueInput.value) : null; 
             if (activity.progressionEnabled && (isNaN(activity.progressionValue) || activity.progressionValue <= 0)) {
                 hasError = true;
                 showMessage('Vul een geldige toename waarde (in minuten) in voor wekelijkse toename.', 'error');
                 return;
             }
-            activity.notes = notesInput ? notesInput.value : null;
         } else if (item.dataset.type === 'document-link') {
             activity.documentName = item.dataset.documentName;
         } else if (item.dataset.type === 'custom-training-measurement') {
@@ -693,51 +646,12 @@ saveDayBtn.addEventListener('click', () => {
             activity.customMeasurementType = item.dataset.customMeasurementType;
             activity.customMeasurementDescription = item.dataset.customMeasurementDescription;
             activity.customMeasurementGoals = item.dataset.customMeasurementGoals;
-        } else if (['strength-exercise', 'recovery-activity', 'coordination-activity', 'flexibility-activity', 'speed-activity', 'nutrition-activity'].includes(item.dataset.type)) { // Algemene oefeningen/voeding
-            const inputTypeSelect = item.querySelector('[data-input-type-select]');
-            const progressionCheckbox = item.querySelector('[data-progression-checkbox]');
-            const progressionValueInput = item.querySelector('[data-progression-value-input]');
-            const notesInput = item.querySelector('[data-notes-input]');
-
-            activity.inputType = inputTypeSelect ? inputTypeSelect.value : null;
-            activity.notes = notesInput ? notesInput.value : null;
-
-            if (activity.inputType === 'time') {
-                activity.duration = item.querySelector('[data-duration-input]') ? parseInt(item.querySelector('[data-duration-input]').value) : null;
-                activity.minTime = item.querySelector('[data-min-time-input]') ? parseInt(item.querySelector('[data-min-time-input]').value) : null;
-                activity.maxTime = item.querySelector('[data-max-time-input]') ? parseInt(item.querySelector('[data-max-time-input]').value) : null;
-                if (isNaN(activity.duration) || activity.duration <= 0) {
-                    hasError = true;
-                    showMessage(`Vul een geldige duur in voor '${activity.name}'.`, 'error');
-                    return;
-                }
-            } else if (activity.inputType === 'reps_sets') {
-                activity.reps = item.querySelector('[data-reps-input]') ? parseInt(item.querySelector('[data-reps-input]').value) : null;
-                activity.sets = item.querySelector('[data-sets-input]') ? parseInt(item.querySelector('[data-sets-input]').value) : null;
-                activity.minReps = item.querySelector('[data-min-reps-input]') ? parseInt(item.querySelector('[data-min-reps-input]').value) : null;
-                activity.maxReps = item.querySelector('[data-max-reps-input]') ? parseInt(item.querySelector('[data-max-reps-input]').value) : null;
-                activity.minSets = item.querySelector('[data-min-sets-input]') ? parseInt(item.querySelector('[data-min-sets-input]').value) : null;
-                activity.maxSets = item.querySelector('[data-max-sets-input]') ? parseInt(item.querySelector('[data-max-sets-input]').value) : null;
-                if (isNaN(activity.reps) || activity.reps <= 0 || isNaN(activity.sets) || activity.sets <= 0) {
-                    hasError = true;
-                    showMessage(`Vul geldige herhalingen en sets in voor '${activity.name}'.`, 'error');
-                    return;
-                }
-            }
-
-            activity.progressionEnabled = progressionCheckbox?.checked || false;
-            activity.progressionValue = progressionValueInput ? parseInt(progressionValueInput.value) : null;
-            if (activity.progressionEnabled && (isNaN(activity.progressionValue) || activity.progressionValue <= 0)) {
-                hasError = true;
-                showMessage(`Vul een geldige toename waarde in voor wekelijkse toename bij '${activity.name}'.`, 'error');
-                return;
-            }
         }
         activities.push(activity);
     });
 
     if (hasError) {
-        return;
+        return; 
     }
 
     if (activities.length === 0) {
@@ -756,8 +670,8 @@ saveDayBtn.addEventListener('click', () => {
 
     showMessage('Dag opgeslagen!', 'success');
     currentDayNameInput.value = '';
-    dayDropZone.innerHTML = '<p class="text-gray-400 text-center">Sleep aangepaste trainingen/rustmetingen, rustdagen, standaard metingen of documenten hierheen om de dag te configureren.</p>';
-    loadSavedDays();
+    dayDropZone.innerHTML = '<p class="text-gray-400 text-center">Sleep hartslagzones, rust, metingen of documenten hierheen om de dag te configureren.</p>';
+    loadSavedDays(); 
 });
 
 function loadSavedDays() {
@@ -775,8 +689,8 @@ function loadSavedDays() {
         dayCard.dataset.type = 'day';
         dayCard.dataset.id = day.id;
         dayCard.dataset.name = day.name;
-        dayCard.dataset.icon = 'fas fa-calendar-day';
-        dayCard.dataset.content = JSON.stringify(day.activities);
+        dayCard.dataset.icon = 'fas fa-calendar-day'; 
+        dayCard.dataset.content = JSON.stringify(day.activities); 
 
         dayCard.innerHTML = `
             <div class="flex items-center justify-between w-full">
@@ -786,17 +700,12 @@ function loadSavedDays() {
             <div class="text-xs text-gray-300 mt-2">
                 ${day.activities.map(act => {
                     let activityText = `<span class="inline-block bg-gray-800 rounded-full px-2 py-1 text-xs font-semibold text-gray-300 mr-1 mb-1"><i class="${act.icon.split(' ')[1]} mr-1 ${act.zoneColor || ''}"></i>${act.name}`;
-                    if (act.type === 'hr-zone' || ['strength-exercise', 'recovery-activity', 'coordination-activity', 'flexibility-activity', 'speed-activity', 'nutrition-activity'].includes(act.type)) {
-                        if (act.inputType === 'time' && act.duration) {
-                            activityText += ` (${act.duration} min)`;
-                        } else if (act.inputType === 'reps_sets' && act.reps && act.sets) {
-                            activityText += ` (${act.reps} reps, ${act.sets} sets)`;
-                        } else if (act.type === 'hr-zone' && act.duration) { // Fallback for old HR zones without inputType
+                    if (act.type === 'hr-zone') {
+                        if (act.duration) {
                             activityText += ` (${act.duration} min)`;
                         }
-
                         if (act.progressionEnabled && act.progressionValue) {
-                            activityText += ` (+${act.progressionValue} min)`;
+                            activityText += ` (+${act.progressionValue} min)`; 
                         }
                     } else if (act.type === 'document-link') {
                         activityText += ` (${act.documentName || 'Onbekend'})`;
@@ -818,7 +727,7 @@ function loadSavedDays() {
 
 // Weken
 const currentWeekNameInput = document.getElementById('current-week-name');
-const weekDaySlots = document.querySelectorAll('.day-slot');
+const weekDaySlots = document.querySelectorAll('.day-slot'); 
 const saveWeekBtn = document.getElementById('save-week-btn');
 const savedWeeksList = document.getElementById('saved-weeks-list');
 
@@ -843,7 +752,7 @@ saveWeekBtn.addEventListener('click', () => {
             };
             isEmptyWeek = false;
         } else {
-            daysInWeek[dayOfWeek] = null;
+            daysInWeek[dayOfWeek] = null; 
         }
     });
 
@@ -882,8 +791,8 @@ function loadSavedWeeks() {
         weekCard.dataset.type = 'week';
         weekCard.dataset.id = week.id;
         weekCard.dataset.name = week.name;
-        weekCard.dataset.icon = 'fas fa-calendar-week';
-        weekCard.dataset.content = JSON.stringify(week.days);
+        weekCard.dataset.icon = 'fas fa-calendar-week'; 
+        weekCard.dataset.content = JSON.stringify(week.days); 
 
         const configuredDays = Object.values(week.days).filter(day => day !== null).map(day => day.name);
         const summaryText = configuredDays.length > 0 ? configuredDays.join(', ') : 'Geen dagen geconfigureerd';
@@ -952,12 +861,12 @@ saveBlokBtn.addEventListener('click', () => {
     }
 
     const blokId = generateUniqueId();
-    const newBlok = {
-        id: blokId,
-        name: blokName,
+    const newBlok = { 
+        id: blokId, 
+        name: blokName, 
         weeks: weeksInBlok,
         notes: blokNotes // Opslaan van notities
-    };
+    }; 
 
     let savedBloks = JSON.parse(localStorage.getItem('cardioBloks') || '[]');
     savedBloks.push(newBlok);
@@ -980,7 +889,7 @@ function loadSavedBloks() {
 
     savedBloks.forEach(blok => {
         const blokCard = document.createElement('div');
-        blokCard.className = 'dropped-item flex flex-col p-3 rounded-md bg-gray-700';
+        blokCard.className = 'dropped-item flex flex-col p-3 rounded-md bg-gray-700'; 
         blokCard.dataset.id = blok.id;
         blokCard.dataset.name = blok.name;
         blokCard.dataset.type = 'blok'; // Add type for consistency
@@ -1011,16 +920,16 @@ function addRemoveListenersToSavedItems() {
         button.addEventListener('click', (e) => {
             const idToRemove = e.target.closest('button').dataset.id;
             const listName = e.target.closest('button').dataset.list;
-
+            
             let savedItems = JSON.parse(localStorage.getItem(listName) || '[]');
             savedItems = savedItems.filter(item => item.id !== idToRemove);
             localStorage.setItem(listName, JSON.stringify(savedItems));
-
+            
             showMessage('Item verwijderd!', 'info');
             // Herlaad de juiste lijst
             if (listName === 'cardioDays') loadSavedDays();
             if (listName === 'cardioWeeks') loadSavedWeeks();
-            if (listName === 'cardioBloks') loadSavedBloks();
+            if (listName === 'cardioBloks') loadSavedBloks(); 
             if (listName === 'customMeasurements') loadCustomMeasurements(); // Voor aangepaste metingen
         });
     });
@@ -1036,7 +945,7 @@ loadCustomMeasurements(); // Laad aangepaste metingen bij start
 function createNewItem(type, namePrompt, listName, icon, color) {
     const copyOption = confirm(`Wil je kopiëren van een bestaande ${type}?`);
     let itemName = '';
-    let contentToCopy = (type === 'day' || type === 'custom-training-measurement') ? [] : {};
+    let contentToCopy = (type === 'day' || type === 'custom-training-measurement') ? [] : {}; 
 
     if (copyOption) {
         const itemIdToCopy = prompt(`Voer de ID in van de ${type} die je wilt kopiëren:`);
@@ -1057,12 +966,12 @@ function createNewItem(type, namePrompt, listName, icon, color) {
                 return;
             }
         } else {
-            return;
+            return; 
         }
     } else {
         itemName = prompt(namePrompt);
     }
-
+    
     if (itemName) {
         const itemId = generateUniqueId();
         const newItemElement = document.createElement('div');
@@ -1072,7 +981,7 @@ function createNewItem(type, namePrompt, listName, icon, color) {
         newItemElement.dataset.id = itemId;
         newItemElement.dataset.name = itemName;
         newItemElement.dataset.icon = icon;
-
+        
         // Specifieke content voor custom measurements
         if (type === 'custom-training-measurement') {
             newItemElement.dataset.customMeasurementType = 'training';
@@ -1127,7 +1036,7 @@ document.getElementById('create-week-btn').addEventListener('click', () => {
     createNewItem('week', 'Naam voor de nieuwe week:', 'Weeks', 'fas fa-calendar-week', 'text-purple-300');
 });
 
-document.getElementById('create-block-btn').addEventListener('click', () => {
+document.getElementById('create-block-btn').addEventListener('click', () => { // Aangepaste ID
     createNewItem('block', 'Naam voor het nieuwe blok:', 'Bloks', 'fas fa-layer-group', 'text-cyan-300');
 });
 
@@ -1153,68 +1062,17 @@ function generateTimeLabels() {
 document.addEventListener('DOMContentLoaded', generateTimeLabels);
 
 
-/// --- Form Builder Logic ---
-(function() { // Encapsulate in an IIFE to avoid global scope pollution
+// --- Form Builder Logica ---
+const customTrainingZonesDropZone = document.getElementById('custom-training-zones-drop-zone');
+const saveCustomTrainingBtn = document.getElementById('save-custom-training-btn');
+const customTrainingNameInput = document.getElementById('custom-training-name');
 
-    // Helper function for safer element selection
-    function getElementByIdSafe(id) {
-        const element = document.getElementById(id);
-        if (!element) {
-            console.error(`Error: Element with ID '${id}' not found.`);
-            // Depending on severity, you might throw an error, disable functionality, or return null.
-            // For now, we'll just log and return null.
-        }
-        return element;
-    }
+const saveCustomRestBtn = document.getElementById('save-custom-rest-btn');
+const customRestNameInput = document.getElementById('custom-rest-name');
+const customRestDescriptionInput = document.getElementById('custom-rest-description');
+const customRestGoalsInput = document.getElementById('custom-rest-goals');
 
-    const customTrainingZonesDropZone = getElementByIdSafe('custom-training-zones-drop-zone');
-    const saveCustomTrainingBtn = getElementByIdSafe('save-custom-training-btn');
-    const customTrainingNameInput = getElementByIdSafe('custom-training-name');
-
-    const saveCustomRestBtn = getElementByIdSafe('save-custom-rest-btn');
-    const customRestNameInput = getElementByIdSafe('custom-rest-name');
-    const customRestDescriptionInput = getElementByIdSafe('custom-rest-description');
-    const customRestGoalsInput = getElementByIdSafe('custom-rest-goals');
-
-    const customMeasurementsList = getElementByIdSafe('custom-measurements-list');
-
-    // --- Event Listeners and Placeholder Functions ---
-
-    if (saveCustomTrainingBtn) {
-        saveCustomTrainingBtn.addEventListener('click', () => {
-            const trainingName = customTrainingNameInput ? customTrainingNameInput.value : '';
-            console.log('Saving Custom Training:', trainingName);
-            // TODO: Add logic to collect data from customTrainingZonesDropZone
-            // TODO: Add validation and actual save/API call logic here
-            alert(`Custom Training "${trainingName}" saved (placeholder).`);
-        });
-    }
-
-    if (saveCustomRestBtn) {
-        saveCustomRestBtn.addEventListener('click', () => {
-            const restName = customRestNameInput ? customRestNameInput.value : '';
-            const restDescription = customRestDescriptionInput ? customRestDescriptionInput.value : '';
-            const restGoals = customRestGoalsInput ? customRestGoalsInput.value : '';
-            console.log('Saving Custom Rest:', { restName, restDescription, restGoals });
-            // TODO: Add validation and actual save/API call logic here
-            alert(`Custom Rest "${restName}" saved (placeholder).`);
-        });
-    }
-
-    // Example: How you might interact with customMeasurementsList
-    function addMeasurementItem(text) {
-        if (customMeasurementsList) {
-            const listItem = document.createElement('li');
-            listItem.textContent = text;
-            customMeasurementsList.appendChild(listItem);
-        }
-    }
-
-    // Example usage (for demonstration, you'd trigger this from user interaction)
-    // addMeasurementItem('Heart Rate');
-    // addMeasurementItem('Blood Pressure');
-
-})(); // End of IIFE
+const customMeasurementsList = document.getElementById('custom-measurements-list');
 
 // Opslaan Aangepaste Training Meting
 saveCustomTrainingBtn.addEventListener('click', () => {
@@ -1227,55 +1085,27 @@ saveCustomTrainingBtn.addEventListener('click', () => {
     const definition = [];
     let hasError = false;
     customTrainingZonesDropZone.querySelectorAll('.dropped-item').forEach(item => {
-        const activity = {
+        const durationInput = item.querySelector('[data-duration-input]');
+        const duration = parseInt(durationInput.value);
+        if (isNaN(duration) || duration <= 0) {
+            hasError = true;
+            showMessage('Vul een geldige duur (in minuten) in voor alle HR zones in de training.', 'error');
+            return;
+        }
+        definition.push({
             type: item.dataset.type,
             name: item.dataset.name,
             icon: item.querySelector('i').className,
             zoneColor: item.dataset.zoneColor || '',
-            inputType: item.dataset.inputType || null,
-            notes: item.querySelector('[data-notes-input]') ? item.querySelector('[data-notes-input]').value : null,
-        };
-
-        if (activity.inputType === 'time' || activity.type === 'hr-zone') { // HR zones also use duration
-            activity.duration = item.querySelector('[data-duration-input]') ? parseInt(item.querySelector('[data-duration-input]').value) : null;
-            activity.minTime = item.querySelector('[data-min-time-input]') ? parseInt(item.querySelector('[data-min-time-input]').value) : null;
-            activity.maxTime = item.querySelector('[data-max-time-input]') ? parseInt(item.querySelector('[data-max-time-input]').value) : null;
-
-            if (isNaN(activity.duration) || activity.duration <= 0) {
-                hasError = true;
-                showMessage(`Vul een geldige duur in voor '${activity.name}'.`, 'error');
-                return;
-            }
-        } else if (activity.inputType === 'reps_sets') {
-            activity.reps = item.querySelector('[data-reps-input]') ? parseInt(item.querySelector('[data-reps-input]').value) : null;
-            activity.sets = item.querySelector('[data-sets-input]') ? parseInt(item.querySelector('[data-sets-input]').value) : null;
-            activity.minReps = item.querySelector('[data-min-reps-input]') ? parseInt(item.querySelector('[data-min-reps-input]').value) : null;
-            activity.maxReps = item.querySelector('[data-max-reps-input]') ? parseInt(item.querySelector('[data-max-reps-input]').value) : null;
-            activity.minSets = item.querySelector('[data-min-sets-input]') ? parseInt(item.querySelector('[data-min-sets-input]').value) : null;
-            activity.maxSets = item.querySelector('[data-max-sets-input]') ? parseInt(item.querySelector('[data-max-sets-input]').value) : null;
-
-            if (isNaN(activity.reps) || activity.reps <= 0 || isNaN(activity.sets) || activity.sets <= 0) {
-                hasError = true;
-                showMessage(`Vul geldige herhalingen en sets in voor '${activity.name}'.`, 'error');
-                return;
-            }
-        }
-
-        activity.progressionEnabled = item.querySelector('[data-progression-checkbox]')?.checked || false;
-        activity.progressionValue = item.querySelector('[data-progression-value-input]') ? parseInt(item.querySelector('[data-progression-value-input]').value) : null;
-        if (activity.progressionEnabled && (isNaN(activity.progressionValue) || activity.progressionValue <= 0)) {
-            hasError = true;
-            showMessage(`Vul een geldige toename waarde in voor wekelijkse toename bij '${activity.name}'.`, 'error');
-            return;
-        }
-        definition.push(activity);
+            duration: duration
+        });
     });
 
     if (hasError) {
         return;
     }
     if (definition.length === 0) {
-        showMessage('Voeg HR zones of oefeningen toe aan de aangepaste training.', 'error');
+        showMessage('Voeg HR zones toe aan de aangepaste training.', 'error');
         return;
     }
 
@@ -1296,7 +1126,7 @@ saveCustomTrainingBtn.addEventListener('click', () => {
 
     showMessage('Aangepaste training opgeslagen!', 'success');
     customTrainingNameInput.value = '';
-    customTrainingZonesDropZone.innerHTML = '<p class="text-gray-400 text-center text-sm">Sleep HR zones of oefeningen hierheen om de training te definiëren.</p>';
+    customTrainingZonesDropZone.innerHTML = '<p class="text-gray-400 text-center text-sm">Sleep HR zones hierheen om de training te definiëren.</p>';
     loadCustomMeasurements();
 });
 
@@ -1372,7 +1202,7 @@ function loadCustomMeasurements() {
             <button class="remove-saved-item-btn text-red-400 hover:text-red-300" data-id="${measurement.id}" data-list="customMeasurements"><i class="fas fa-times"></i></button>
         `;
         document.getElementById('available-modules').appendChild(measurementItem);
-
+        
         // Voeg dragstart listener toe aan het nieuwe element
         measurementItem.addEventListener('dragstart', (e) => {
             draggedItemData = {
@@ -1421,7 +1251,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Activeer de Form Builder tab bij het laden
     document.querySelector('.tab-button[data-tab="form-builder"]').click();
 
-    // Zorg ervoor dat de juiste categorie in de zijbalk actief is bij het laden
     const initialCategory = categorySelect.value;
     categoryContents.forEach(contentDiv => {
         if (contentDiv.id === `category-${initialCategory}`) {
@@ -1431,4 +1260,5 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
+
 }
