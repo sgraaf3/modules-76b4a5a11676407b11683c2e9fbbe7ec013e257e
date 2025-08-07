@@ -483,7 +483,13 @@ export async function initReportsView() {
         if (sleepTrendChartCtx) {
             // Opmerking: Voor slaapdata is een 'sleepData' store nodig met dagelijkse/wekelijkse logs.
             // Voor nu gebruiken we placeholder data of de laatst bekende.
-            const sleepData = await getAllData('sleepData'); // Aanname: 'sleepData' store
+            let sleepData = []; // Start with empty data
+            try {
+                sleepData = await getAllData('sleepData'); // Aanname: 'sleepData' store
+            } catch (error) {
+                console.warn("Could not retrieve 'sleepData' from the database. This object store might be missing.", error);
+                showNotification("Slaapdata kon niet worden geladen.", "warning");
+            }
             const sleepDataLastMonth = filterDataLastMonth(sleepData, 'date'); // Aanname: 'date' veld
 
             const labels = sleepDataLastMonth.map(item => new Date(item.date).toLocaleDateString());
