@@ -23,7 +23,7 @@ import { initRestReportsView } from './js/restReportsView.js'; // NIEUW: Importe
 import { initDashboardReportsView } from './js/dashboardReportsView.js';
 import { initSchedulesView } from './js/schedulesView.js';
 import { initLessonSchedulerView } from './js/lessonSchedulerView.js';
-import { initLessonScheduleBuilderView } from './js/lessonScheduleBuilderView.js';
+import { initLessonScheduleBuilderView } from './js/lessonScheduleBuilderView.js'; // NIEUW: Importeer de lesroosterbouwer
 import { initMeetingPlannerView } from './js/meetingPlannerView.js';
 import { initMessagesView } from './js/messagesView.js';
 import { initMemberSpecificprogressView, showDetailedGraph } from './js/memberSpecificprogressView.js';
@@ -97,7 +97,7 @@ const viewConfig = {
     'schedulesView': { html: 'views/schedulesView.html', init: initSchedulesView },
     'lessonSchedulerView': { html: 'views/lessonSchedulerView.html', init: initLessonSchedulerView },
     'scheduleBuilderView': { html: 'views/scheduleBuilderView.html', init: initScheduleBuilderView }, 
-    'lessonScheduleBuilderView': { html: './views/lessonScheduleBuilderView.html', init: initLessonScheduleBuilderView },
+    'lessonScheduleBuilderView': { html: './views/lessonScheduleBuilder.html', init: initLessonScheduleBuilderView }, // NIEUW: Lesroosterbouwer
     'meetingPlannerView': { html: './views/meetingPlannerView.html', init: initMeetingPlannerView },
     'messagesView': { html: './views/messagesView.html', init: initMessagesView },
     'memberSpecificprogressView': { html: './views/memberSpecificprogressView.html', init: initMemberSpecificprogressView },
@@ -149,24 +149,27 @@ document.addEventListener('DOMContentLoaded', async () => {
                 await config.init(showView, data); // Geef showView en data door
             }
 
+            // Algemene terug-naar-dashboard knop
             document.querySelectorAll('[data-action="backToDashboard"]').forEach(button => {
                 button.addEventListener('click', () => {
                     showView('dashboardView');
                 });
             });
 
+            // Algemene dashboard widget card listeners (voor navigatie naar gedetailleerde views)
             document.querySelectorAll('.dashboard-widget-card').forEach(card => {
                 card.addEventListener('click', (event) => {
                     const targetViewId = event.currentTarget.dataset.targetView;
                     const graphType = event.currentTarget.dataset.graphType;
                     if (targetViewId === 'webGraphsView' && graphType) {
                         showView(targetViewId, { graphType: graphType });
-                    } else {
+                    } else if (targetViewId) { // Zorg ervoor dat targetViewId bestaat
                         showView(targetViewId);
                     }
                 });
             });
 
+            // Algemene bottom-nav item listeners
             document.querySelectorAll('.bottom-nav-item').forEach(item => {
                 item.addEventListener('click', (event) => {
                     const targetViewId = event.currentTarget.dataset.targetView;
@@ -183,6 +186,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
+    // Start de applicatie met het dashboard
     showView('dashboardView');
 
     // --- Globale Bluetooth Widget Logica (blijft in app.js omdat het een zwevende widget is) ---

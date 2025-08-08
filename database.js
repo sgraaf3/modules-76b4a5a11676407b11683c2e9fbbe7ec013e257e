@@ -1,5 +1,5 @@
 const DB_NAME = 'SportsCRMDB';
-const DB_VERSION = 12; // VERSIE VERHOOGD NAAR 11
+const DB_VERSION = 12; // VERSIE VERHOOGD NAAR 12 voor de nieuwe 'lessons' store
 
 const USER_PROFILE_STORE = 'userProfile';
 const TRAINING_SESSIONS_STORE = 'trainingSessions';
@@ -28,6 +28,7 @@ const NOTES_STORE = 'notesData';
 const ACTION_CENTER_STORE = 'actionCenterData';
 const USER_ROLE_STORE = 'userRoles';
 const SLEEP_DATA_STORE = 'sleepData';
+const LESSONS_STORE = 'lessons'; // NIEUW: Store voor individuele lessen
 
 let dbInstance;
 
@@ -51,7 +52,8 @@ export async function openDatabase() {
                 USER_ROLE_STORE,
                 SLEEP_DATA_STORE,
                 'restSessionsFree',
-                'restSessionsAdvanced'
+                'restSessionsAdvanced',
+                LESSONS_STORE // NIEUW: Voeg de 'lessons' store toe
             ];
 
             stores.forEach(storeName => {
@@ -66,6 +68,8 @@ export async function openDatabase() {
                         options = { keyPath: 'id' }; // adminSecretData gebruikt 'id' als keyPath, geen autoIncrement
                     } else if (storeName === USER_ROLE_STORE) {
                         options = { keyPath: 'userId' }; // userRoles gebruikt 'userId' als keyPath, geen autoIncrement
+                    } else if (storeName === LESSON_SCHEDULES_STORE) {
+                        options = { keyPath: 'id' }; // lessonSchedules gebruikt 'id' als keyPath (bijv. 'week-0')
                     }
                     db.createObjectStore(storeName, options);
                 }

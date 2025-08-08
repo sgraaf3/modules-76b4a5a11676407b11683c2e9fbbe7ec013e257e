@@ -3,7 +3,185 @@
     <span>Lesrooster Bouwer</span>
     <button class="icon-button"><i class="fas fa-ellipsis-v"></i></button>
 </div>
-<div class="p-4">
-    <p class="text-lg text-gray-300 mb-4">Stel gedetailleerde lesroosters samen, inclusief functies, voorschriften en specifieke dagconfiguraties.</p>
-    <p class="text-lg text-gray-300 mb-4">Gebruik een drag-and-drop interface voor het bouwen van uw lesmodules.</p>
+<div class="p-4 flex flex-col md:flex-row gap-4 h-[calc(100vh-120px)]">
+    <!-- Zijbalk voor beschikbare lessen -->
+    <div class="sidebar bg-gray-900 p-4 rounded-lg shadow-md md:w-1/4 flex-shrink-0 overflow-y-auto">
+        <h2 class="text-xl font-bold text-gray-100 mb-4">Beschikbare Lessen</h2>
+
+        <div class="category-select-container mb-4">
+            <label for="lessonCategorySelect" class="block text-sm font-medium text-gray-400 mb-1">Kies Sportsectie:</label>
+            <select id="lessonCategorySelect" class="p-2 rounded-md bg-gray-700 border border-gray-600 text-gray-200 w-full">
+                <option value="all">Alle Categorieën</option>
+                <option value="fitness">Fitness</option>
+                <option value="budo">Budo</option>
+                <option value="dance">Dans</option>
+                <option value="swim">Zwemmen</option>
+                <!-- Meer categorieën kunnen hier worden toegevoegd -->
+            </select>
+        </div>
+
+        <div id="availableLessonsList" class="flex flex-col gap-2">
+            <!-- Lessen worden hier dynamisch geladen -->
+            <p class="text-gray-400 text-sm">Geen lessen beschikbaar.</p>
+        </div>
+
+        <h3 class="text-lg font-bold text-gray-100 mt-6 mb-2">Nieuwe Les Toevoegen</h3>
+        <form id="newLessonForm" class="flex flex-col gap-2">
+            <input type="text" id="newLessonName" placeholder="Lesnaam" required class="p-2 rounded-md bg-gray-700 border border-gray-600 text-gray-200">
+            <select id="newLessonCategory" class="p-2 rounded-md bg-gray-700 border border-gray-600 text-gray-200">
+                <option value="fitness">Fitness</option>
+                <option value="budo">Budo</option>
+                <option value="dance">Dans</option>
+                <option value="swim">Zwemmen</option>
+            </select>
+            <input type="text" id="newLessonTeacher" placeholder="Docent" class="p-2 rounded-md bg-gray-700 border border-gray-600 text-gray-200">
+            <input type="number" id="newLessonDuration" placeholder="Duur (min)" min="1" class="p-2 rounded-md bg-gray-700 border border-gray-600 text-gray-200">
+            <textarea id="newLessonExplanation" placeholder="Uitleg" rows="2" class="p-2 rounded-md bg-gray-700 border border-gray-600 text-gray-200"></textarea>
+            <input type="text" id="newLessonDocs" placeholder="Document URL (optioneel)" class="p-2 rounded-md bg-gray-700 border border-gray-600 text-gray-200">
+            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200">Les Toevoegen</button>
+        </form>
+    </div>
+
+    <!-- Hoofdinhoud: Kalender voor lesrooster -->
+    <div class="main-content flex-grow bg-gray-800 p-4 rounded-lg shadow-md overflow-y-auto">
+        <h2 class="text-xl font-bold text-gray-100 border-b border-gray-700 pb-2 mb-4">Lesrooster</h2>
+
+        <div class="flex justify-between items-center mb-4">
+            <button id="prevWeekBtn" class="bg-gray-700 hover:bg-gray-600 text-gray-200 font-bold py-2 px-4 rounded-md"><i class="fas fa-chevron-left"></i> Vorige Week</button>
+            <span id="currentWeekDisplay" class="text-lg font-semibold text-gray-100">Week --</span>
+            <button id="nextWeekBtn" class="bg-gray-700 hover:bg-gray-600 text-gray-200 font-bold py-2 px-4 rounded-md">Volgende Week <i class="fas fa-chevron-right"></i></button>
+        </div>
+
+        <div class="calendar-grid-lesson">
+            <div class="calendar-header-day text-gray-400">Maandag</div>
+            <div class="calendar-header-day text-gray-400">Dinsdag</div>
+            <div class="calendar-header-day text-gray-400">Woensdag</div>
+            <div class="calendar-header-day text-gray-400">Donderdag</div>
+            <div class="calendar-header-day text-gray-400">Vrijdag</div>
+            <div class="calendar-header-day text-gray-400">Zaterdag</div>
+            <div class="calendar-header-day text-gray-400">Zondag</div>
+
+            <div class="calendar-day-cell-lesson" data-day-of-week="Maandag">
+                <div class="lesson-drop-zone drop-zone h-full min-h-[100px] p-2">
+                    <p class="text-gray-500 text-sm">Sleep lessen hierheen</p>
+                </div>
+            </div>
+            <div class="calendar-day-cell-lesson" data-day-of-week="Dinsdag">
+                <div class="lesson-drop-zone drop-zone h-full min-h-[100px] p-2">
+                    <p class="text-gray-500 text-sm">Sleep lessen hierheen</p>
+                </div>
+            </div>
+            <div class="calendar-day-cell-lesson" data-day-of-week="Woensdag">
+                <div class="lesson-drop-zone drop-zone h-full min-h-[100px] p-2">
+                    <p class="text-gray-500 text-sm">Sleep lessen hierheen</p>
+                </div>
+            </div>
+            <div class="calendar-day-cell-lesson" data-day-of-week="Donderdag">
+                <div class="lesson-drop-zone drop-zone h-full min-h-[100px] p-2">
+                    <p class="text-gray-500 text-sm">Sleep lessen hierheen</p>
+                </div>
+            </div>
+            <div class="calendar-day-cell-lesson" data-day-of-week="Vrijdag">
+                <div class="lesson-drop-zone drop-zone h-full min-h-[100px] p-2">
+                    <p class="text-gray-500 text-sm">Sleep lessen hierheen</p>
+                </div>
+            </div>
+            <div class="calendar-day-cell-lesson" data-day-of-week="Zaterdag">
+                <div class="lesson-drop-zone drop-zone h-full min-h-[100px] p-2">
+                    <p class="text-gray-500 text-sm">Sleep lessen hierheen</p>
+                </div>
+            </div>
+            <div class="calendar-day-cell-lesson" data-day-of-week="Zondag">
+                <div class="lesson-drop-zone drop-zone h-full min-h-[100px] p-2">
+                    <p class="text-gray-500 text-sm">Sleep lessen hierheen</p>
+                </div>
+            </div>
+        </div>
+
+        <button id="saveLessonScheduleBtn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200 w-full mt-4">
+            <i class="fas fa-save mr-2"></i>Sla Lesrooster op
+        </button>
+    </div>
 </div>
+
+<div id="message-box" class="message-box"></div>
+
+<style>
+    /* Specifieke stijlen voor de lesroosterbouwer kalender */
+    .calendar-grid-lesson {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 0.5rem;
+    }
+    .calendar-header-day {
+        text-align: center;
+        font-weight: bold;
+        padding: 0.5rem;
+        background-color: #1f2937; /* bg-gray-800 */
+        border-radius: 0.375rem;
+    }
+    .calendar-day-cell-lesson {
+        background-color: #2c2c34;
+        border-radius: 0.5rem;
+        min-height: 150px; /* Voldoende ruimte voor lessen */
+        padding: 0.5rem;
+        border: 2px dashed #4b5563; /* Drop zone style */
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    .lesson-drop-zone.drag-over {
+        background-color: #2d3748;
+        border-color: #60a5fa;
+    }
+    .lesson-item {
+        background-color: #374151; /* bg-gray-700 */
+        padding: 0.75rem;
+        border-radius: 0.5rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        cursor: grab;
+    }
+    .lesson-item .lesson-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-weight: bold;
+        color: #e5e7eb;
+        margin-bottom: 0.5rem;
+    }
+    .lesson-item .lesson-details {
+        font-size: 0.875rem;
+        color: #9ca3af;
+        margin-bottom: 0.5rem;
+    }
+    .lesson-item .lesson-settings {
+        display: none; /* Standaard verborgen */
+        flex-direction: column;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+    }
+    .lesson-item .lesson-settings.active {
+        display: flex;
+    }
+    .lesson-item input, .lesson-item select, .lesson-item textarea {
+        background-color: #1f2937;
+        border: 1px solid #374151;
+        color: #e5e7eb;
+        padding: 0.4rem;
+        border-radius: 0.3rem;
+        font-size: 0.875rem;
+    }
+    .lesson-item .remove-btn {
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+        background: none;
+        border: none;
+        color: #f87171;
+        cursor: pointer;
+        font-size: 1rem;
+    }
+</style>

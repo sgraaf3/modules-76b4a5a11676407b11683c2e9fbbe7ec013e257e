@@ -840,3 +840,28 @@ body {
 .category-content.active {
     display: block;
 }
+/* Animatie voor tabbladen */
+.tab-content {
+    opacity: 0;
+    transform: translateY(20px); /* Begin iets lager */
+    transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+    position: absolute; /* Zorgt dat ze over elkaar heen kunnen liggen */
+    width: 100%;
+    top: 0;
+    left: 0;
+    padding: 1.5rem; /* Zorg voor padding zoals in main-content */
+}
+
+.tab-content.active {
+    opacity: 1;
+    transform: translateY(0);
+    position: relative; /* Zorgt dat het ruimte inneemt als het actief is */
+}
+
+/* Zorg dat de main-content de hoogte van de actieve tab bepaalt */
+.main-content {
+    flex-grow: 1;
+    padding: 0; /* Verwijder padding hier, de tab-content heeft het nu */
+    overflow-y: auto;
+    position: relative; /* Voor absolute positionering van tab-content */
+}

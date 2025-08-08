@@ -1,3 +1,5 @@
+import { getUserRole, getOrCreateUserId } from '../database.js'; // Importeer getUserRole
+
 export function initScheduleBuilderView() {
     console.log("Schedule Builder View geïnitialiseerd.");
 
@@ -16,7 +18,7 @@ export function initScheduleBuilderView() {
         }, 3000);
     }
 
-    // --- Form Builder Logica ---
+    // --- UI Elementen ---
     const customTrainingZonesDropZone = document.getElementById('custom-training-zones-drop-zone');
     const saveCustomTrainingBtn = document.getElementById('save-custom-training-btn');
     const customTrainingNameInput = document.getElementById('custom-training-name');
@@ -27,30 +29,146 @@ export function initScheduleBuilderView() {
     const customRestGoalsInput = document.getElementById('custom-rest-goals');
 
     const customMeasurementsList = document.getElementById('custom-measurements-list');
+    const availableModulesContainer = document.getElementById('available-modules');
+    const allSavedItemsList = document.getElementById('all-saved-items-list'); // Nieuwe container voor gecombineerde lijst
+
+    const tabContents = document.querySelectorAll('.tab-content');
+    const tabButtons = document.querySelectorAll('.tab-button');
+    const formBuilderTab = document.getElementById('tab-form-builder');
+    const formBuilderTabButton = document.querySelector('.tab-button[data-tab="form-builder"]');
+
+    const categorySelect = document.getElementById('category-select');
+    const categoryContents = document.querySelectorAll('.category-content');
+
+    let currentUserId = getOrCreateUserId(); // Haal de huidige gebruiker ID op
+
+    // Array om alle basis sleepbare items op te slaan bij initialisatie
+    let baseDraggableItems = [];
+
+    // Functie om de zichtbaarheid van de zijbalk te updaten op basis van het actieve tabblad
+    function updateSidebarVisibility(activeTabId) {
+        const categorySelectContainer = document.querySelector('.category-select-container');
+        const createDayBtn = document.getElementById('create-day-btn');
+        const createWeekBtn = document.getElementById('create-week-btn');
+        const createBlockBtn = document.getElementById('create-block-btn');
+
+        // Hide all category content divs initially
+        categoryContents.forEach(el => el.style.display = 'none');
+        // Hide all individual drag-items within availableModulesContainer
+        availableModulesContainer.querySelectorAll('.drag-item').forEach(el => el.style.display = 'none');
+
+        // Hide all "Create New..." buttons initially
+        if (createDayBtn) createDayBtn.style.display = 'none';
+        if (createWeekBtn) createWeekBtn.style.display = 'none';
+        if (createBlockBtn) createBlockBtn.style.display = 'none';
+        
+        // Hide category select container initially
+        if (categorySelectContainer) categorySelectContainer.style.display = 'none';
+        // Hide the combined list initially
+        if (allSavedItemsList) allSavedItemsList.style.display = 'none';
+
+        if (activeTabId === 'tab-dag') {
+            if (categorySelectContainer) categorySelectContainer.style.display = 'block';
+            // Show the currently selected category content
+            const selectedCategory = categorySelect.value;
+            const activeCategoryContent = document.getElementById(`category-${selectedCategory}`);
+            if (activeCategoryContent) {
+                activeCategoryContent.style.display = 'block';
+                activeCategoryContent.querySelectorAll('.drag-item').forEach(el => el.style.display = 'flex');
+            }
+            // Always show custom measurements list for Day tab
+            customMeasurementsList.style.display = 'block';
+            customMeasurementsList.querySelectorAll('.drag-item').forEach(el => el.style.display = 'flex');
+
+            // Show all "Maak Nieuwe..." buttons
+            if (createDayBtn) createDayBtn.style.display = 'block';
+            if (createWeekBtn) createWeekBtn.style.display = 'block';
+            if (createBlockBtn) createBlockBtn.style.display = 'block';
+
+        } else if (activeTabId === 'tab-week') {
+            // Show only the combined list of saved days, weeks, and blocks
+            if (allSavedItemsList) allSavedItemsList.style.display = 'block';
+            allSavedItemsList.querySelectorAll('.drag-item').forEach(el => {
+                // Filter items op basis van het tabblad
+                if (el.dataset.type === 'day') {
+                    el.style.display = 'flex';
+                } else {
+                    el.style.display = 'none'; // Verberg andere types
+                }
+            });
+            
+            // Show all "Maak Nieuwe..." buttons (as they create items for the sidebar)
+            if (createDayBtn) createDayBtn.style.display = 'block';
+            if (createWeekBtn) createWeekBtn.style.display = 'block';
+            if (createBlockBtn) createBlockBtn.style.display = 'block';
+
+        } else if (activeTabId === 'tab-blok') {
+            // Show only the combined list of saved days, weeks, and blocks
+            if (allSavedItemsList) allSavedItemsList.style.display = 'block';
+            allSavedItemsList.querySelectorAll('.drag-item').forEach(el => {
+                // Filter items op basis van het tabblad
+                if (el.dataset.type === 'week') {
+                    el.style.display = 'flex';
+                } else {
+                    el.style.display = 'none'; // Verberg andere types
+                }
+            });
+
+            // Show all "Maak Nieuwe..." buttons
+            if (createDayBtn) createDayBtn.style.display = 'block';
+            if (createWeekBtn) createWeekBtn.style.display = 'block';
+            if (createBlockBtn) createBlockBtn.style.display = 'block';
+
+        } else if (activeTabId === 'tab-form-builder') {
+            // Show only custom measurements list
+            customMeasurementsList.style.display = 'block';
+            customMeasurementsList.querySelectorAll('.drag-item').forEach(el => el.style.display = 'flex');
+
+            // Show all "Maak Nieuwe..." buttons
+            if (createDayBtn) createDayBtn.style.display = 'block';
+            if (createWeekBtn) createWeekBtn.style.display = 'block';
+            if (createBlockBtn) createBlockBtn.style.display = 'block';
+        }
+    }
 
     // --- Tab Navigatie Logica ---
-    document.querySelectorAll('.tab-button').forEach(button => {
+    tabButtons.forEach(button => {
         button.addEventListener('click', () => {
-            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            // Verwijder 'active' van alle tabbladen en inhoud
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            tabContents.forEach(content => {
+                content.classList.remove('active', 'fade-in'); // Verwijder animatieklassen
+                content.classList.add('hidden'); // Verberg direct
+            });
 
+            // Voeg 'active' toe aan de geklikte tabblad
             button.classList.add('active');
-            document.getElementById(`tab-${button.dataset.tab}`).classList.add('active');
+            const activeTabId = `tab-${button.dataset.tab}`;
+            const targetContent = document.getElementById(activeTabId);
+            
+            // Toon de inhoud en voeg animatie toe
+            targetContent.classList.remove('hidden');
+            setTimeout(() => { // Kleine vertraging voor de animatie
+                targetContent.classList.add('active', 'fade-in');
+            }, 10);
+            
 
+            // Update de zichtbaarheid van de zijbalk
+            updateSidebarVisibility(activeTabId);
+            
             // Laad opgeslagen items wanneer van tabblad wordt gewisseld
-            loadSavedDays();
-            loadSavedWeeks();
-            loadSavedBloks();
+            renderAllSavedItems(); // Deze roept nu renderAllSavedItems aan
             loadCustomMeasurements(); 
         });
     });
 
     // --- Drag & Drop Logica ---
     let draggedItemData = null; // Slaat de data van het gesleepte item op
+    let isDraggingExistingItem = false; // Nieuwe vlag om te controleren of een bestaand item wordt verplaatst
+    let originalParent = null; // Oorspronkelijke ouder van het gesleepte item
 
     document.querySelectorAll('.drag-item').forEach(item => {
         item.addEventListener('dragstart', (e) => {
-            // Dit deel is gewijzigd om alle dataset-attributen correct te verwerken
             draggedItemData = { ...e.target.dataset };
             if (draggedItemData.content) {
                 try {
@@ -69,8 +187,16 @@ export function initScheduleBuilderView() {
                 }
             }
 
+            // Controleer of het een bestaand item in een dropzone is
+            if (e.target.classList.contains('timeline-item') || e.target.classList.contains('dropped-item')) {
+                isDraggingExistingItem = true;
+                originalParent = e.target.parentNode;
+                e.dataTransfer.effectAllowed = 'move';
+            } else {
+                isDraggingExistingItem = false;
+                e.dataTransfer.effectAllowed = 'copy'; // Kopiëren vanuit de zijbalk
+            }
             e.dataTransfer.setData('text/plain', JSON.stringify(draggedItemData));
-            e.dataTransfer.effectAllowed = 'move';
         });
     });
 
@@ -78,7 +204,7 @@ export function initScheduleBuilderView() {
         zone.addEventListener('dragover', (e) => {
             e.preventDefault(); 
             zone.classList.add('drag-over');
-            e.dataTransfer.dropEffect = 'move';
+            e.dataTransfer.dropEffect = isDraggingExistingItem ? 'move' : 'copy';
         });
 
         zone.addEventListener('dragleave', (e) => {
@@ -134,24 +260,38 @@ export function initScheduleBuilderView() {
                 return;
             }
 
+            // Als het een bestaand item is dat wordt verplaatst, verwijder het dan van de oorspronkelijke locatie
+            if (isDraggingExistingItem && originalParent) {
+                const draggedElement = originalParent.querySelector(`[data-id="${data.id}"]`);
+                if (draggedElement) {
+                    draggedElement.remove();
+                    checkAndAddPlaceholder(originalParent); // Voeg placeholder terug als oorspronkelijke zone leeg is
+                }
+            }
+
             // Verwijder placeholder tekst indien aanwezig
             const placeholder = zone.querySelector('p.text-gray-400');
             if (placeholder) {
                 placeholder.remove();
             }
 
+            const rect = zone.getBoundingClientRect();
+            const relativeY = e.clientY - rect.top;
+
             // Aangepaste logica voor het renderen van gedropte items
             if (dropZoneId === 'day-drop-zone' && (data.type === 'custom-training-measurement' || data.type === 'custom-rest-measurement')) {
-                 renderCustomMeasurementInDay(zone, data);
+                 renderCustomMeasurementInDay(relativeY, zone, data);
             } else if (dropZoneId === 'day-drop-zone' || dropZoneId === 'custom-training-zones-drop-zone') {
-                createSingleDroppedItem(zone, data, dropZoneId);
+                createSingleDroppedItem(relativeY, zone, data, dropZoneId);
             } else {
-                 createWeekOrBlockDroppedItem(zone, data, dropZoneId);
+                 createWeekOrBlockDroppedItem(relativeY, zone, data, dropZoneId);
             }
+            isDraggingExistingItem = false; // Reset de vlag na de drop
+            originalParent = null; // Reset de oorspronkelijke ouder
         });
     });
 
-    function createSingleDroppedItem(zone, data, dropZoneId) {
+    function createSingleDroppedItem(yPosition, zone, data, dropZoneId) {
         const droppedItem = document.createElement('div');
         droppedItem.dataset.id = data.id || generateUniqueId();
         droppedItem.dataset.type = data.type;
@@ -175,22 +315,33 @@ export function initScheduleBuilderView() {
         if (data.minTime) droppedItem.dataset.minTime = data.minTime;
         if (data.maxTime) droppedItem.dataset.maxTime = data.maxTime;
         if (data.notes) droppedItem.dataset.notes = data.notes;
+        if (data.duration) droppedItem.dataset.duration = data.duration;
+        if (data.progressionEnabled) droppedItem.dataset.progressionEnabled = data.progressionEnabled;
+        if (data.progressionValue) droppedItem.dataset.progressionValue = data.progressionValue;
+        if (data.preferredStartTime) droppedItem.dataset.preferredStartTime = data.preferredStartTime; // Nieuw: Voorkeur Starttijd
 
-        let innerHtmlContent = `<span><i class="${data.icon} mr-2 ${data.zoneColor || ''}"></i>${data.name}</span>`;
+        droppedItem.setAttribute('draggable', 'true'); // Maak geplaatste items draggable
 
-        if (dropZoneId === 'day-drop-zone') {
-            droppedItem.className = `timeline-item flex items-center p-2 mb-1 rounded-md bg-gray-700`;
-            droppedItem.style.position = 'absolute';
-            droppedItem.style.width = '100%';
-            droppedItem.style.top = `${e.clientY - zone.getBoundingClientRect().top}px`;
-            droppedItem.style.left = '0';
-        } else {
-             droppedItem.className = 'dropped-item flex items-center p-2 mb-1 rounded-md bg-gray-700';
+        let innerHtmlContent = `
+            <div class="element-header flex items-center justify-between w-full">
+                <span><i class="${data.icon} mr-2 ${data.zoneColor || ''}"></i>${data.name}</span>
+                <button class="remove-btn"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="element-settings hidden flex flex-col mt-2">
+        `;
+
+        if (dropZoneId === 'day-drop-zone') { // Alleen voor items in de dag-tijdlijn
+            innerHtmlContent += `
+                <div class="flex items-center space-x-2 w-full md:w-auto flex-wrap mb-2">
+                    <label for="startTime-${droppedItem.dataset.id}" class="text-sm text-gray-300">Starttijd:</label>
+                    <input type="time" id="startTime-${droppedItem.dataset.id}" class="w-24 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-preferred-start-time-input value="${data.preferredStartTime || ''}">
+                </div>
+            `;
         }
-        
+
         if (data.type === 'hr-zone') {
             innerHtmlContent += `
-                <div class="flex items-center space-x-2 ml-auto">
+                <div class="flex items-center space-x-2 ml-auto w-full md:w-auto flex-wrap">
                     <input type="number" placeholder="Minuten" class="w-20 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-duration-input value="${data.duration || ''}">
                     <label class="flex items-center text-sm text-gray-300">
                         <input type="checkbox" class="form-checkbox h-4 w-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500" data-progression-checkbox ${data.progressionEnabled ? 'checked' : ''}>
@@ -208,11 +359,6 @@ export function initScheduleBuilderView() {
             }
             droppedItem.dataset.documentName = data.documentName;
             innerHtmlContent += `<span class="ml-2 text-gray-400">(${data.documentName})</span>`;
-        } else if (data.type === 'custom-training-measurement' && data.customMeasurementDefinition) {
-            const totalDuration = data.customMeasurementDefinition.reduce((sum, item) => sum + (item.duration || 0), 0);
-            innerHtmlContent += `<span class="ml-2 text-gray-400">(${totalDuration} min)</span>`;
-        } else if (data.type === 'custom-rest-measurement' && data.customMeasurementDescription) {
-            innerHtmlContent += `<span class="ml-2 text-gray-400">(${data.customMeasurementDescription.substring(0, 20)}...)</span>`;
         } else if (['strength-exercise', 'recovery-activity', 'coordination-activity', 'flexibility-activity', 'speed-activity', 'nutrition-activity'].includes(data.type)) {
             const timeDisplay = data.inputType === 'reps_sets' ? 'display:none;' : 'display:flex;';
             const repsSetsDisplay = data.inputType === 'time' || !data.inputType ? 'display:none;' : 'display:flex;';
@@ -244,33 +390,62 @@ export function initScheduleBuilderView() {
                 </div>
             `;
         }
-        innerHtmlContent += `<button class="remove-btn"><i class="fas fa-times"></i></button>`;
+        innerHtmlContent += `</div>`; // Sluit element-settings
         droppedItem.innerHTML = innerHtmlContent;
+        if (dropZoneId === 'day-drop-zone') {
+            droppedItem.className = `timeline-item flex flex-col p-2 mb-1 rounded-md bg-gray-700`;
+            // Verwijder absolute positionering
+            // droppedItem.style.top = `${yPosition}px`;
+            // droppedItem.style.left = '0';
+            // droppedItem.style.width = '100%';
+            // droppedItem.style.position = 'absolute';
+        } else {
+             droppedItem.className = 'dropped-item flex flex-col p-2 mb-1 rounded-md bg-gray-700';
+        }
+
         zone.appendChild(droppedItem);
         addEventListenersToDroppedItem(droppedItem);
         showMessage(`${data.name} toegevoegd!`, 'success');
     }
 
-    function createWeekOrBlockDroppedItem(zone, data, dropZoneId) {
+    function createWeekOrBlockDroppedItem(yPosition, zone, data, dropZoneId) {
         const droppedItem = document.createElement('div');
-        droppedItem.className = 'dropped-item flex items-center justify-between p-2 mb-2 rounded-md bg-gray-700';
+        droppedItem.className = 'dropped-item flex flex-col p-2 mb-2 rounded-md bg-gray-700';
         droppedItem.dataset.id = data.id;
         droppedItem.dataset.type = data.type;
         droppedItem.dataset.name = data.name;
         droppedItem.dataset.icon = data.icon;
         droppedItem.dataset.content = JSON.stringify(data.content);
 
-        let innerHtmlContent = `<span><i class="${data.icon} mr-2"></i>${data.name}</span>`;
+        droppedItem.setAttribute('draggable', 'true'); // Maak geplaatste items draggable
+
+        let innerHtmlContent = `
+            <div class="element-header flex items-center justify-between w-full">
+                <span><i class="${data.icon} mr-2"></i>${data.name}</span>
+                <button class="remove-btn"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="element-settings hidden flex flex-col mt-2">
+        `;
 
         if (data.type === 'week' && dropZoneId === 'blok-drop-zone') {
             innerHtmlContent += `
-                <div class="flex items-center space-x-2 ml-auto">
+                <div class="flex items-center space-x-2 w-full">
                     <span class="text-sm text-gray-300">Herhalingen:</span>
-                    <input type="number" value="1" min="1" class="w-16 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-repetitions-input>
+                    <input type="number" value="${data.repetitions || 1}" min="1" class="w-16 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-repetitions-input>
                 </div>
             `;
+        } else if (data.type === 'day' && dropZoneId !== 'blok-drop-zone') {
+            // Samenvatting voor dag in kalenderweergave
+            let summaryHtml = '';
+            if (data.content && Array.isArray(data.content)) {
+                const hrZonesSummary = data.content.filter(act => act.type === 'hr-zone').map(hrz => `${hrz.name} (${hrz.duration} min)`).join(', ');
+                const otherActivities = data.content.filter(act => act.type !== 'hr-zone').map(act => act.name).join(', ');
+                summaryHtml = `<div class="text-xs text-gray-400 mt-1">${hrZonesSummary}${otherActivities ? (hrZonesSummary ? '; ' : '') + otherActivities : ''}</div>`;
+            }
+            innerHtmlContent += summaryHtml;
         }
-        innerHtmlContent += `<button class="remove-btn"><i class="fas fa-times"></i></button>`;
+
+        innerHtmlContent += `</div>`; // Sluit element-settings
         droppedItem.innerHTML = innerHtmlContent;
         zone.innerHTML = '';
         zone.appendChild(droppedItem);
@@ -278,13 +453,14 @@ export function initScheduleBuilderView() {
         showMessage(`${data.name} toegevoegd!`, 'success');
     }
 
-    function renderCustomMeasurementInDay(zone, data) {
+    function renderCustomMeasurementInDay(yPosition, zone, data) {
         const customMeasurementCard = document.createElement('div');
         customMeasurementCard.className = `timeline-item custom-measurement-group p-2 mb-2 rounded-md border border-gray-600 bg-gray-800 relative`;
-        customMeasurementCard.style.position = 'absolute';
-        customMeasurementCard.style.width = '100%';
-        customMeasurementCard.style.top = `${e.clientY - zone.getBoundingClientRect().top}px`;
-        customMeasurementCard.style.left = '0';
+        // Verwijder absolute positionering
+        // customMeasurementCard.style.top = `${yPosition}px`;
+        // customMeasurementCard.style.left = '0';
+        // customMeasurementCard.style.width = '100%';
+        // customMeasurementCard.style.position = 'absolute';
         
         customMeasurementCard.dataset.id = data.id || generateUniqueId();
         customMeasurementCard.dataset.type = data.type;
@@ -294,14 +470,26 @@ export function initScheduleBuilderView() {
         customMeasurementCard.dataset.customMeasurementDefinition = JSON.stringify(data.customMeasurementDefinition);
         customMeasurementCard.dataset.customMeasurementDescription = data.customMeasurementDescription;
         customMeasurementCard.dataset.customMeasurementGoals = data.customMeasurementGoals;
+        if (data.preferredStartTime) customMeasurementCard.dataset.preferredStartTime = data.preferredStartTime; // Nieuw: Voorkeur Starttijd
+
+        customMeasurementCard.setAttribute('draggable', 'true'); // Maak geplaatste items draggable
         
         let headerHtml = `
-            <div class="flex items-center justify-between bg-gray-700 p-2 rounded-md mb-2">
+            <div class="element-header flex items-center justify-between bg-gray-700 p-2 rounded-md mb-2">
                 <span><i class="${data.icon} mr-2 ${data.zoneColor || ''}"></i>${data.name}</span>
                 <button class="remove-btn"><i class="fas fa-times"></i></button>
             </div>
-            <div class="nested-items-container flex flex-col space-y-1">
+            <div class="element-settings hidden nested-items-container flex flex-col space-y-1">
         `;
+
+        if (zone.id === 'day-drop-zone') { // Alleen voor items in de dag-tijdlijn
+            headerHtml += `
+                <div class="flex items-center space-x-2 w-full md:w-auto flex-wrap mb-2">
+                    <label for="startTime-${customMeasurementCard.dataset.id}" class="text-sm text-gray-300">Starttijd:</label>
+                    <input type="time" id="startTime-${customMeasurementCard.dataset.id}" class="w-24 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-preferred-start-time-input value="${data.preferredStartTime || ''}">
+                </div>
+            `;
+        }
         
         if (data.customMeasurementType === 'training' && data.customMeasurementDefinition && Array.isArray(data.customMeasurementDefinition)) {
             data.customMeasurementDefinition.forEach(subItem => {
@@ -320,22 +508,16 @@ export function initScheduleBuilderView() {
         customMeasurementCard.innerHTML = headerHtml;
         zone.appendChild(customMeasurementCard);
         
-        // Add event listeners for new nested inputs
+        addEventListenersToDroppedItem(customMeasurementCard);
         addEventListenersToNestedItems(customMeasurementCard);
         
-        // Add remove listener to the main remove button
-        customMeasurementCard.querySelector('.remove-btn').addEventListener('click', () => {
-            customMeasurementCard.remove();
-            checkAndAddPlaceholder(zone);
-        });
-
         showMessage(`${data.name} toegevoegd!`, 'success');
     }
 
     // Functie om de HTML voor een genest item te genereren
     function renderNestedItemHtml(item) {
         let contentHtml = `
-            <div class="nested-item flex items-center p-2 rounded-md bg-gray-700 w-full"
+            <div class="nested-item flex flex-col p-2 rounded-md bg-gray-700 w-full"
                  data-type="${item.type}" data-name="${item.name}" data-icon="${item.icon}"
                  data-zone-color="${item.zoneColor || ''}" data-input-type="${item.inputType || ''}"
                  data-reps="${item.reps || ''}" data-sets="${item.sets || ''}"
@@ -346,13 +528,16 @@ export function initScheduleBuilderView() {
                  data-progression-enabled="${item.progressionEnabled || 'false'}"
                  data-progression-value="${item.progressionValue || ''}">
                  
-                <span><i class="${item.icon} mr-2 ${item.zoneColor || ''}"></i>${item.name}</span>
+                <div class="element-header flex items-center justify-between w-full">
+                    <span><i class="${item.icon} mr-2 ${item.zoneColor || ''}"></i>${item.name}</span>
+                </div>
+                <div class="element-settings hidden nested-inputs flex flex-col mt-2 space-y-1 w-full">
         `;
         
         // Voeg de inputvelden toe
         if (item.type === 'hr-zone') {
              contentHtml += `
-                <div class="flex items-center space-x-2 ml-auto">
+                <div class="flex items-center space-x-2 w-full md:w-auto flex-wrap">
                     <input type="number" placeholder="Minuten" class="w-20 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-duration-input value="${item.duration || ''}">
                     <label class="flex items-center text-sm text-gray-300">
                         <input type="checkbox" class="form-checkbox h-4 w-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500" data-progression-checkbox ${item.progressionEnabled ? 'checked' : ''}>
@@ -366,7 +551,7 @@ export function initScheduleBuilderView() {
             const timeDisplay = item.inputType === 'reps_sets' ? 'display:none;' : 'display:flex;';
             const repsSetsDisplay = item.inputType === 'time' || !item.inputType ? 'display:none;' : 'display:flex;';
             contentHtml += `
-                <div class="flex items-center space-x-2 ml-auto w-full md:w-auto flex-wrap">
+                <div class="flex items-center space-x-2 w-full md:w-auto flex-wrap">
                     <select class="p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm mt-1" data-input-type-select>
                         <option value="time" ${item.inputType === 'time' ? 'selected' : ''}>Tijd (min)</option>
                         <option value="reps_sets" ${item.inputType === 'reps_sets' ? 'selected' : ''}>Reps & Sets</option>
@@ -394,18 +579,38 @@ export function initScheduleBuilderView() {
             `;
         }
         
-        contentHtml += `</div>`;
+        contentHtml += `</div>`; // Sluit element-settings
+        contentHtml += `</div>`; // Sluit nested-item
         return contentHtml;
     }
 
     // Hulpfunctie om event listeners toe te voegen aan een gedropt item
     function addEventListenersToDroppedItem(item) {
+        const header = item.querySelector('.element-header');
+        const settings = item.querySelector('.element-settings');
+        const removeBtn = item.querySelector('.remove-btn');
+
+        if (header && settings) {
+            header.addEventListener('click', (e) => {
+                if (e.target.closest('.remove-btn')) return; // Voorkom togglen als op verwijderknop geklikt wordt
+                settings.classList.toggle('hidden');
+            });
+        }
+        
+        if (removeBtn) {
+            removeBtn.addEventListener('click', (e) => {
+                e.stopPropagation(); // Voorkom dat de klik doorgeeft aan de header
+                item.remove();
+                checkAndAddPlaceholder(item.parentNode);
+                renderAllSavedItems(); // Update de gecombineerde lijst na verwijdering
+            });
+        }
+        
         const inputTypeSelect = item.querySelector('[data-input-type-select]');
         const timeInputsDiv = item.querySelector('[data-time-inputs]');
         const repsSetsInputsDiv = item.querySelector('[data-reps-sets-inputs]');
         const progressionCheckbox = item.querySelector('[data-progression-checkbox]');
         const progressionValueInput = item.querySelector('[data-progression-value-input]');
-        const removeBtn = item.querySelector('.remove-btn');
 
         if (inputTypeSelect) {
             inputTypeSelect.addEventListener('change', () => {
@@ -428,18 +633,19 @@ export function initScheduleBuilderView() {
                 }
             });
         }
-        
-        if (removeBtn) {
-            removeBtn.addEventListener('click', () => {
-                item.remove();
-                checkAndAddPlaceholder(item.parentNode);
-            });
-        }
     }
 
     // Hulpfunctie om listeners toe te voegen aan geneste elementen
     function addEventListenersToNestedItems(parentItem) {
         parentItem.querySelectorAll('.nested-item').forEach(item => {
+            const header = item.querySelector('.element-header');
+            const settings = item.querySelector('.element-settings');
+            if(header && settings){
+                 header.addEventListener('click', () => {
+                     settings.classList.toggle('hidden');
+                 });
+            }
+
             const inputTypeSelect = item.querySelector('[data-input-type-select]');
             const timeInputsDiv = item.querySelector('[data-time-inputs]');
             const repsSetsInputsDiv = item.querySelector('[data-reps-sets-inputs]');
@@ -500,7 +706,7 @@ export function initScheduleBuilderView() {
         if (Array.isArray(contentData)) { // Voor Dag (array van activiteiten) of Custom Training (array van zones)
             contentData.forEach(item => {
                 if (item.type === 'custom-training-measurement' || item.type === 'custom-rest-measurement') {
-                     renderCustomMeasurementInDay(dropZoneElement, item);
+                     renderCustomMeasurementInDay(item.topPosition || 0, dropZoneElement, item);
                 } else {
                      const droppedItem = document.createElement('div');
                      droppedItem.dataset.id = item.id || generateUniqueId();
@@ -510,6 +716,7 @@ export function initScheduleBuilderView() {
                      droppedItem.dataset.zoneColor = item.zoneColor || '';
                      droppedItem.dataset.documentName = item.documentName || '';
                      droppedItem.dataset.customMeasurementType = item.customMeasurementType || '';
+                     droppedItem.dataset.customMeasurementDefinition = item.customMeasurementDefinition ? JSON.stringify(item.customMeasurementDefinition) : '';
                      droppedItem.dataset.customMeasurementDescription = item.customMeasurementDescription || '';
                      droppedItem.dataset.customMeasurementGoals = item.customMeasurementGoals || '';
                      droppedItem.dataset.inputType = item.inputType || '';
@@ -528,13 +735,31 @@ export function initScheduleBuilderView() {
                      if (item.content) {
                           droppedItem.dataset.content = JSON.stringify(item.content);
                      }
+                    if (item.preferredStartTime) droppedItem.dataset.preferredStartTime = item.preferredStartTime; // Nieuw: Voorkeur Starttijd
+
+                    droppedItem.setAttribute('draggable', 'true'); // Maak geplaatste items draggable
                     
-                     let innerHtmlContent = `<span><i class="${item.icon} mr-2 ${item.zoneColor || ''}"></i>${item.name}</span>`;
+                     let innerHtmlContent = `
+                        <div class="element-header flex items-center justify-between w-full">
+                            <span><i class="${item.icon} mr-2 ${item.zoneColor || ''}"></i>${item.name}</span>
+                            <button class="remove-btn"><i class="fas fa-times"></i></button>
+                        </div>
+                        <div class="element-settings hidden flex flex-col mt-2">
+                     `;
+
+                    if (dropZoneElement.id === 'day-drop-zone') { // Alleen voor items in de dag-tijdlijn
+                        innerHtmlContent += `
+                            <div class="flex items-center space-x-2 w-full md:w-auto flex-wrap mb-2">
+                                <label for="startTime-${droppedItem.dataset.id}" class="text-sm text-gray-300">Starttijd:</label>
+                                <input type="time" id="startTime-${droppedItem.dataset.id}" class="w-24 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-preferred-start-time-input value="${item.preferredStartTime || ''}">
+                            </div>
+                        `;
+                    }
             
                     if (item.type === 'hr-zone') {
-                        droppedItem.className = `timeline-item flex items-center p-2 mb-1 rounded-md bg-gray-700 hr-zone-bar`;
+                        droppedItem.className = `timeline-item flex flex-col p-2 mb-1 rounded-md bg-gray-700 hr-zone-bar`;
                         innerHtmlContent += `
-                            <div class="flex items-center space-x-2 ml-auto">
+                            <div class="flex items-center space-x-2 w-full md:w-auto flex-wrap">
                                 <input type="number" placeholder="Minuten" class="w-20 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-duration-input value="${item.duration || ''}">
                                 <label class="flex items-center text-sm text-gray-300">
                                     <input type="checkbox" class="form-checkbox h-4 w-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500" data-progression-checkbox ${item.progressionEnabled ? 'checked' : ''}>
@@ -547,43 +772,44 @@ export function initScheduleBuilderView() {
                     } else if (['strength-exercise', 'recovery-activity', 'coordination-activity', 'flexibility-activity', 'speed-activity', 'nutrition-activity'].includes(item.type)) {
                          const timeDisplay = item.inputType === 'reps_sets' ? 'display:none;' : 'display:flex;';
                          const repsSetsDisplay = item.inputType === 'time' || !item.inputType ? 'display:none;' : 'display:flex;';
-                         droppedItem.className = 'timeline-item flex items-center p-2 mb-1 rounded-md bg-gray-700';
+                         droppedItem.className = 'timeline-item flex flex-col p-2 mb-1 rounded-md bg-gray-700';
                          innerHtmlContent += `
-                             <div class="flex items-center space-x-2 ml-auto w-full md:w-auto flex-wrap">
-                                 <select class="p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm mt-1" data-input-type-select>
-                                     <option value="time" ${item.inputType === 'time' ? 'selected' : ''}>Tijd (min)</option>
-                                     <option value="reps_sets" ${item.inputType === 'reps_sets' ? 'selected' : ''}>Reps & Sets</option>
-                                 </select>
-                                 <div class="flex items-center space-x-1 mt-1" data-time-inputs style="${timeDisplay}">
-                                     <input type="number" placeholder="Duur" class="w-16 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-duration-input value="${item.duration || ''}">
-                                     <input type="number" placeholder="Min" class="w-16 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-min-time-input value="${item.minTime || ''}">
-                                     <input type="number" placeholder="Max" class="w-16 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-max-time-input value="${item.maxTime || ''}">
-                                 </div>
-                                 <div class="flex items-center space-x-1 mt-1" data-reps-sets-inputs style="${repsSetsDisplay}">
-                                     <input type="number" placeholder="Reps" class="w-16 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-reps-input value="${item.reps || ''}">
-                                     <input type="number" placeholder="Sets" class="w-16 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-sets-input value="${item.sets || ''}">
-                                     <input type="number" placeholder="Min R" class="w-16 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-min-reps-input value="${item.minReps || ''}">
-                                     <input type="number" placeholder="Max R" class="w-16 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-max-reps-input value="${item.maxReps || ''}">
-                                     <input type="number" placeholder="Min S" class="w-16 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-min-sets-input value="${item.minSets || ''}">
-                                     <input type="number" placeholder="Max S" class="w-16 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-max-sets-input value="${item.maxSets || ''}">
-                                 </div>
-                                 <label class="flex items-center text-sm text-gray-300 mt-1">
-                                     <input type="checkbox" class="form-checkbox h-4 w-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500" data-progression-checkbox ${item.progressionEnabled ? 'checked' : ''}>
-                                     <span class="ml-1">Wekelijks toenemen?</span>
-                                 </label>
-                                 <input type="number" placeholder="Waarde" class="w-16 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm mt-1" data-progression-value-input value="${item.progressionValue || ''}" ${!item.progressionEnabled ? 'disabled' : ''}>
-                                 <input type="text" placeholder="Notities" class="w-24 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm mt-1" data-notes-input value="${item.notes || ''}">
-                             </div>
+                            <div class="flex items-center space-x-2 w-full md:w-auto flex-wrap">
+                                <select class="p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm mt-1" data-input-type-select>
+                                    <option value="time" ${item.inputType === 'time' ? 'selected' : ''}>Tijd (min)</option>
+                                    <option value="reps_sets" ${item.inputType === 'reps_sets' ? 'selected' : ''}>Reps & Sets</option>
+                                </select>
+                                <div class="flex items-center space-x-1 mt-1" data-time-inputs style="${timeDisplay}">
+                                    <input type="number" placeholder="Duur" class="w-16 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-duration-input value="${item.duration || ''}">
+                                    <input type="number" placeholder="Min" class="w-16 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-min-time-input value="${item.minTime || ''}">
+                                    <input type="number" placeholder="Max" class="w-16 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-max-time-input value="${item.maxTime || ''}">
+                                </div>
+                                <div class="flex items-center space-x-1 mt-1" data-reps-sets-inputs style="${repsSetsDisplay}">
+                                    <input type="number" placeholder="Reps" class="w-16 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-reps-input value="${item.reps || ''}">
+                                    <input type="number" placeholder="Sets" class="w-16 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-sets-input value="${item.sets || ''}">
+                                    <input type="number" placeholder="Min R" class="w-16 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-min-reps-input value="${item.minReps || ''}">
+                                    <input type="number" placeholder="Max R" class="w-16 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-max-reps-input value="${item.maxReps || ''}">
+                                    <input type="number" placeholder="Min S" class="w-16 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-min-sets-input value="${item.minSets || ''}">
+                                    <input type="number" placeholder="Max S" class="w-16 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-max-sets-input value="${item.maxSets || ''}">
+                                </div>
+                                <label class="flex items-center text-sm text-gray-300 mt-1">
+                                    <input type="checkbox" class="form-checkbox h-4 w-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500" data-progression-checkbox ${item.progressionEnabled ? 'checked' : ''}>
+                                    <span class="ml-1">Wekelijks toenemen?</span>
+                                </label>
+                                <input type="number" placeholder="Waarde" class="w-16 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm mt-1" data-progression-value-input value="${item.progressionValue || ''}" ${!item.progressionEnabled ? 'disabled' : ''}>
+                                <input type="text" placeholder="Notities" class="w-24 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm mt-1" data-notes-input value="${item.notes || ''}">
+                            </div>
                          `;
                     }
-                    innerHtmlContent += `<button class="remove-btn"><i class="fas fa-times"></i></button>`;
+                    innerHtmlContent += `</div>`; // Sluit element-settings
                     droppedItem.innerHTML = innerHtmlContent;
 
                      // Set position for loaded items in day-drop-zone
                      if (dropZoneElement.id === 'day-drop-zone') {
-                         droppedItem.style.top = `${item.topPosition || 0}px`;
-                         droppedItem.style.left = '0';
-                         droppedItem.style.position = 'absolute';
+                         // Verwijder absolute positionering
+                         // droppedItem.style.top = `${item.topPosition || 0}px`;
+                         // droppedItem.style.left = '0';
+                         // droppedItem.style.position = 'absolute';
                      }
                 
                      dropZoneElement.appendChild(droppedItem);
@@ -605,6 +831,8 @@ export function initScheduleBuilderView() {
                         droppedItem.dataset.icon = item.icon;
                         droppedItem.dataset.content = JSON.stringify(item.content);
 
+                        droppedItem.setAttribute('draggable', 'true'); // Maak geplaatste items draggable
+
                         let summaryHtml = '';
                         if (item.type === 'day' && item.content && Array.isArray(item.content)) {
                             const hrZonesSummary = item.content.filter(act => act.type === 'hr-zone').map(hrz => `${hrz.name} (${hrz.duration} min)`).join(', ');
@@ -616,9 +844,13 @@ export function initScheduleBuilderView() {
                         }
 
                         droppedItem.innerHTML = `
-                            <span><i class="${item.icon} mr-2"></i>${item.name}</span>
-                            ${summaryHtml}
-                            <button class="remove-btn absolute top-1 right-1"><i class="fas fa-times"></i></button>
+                            <div class="element-header flex items-center justify-between w-full">
+                                <span><i class="${item.icon} mr-2"></i>${item.name}</span>
+                                <button class="remove-btn absolute top-1 right-1"><i class="fas fa-times"></i></button>
+                            </div>
+                            <div class="element-settings hidden flex flex-col mt-2">
+                                ${summaryHtml}
+                            </div>
                         `;
                         slot.appendChild(droppedItem);
                         addEventListenersToDroppedItem(droppedItem);
@@ -645,23 +877,189 @@ export function initScheduleBuilderView() {
                 droppedItem.dataset.content = JSON.stringify(item.content);
                 droppedItem.dataset.repetitions = item.repetitions || 1;
 
+                droppedItem.setAttribute('draggable', 'true'); // Maak geplaatste items draggable
+
                 droppedItem.innerHTML = `
-                    <div class="flex items-center justify-between w-full">
+                    <div class="element-header flex items-center justify-between w-full">
                         <span><i class="${item.icon} mr-2 text-cyan-300"></i>${item.name}</span>
-                        <div class="flex items-center space-x-2 ml-auto">
+                        <button class="remove-btn"><i class="fas fa-times"></i></button>
+                    </div>
+                     <div class="element-settings hidden flex flex-col mt-2">
+                         <div class="flex items-center space-x-2 w-full">
                             <span class="text-sm text-gray-300">Herhalingen:</span>
                             <input type="number" value="${item.repetitions || 1}" min="1" class="w-16 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-repetitions-input>
                         </div>
-                        <button class="remove-btn"><i class="fas fa-times"></i></button>
-                    </div>
-                    <div class="text-xs text-gray-300 mt-2">
-                        ${Object.keys(item.content).filter(day => item.content[day]).map(day => `<span class="inline-block bg-gray-800 rounded-full px-2 py-1 text-xs font-semibold text-gray-300 mr-1 mb-1">${item.content[day].name}</span>`).join('')}
-                    </div>
+                        <div class="text-xs text-gray-300 mt-2">
+                            ${Object.keys(item.content).filter(day => item.content[day]).map(day => `<span class="inline-block bg-gray-800 rounded-full px-2 py-1 text-xs font-semibold text-gray-300 mr-1 mb-1">${item.content[day].name}</span>`).join('')}
+                        </div>
+                     </div>
                 `;
                 dropZoneElement.appendChild(droppedItem);
                 addEventListenersToDroppedItem(droppedItem);
             });
         }
+    }
+
+    // --- Render alle opgeslagen items (Dagen, Weken, Blokken, Custom Measurements, en basis elementen) in één lijst ---
+    async function renderAllSavedItems() {
+        if (!allSavedItemsList) {
+            console.error("Container for all saved items not found.");
+            return;
+        }
+        allSavedItemsList.innerHTML = ''; // Clear the list
+
+        let allItems = [];
+
+        // Voeg basis sleepbare items toe (HR zones, strength exercises, etc.)
+        baseDraggableItems.forEach(item => {
+            allItems.push({ ...item, sortOrder: 1 }); // SortOrder 1 for base elements
+        });
+
+        const savedDays = JSON.parse(localStorage.getItem('cardioDays') || '[]');
+        const savedWeeks = JSON.parse(localStorage.getItem('cardioWeeks') || '[]');
+        const savedBloks = JSON.parse(localStorage.getItem('cardioBloks') || '[]');
+        const customMeasurements = JSON.parse(localStorage.getItem('customMeasurements') || '[]');
+
+        // Add saved days
+        savedDays.forEach(day => {
+            allItems.push({
+                ...day,
+                displayType: 'Dag', // For sorting and display
+                sortOrder: 2 // After elements, before weeks
+            });
+        });
+
+        // Add saved weeks
+        savedWeeks.forEach(week => {
+            allItems.push({
+                ...week,
+                displayType: 'Week', // For sorting and display
+                sortOrder: 3 // After days, before blocks
+            });
+        });
+
+        // Add saved blocks
+        savedBloks.forEach(blok => {
+            allItems.push({
+                ...blok,
+                displayType: 'Blok', // For sorting and display
+                sortOrder: 4 // Last
+            });
+        });
+
+        // Add custom measurements
+        customMeasurements.forEach(measurement => {
+            allItems.push({
+                ...measurement,
+                displayType: 'Aangepaste Meting',
+                sortOrder: 1.5 // Tussen basis elementen en dagen
+            });
+        });
+
+
+        // Sort items: element (1) -> custom measurement (1.5) -> day (2) -> week (3) -> block (4)
+        allItems.sort((a, b) => {
+            if (a.sortOrder !== b.sortOrder) {
+                return a.sortOrder - b.sortOrder;
+            }
+            return a.name.localeCompare(b.name); // Then by name
+        });
+
+        if (allItems.length === 0) {
+            allSavedItemsList.innerHTML = '<p class="text-gray-400 col-span-full">Nog geen schema\'s of elementen opgeslagen.</p>';
+            return;
+        }
+
+        allItems.forEach(item => {
+            const itemCard = document.createElement('div');
+            itemCard.className = 'drag-item bg-gray-600 p-3 rounded-md shadow flex flex-col cursor-grab';
+            itemCard.setAttribute('draggable', 'true');
+            itemCard.dataset.type = item.type;
+            itemCard.dataset.id = item.id;
+            itemCard.dataset.name = item.name;
+            itemCard.dataset.icon = item.icon;
+            if (item.content) itemCard.dataset.content = JSON.stringify(item.content);
+            if (item.repetitions) itemCard.dataset.repetitions = item.repetitions;
+            if (item.customMeasurementType) itemCard.dataset.customMeasurementType = item.customMeasurementType;
+            if (item.customMeasurementDefinition) itemCard.dataset.customMeasurementDefinition = JSON.stringify(item.customMeasurementDefinition);
+            if (item.customMeasurementDescription) itemCard.dataset.customMeasurementDescription = item.customMeasurementDescription;
+            if (item.customMeasurementGoals) itemCard.dataset.customMeasurementGoals = item.customMeasurementGoals;
+            if (item.zoneColor) itemCard.dataset.zoneColor = item.zoneColor; // Zorg dat zoneColor ook wordt doorgegeven
+            if (item.inputType) itemCard.dataset.inputType = item.inputType;
+            if (item.reps) itemCard.dataset.reps = item.reps;
+            if (item.sets) itemCard.dataset.sets = item.sets;
+            if (item.minReps) itemCard.dataset.minReps = item.minReps;
+            if (item.maxReps) itemCard.dataset.maxReps = item.maxReps;
+            if (item.minSets) itemCard.dataset.minSets = item.minSets;
+            if (item.maxSets) itemCard.dataset.maxSets = item.maxSets;
+            if (item.minTime) itemCard.dataset.minTime = item.minTime;
+            if (item.maxTime) itemCard.dataset.maxTime = item.maxTime;
+            if (item.notes) itemCard.dataset.notes = item.notes;
+            if (item.duration) itemCard.dataset.duration = item.duration;
+            if (item.progressionEnabled) itemCard.dataset.progressionEnabled = item.progressionEnabled;
+            if (item.progressionValue) itemCard.dataset.progressionValue = item.progressionValue;
+            if (item.preferredStartTime) itemCard.dataset.preferredStartTime = item.preferredStartTime;
+
+
+            let summaryText = '';
+            if (item.type === 'day' && item.activities && Array.isArray(item.activities)) {
+                const activityNames = item.activities.map(act => act.name).join(', ');
+                summaryText = `<div class="text-xs text-gray-400 mt-1">Activiteiten: ${activityNames}</div>`;
+            } else if (item.type === 'week' && item.days && typeof item.days === 'object') {
+                const configuredDays = Object.values(item.days).filter(day => day !== null).map(day => day.name);
+                summaryText = `<div class="text-xs text-gray-400 mt-1">Dagen: ${configuredDays.length > 0 ? configuredDays.join(', ') : 'Geen dagen'}</div>`;
+            } else if (item.type === 'blok' && item.weeks && Array.isArray(item.weeks)) {
+                const configuredWeeks = item.weeks.map(week => `${week.name} (${week.repetitions}x)`).join(', ');
+                summaryText = `<div class="text-xs text-gray-400 mt-1">Weken: ${configuredWeeks.length > 0 ? configuredWeeks : 'Geen weken'}</div>`;
+            } else if (item.type === 'custom-training-measurement' && item.customMeasurementDefinition) {
+                const totalDuration = item.customMeasurementDefinition.reduce((sum, subItem) => sum + (subItem.duration || 0), 0);
+                summaryText = `<div class="text-xs text-gray-400 mt-1">Duur: ${totalDuration} min</div>`;
+            } else if (item.type === 'custom-rest-measurement') {
+                summaryText = `<div class="text-xs text-gray-400 mt-1">Rustmeting</div>`;
+            } else { // Voor de basis elementen
+                 if (item.duration) { // Bijv. voor standaard HR zones
+                    summaryText = `<div class="text-xs text-gray-400 mt-1">Duur: ${item.duration} min</div>`;
+                 } else if (item.reps && item.sets) { // Bijv. voor standaard krachtoefeningen
+                    summaryText = `<div class="text-xs text-gray-400 mt-1">Reps: ${item.reps}, Sets: ${item.sets}</div>`;
+                 }
+            }
+
+
+            itemCard.innerHTML = `
+                <div class="flex items-center justify-between w-full">
+                    <span><i class="${item.icon} mr-2 ${item.zoneColor || ''}"></i>${item.name} (${item.displayType})</span>
+                    <button class="remove-saved-item-btn text-red-400 hover:text-red-300" data-id="${item.id}" data-list="cardio${item.displayType}s"><i class="fas fa-times"></i></button>
+                </div>
+                ${summaryText}
+            `;
+            allSavedItemsList.appendChild(itemCard);
+
+            // Voeg dragstart listener toe aan het nieuwe element in de gecombineerde lijst
+            itemCard.addEventListener('dragstart', (e) => {
+                draggedItemData = { ...e.target.dataset };
+                if (draggedItemData.content) {
+                    try {
+                        draggedItemData.content = JSON.parse(draggedItemData.content);
+                    } catch (error) {
+                        console.error("Fout bij het parsen van draggedItemData.content:", error);
+                        draggedItemData.content = null;
+                    }
+                }
+                if (draggedItemData.customMeasurementDefinition) {
+                    try {
+                        draggedItemData.customMeasurementDefinition = JSON.parse(draggedItemData.customMeasurementDefinition);
+                    } catch (error) {
+                        console.error("Fout bij het parsen van draggedItemData.customMeasurementDefinition:", error);
+                        draggedItemData.customMeasurementDefinition = null;
+                    }
+                }
+                isDraggingExistingItem = true;
+                originalParent = e.target.parentNode;
+                e.dataTransfer.setData('text/plain', JSON.stringify(draggedItemData));
+                e.dataTransfer.effectAllowed = 'move';
+            });
+        });
+        addRemoveListenersToSavedItems(); // Re-attach listeners for dynamically loaded items
     }
 
 
@@ -686,9 +1084,9 @@ export function initScheduleBuilderView() {
              const activity = {
                  type: item.dataset.type,
                  name: item.dataset.name,
-                 icon: item.querySelector('i').className,
+                 icon: item.querySelector('.element-header i').className, // Correcte selector
                  zoneColor: item.dataset.zoneColor || '',
-                 topPosition: parseFloat(item.style.top) || 0,
+                 // topPosition: parseFloat(item.style.top) || 0, // Niet meer nodig voor stacking, maar behouden voor consistentie bij laden
                  progressionEnabled: item.dataset.progressionEnabled === 'true',
                  inputType: item.dataset.inputType || null,
                  reps: item.dataset.reps || null,
@@ -701,13 +1099,15 @@ export function initScheduleBuilderView() {
                  maxTime: item.dataset.maxTime || null,
                  notes: item.dataset.notes || null,
                  duration: item.dataset.duration || null,
-                 progressionValue: item.dataset.progressionValue || null
+                 progressionValue: item.dataset.progressionValue || null,
+                 preferredStartTime: item.querySelector('[data-preferred-start-time-input]') ? item.querySelector('[data-preferred-start-time-input]').value : null // Nieuw: Voorkeur Starttijd
              };
             
              if (item.dataset.type === 'hr-zone') {
                  const durationInput = item.querySelector('[data-duration-input]');
                  const progressionCheckbox = item.querySelector('[data-progression-checkbox]');
                  const progressionValueInput = item.querySelector('[data-progression-value-input]');
+                 const notesInput = item.querySelector('[data-notes-input]');
                 
                  const duration = parseInt(durationInput.value);
                  if (isNaN(duration) || duration <= 0) {
@@ -723,7 +1123,7 @@ export function initScheduleBuilderView() {
                      showMessage('Vul een geldige toename waarde (in minuten) in voor wekelijkse toename.', 'error');
                      return;
                  }
-                 activity.notes = item.querySelector('[data-notes-input]').value;
+                 activity.notes = notesInput.value;
             } else if (['strength-exercise', 'recovery-activity', 'coordination-activity', 'flexibility-activity', 'speed-activity', 'nutrition-activity'].includes(item.dataset.type)) {
                 const inputTypeSelect = item.querySelector('[data-input-type-select]');
                 const progressionCheckbox = item.querySelector('[data-progression-checkbox]');
@@ -752,7 +1152,6 @@ export function initScheduleBuilderView() {
             } else if (item.dataset.type === 'custom-training-measurement' || item.dataset.type === 'custom-rest-measurement') {
                  // Haal de data uit de dataset van de main container
                  activity.customMeasurementType = item.dataset.customMeasurementType;
-                 activity.customMeasurementDefinition = item.dataset.customMeasurementDefinition ? JSON.parse(item.dataset.customMeasurementDefinition) : null;
                  activity.customMeasurementDescription = item.dataset.customMeasurementDescription || null;
                  activity.customMeasurementGoals = item.dataset.customMeasurementGoals || null;
                 
@@ -762,7 +1161,7 @@ export function initScheduleBuilderView() {
                      const subActivity = {
                          type: nestedItem.dataset.type,
                          name: nestedItem.dataset.name,
-                         icon: nestedItem.dataset.icon,
+                         icon: nestedItem.querySelector('.element-header i').className, // Correcte selector
                          zoneColor: nestedItem.dataset.zoneColor,
                          inputType: nestedItem.dataset.inputType,
                          progressionEnabled: nestedItem.dataset.progressionEnabled === 'true',
@@ -800,7 +1199,7 @@ export function initScheduleBuilderView() {
             return;
         }
 
-        activities.sort((a, b) => a.topPosition - b.topPosition);
+        // activities.sort((a, b) => a.topPosition - b.topPosition); // Niet meer nodig voor stacking
 
         const dayId = generateUniqueId();
         const newDay = { id: dayId, name: dayName, activities: activities };
@@ -812,10 +1211,12 @@ export function initScheduleBuilderView() {
         showMessage('Dag opgeslagen!', 'success');
         currentDayNameInput.value = '';
         dayDropZone.innerHTML = '<p class="text-gray-400 text-center">Sleep hartslagzones, rust, metingen of documenten hierheen om de dag te configureren.</p>';
-        loadSavedDays(); 
+        renderAllSavedItems(); // Roep de functie aan om de gecombineerde lijst te updaten
     });
 
     function loadSavedDays() {
+        // Deze functie is nu voornamelijk voor het bijwerken van de specifieke "Opgeslagen Dagen" lijst,
+        // de algemene lijst wordt bijgewerkt via renderAllSavedItems.
         savedDaysList.innerHTML = '';
         const savedDays = JSON.parse(localStorage.getItem('cardioDays') || '[]');
         if (savedDays.length === 0) {
@@ -863,7 +1264,7 @@ export function initScheduleBuilderView() {
             `;
             savedDaysList.appendChild(dayCard);
         });
-        addRemoveListenersToSavedItems();
+        addRemoveListenersToSavedItems(); // Re-attach listeners for dynamically loaded items
     }
 
     // Weken
@@ -913,7 +1314,7 @@ export function initScheduleBuilderView() {
     weekDaySlots.forEach(slot => {
         slot.innerHTML = '<p class="text-gray-400 text-center text-sm">Sleep dag hier</p>';
     });
-    loadSavedWeeks();
+    renderAllSavedItems(); // Roep de functie aan om de gecombineerde lijst te updaten
 });
 
 function loadSavedWeeks() {
@@ -1016,7 +1417,7 @@ function loadSavedWeeks() {
         currentBlokNameInput.value = '';
         currentBlokNotesInput.value = '';
         blokDropZone.innerHTML = '<p class="text-gray-400 text-center">Sleep weken hierheen om het blok te configureren.</p>';
-        loadSavedBloks();
+        renderAllSavedItems(); // Roep de functie aan om de gecombineerde lijst te updaten
     });
 
     function loadSavedBloks() {
@@ -1029,7 +1430,8 @@ function loadSavedWeeks() {
 
         savedBloks.forEach(blok => {
             const blokCard = document.createElement('div');
-            blokCard.className = 'dropped-item flex flex-col p-3 rounded-md bg-gray-700'; 
+            blokCard.className = 'drag-item bg-gray-600 p-3 rounded-md shadow flex flex-col cursor-grab'; // Changed to drag-item
+            blokCard.setAttribute('draggable', 'true');
             blokCard.dataset.id = blok.id;
             blokCard.dataset.name = blok.name;
             blokCard.dataset.type = 'blok';
@@ -1041,15 +1443,22 @@ function loadSavedWeeks() {
 
             blokCard.innerHTML = `
                 <div class="flex items-center justify-between w-full">
-                    <span><i class="fas fa-layer-group mr-2 text-cyan-300"></i>${blok.name}</span>
-                    <button class="remove-saved-item-btn" data-id="${blok.id}" data-list="cardioBloks"><i class="fas fa-times"></i></button>
+                    <span><i class="${blokCard.dataset.icon} mr-2 text-cyan-300"></i>${blok.name}</span>
+                    <button class="remove-saved-item-btn text-red-400 hover:text-red-300" data-id="${blok.id}" data-list="cardioBloks"><i class="fas fa-times"></i></button>
                 </div>
-                <div class="text-xs text-gray-300 mt-2">
-                    ${summaryText}
+                <div class="element-settings hidden flex flex-col mt-2">
+                     <div class="flex items-center space-x-2 w-full">
+                        <span class="text-sm text-gray-300">Herhalingen:</span>
+                        <input type="number" value="${blok.repetitions || 1}" min="1" class="w-16 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-repetitions-input>
+                    </div>
+                    <div class="text-xs text-gray-300 mt-2">
+                        ${summaryText}
+                    </div>
                 </div>
                 ${notesText}
             `;
             savedBloksList.appendChild(blokCard);
+            addEventListenersToDroppedItem(blokCard);
         });
         addRemoveListenersToSavedItems();
     }
@@ -1071,6 +1480,7 @@ function loadSavedWeeks() {
                 if (listName === 'cardioWeeks') loadSavedWeeks();
                 if (listName === 'cardioBloks') loadSavedBloks(); 
                 if (listName === 'customMeasurements') loadCustomMeasurements();
+                renderAllSavedItems(); // Update de gecombineerde lijst na verwijdering
             });
         });
     }
@@ -1136,23 +1546,19 @@ function loadSavedWeeks() {
                 </div>
             `;
             document.getElementById('available-modules').appendChild(newItemElement);
-            // Voeg dragstart listener toe aan het nieuwe element
+            
             newItemElement.addEventListener('dragstart', (e) => {
-                draggedItemData = {
-                    type: e.target.dataset.type,
-                    name: e.target.dataset.name,
-                    icon: e.target.dataset.icon,
-                    id: e.target.dataset.id,
-                    content: e.target.dataset.content ? JSON.parse(e.target.dataset.content) : null,
-                    zoneColor: e.target.dataset.zoneColor || '',
-                    duration: e.target.dataset.duration || null,
-                    progressionEnabled: e.target.dataset.progressionEnabled === 'true',
-                    progressionValue: e.target.dataset.progressionValue || null,
-                    customMeasurementType: e.target.dataset.customMeasurementType || null,
-                    customMeasurementDefinition: e.target.dataset.customMeasurementDefinition ? JSON.parse(e.target.dataset.customMeasurementDefinition) : null,
-                    customMeasurementDescription: e.target.dataset.customMeasurementDescription || null,
-                    customMeasurementGoals: e.target.dataset.customMeasurementGoals || null
-                };
+                draggedItemData = { ...e.target.dataset };
+                if (draggedItemData.customMeasurementDefinition) {
+                    try {
+                        draggedItemData.customMeasurementDefinition = JSON.parse(draggedItemData.customMeasurementDefinition);
+                    } catch (error) {
+                        console.error("Fout bij het parsen van draggedItemData.customMeasurementDefinition:", error);
+                        draggedItemData.customMeasurementDefinition = null;
+                    }
+                }
+                isDraggingExistingItem = true; // Mark as existing item being moved
+                originalParent = e.target.parentNode; // Store its current parent
                 e.dataTransfer.setData('text/plain', JSON.stringify(draggedItemData));
                 e.dataTransfer.effectAllowed = 'move';
             });
@@ -1172,23 +1578,8 @@ function loadSavedWeeks() {
         createNewItem('block', 'Naam voor het nieuwe blok:', 'Bloks', 'fas fa-layer-group', 'text-cyan-300');
     });
 
-    // Genereer tijdlabels voor de dagweergave
-    function generateTimeLabels() {
-        const timeLabelsContainer = document.getElementById('day-time-labels');
-        timeLabelsContainer.innerHTML = '';
-        for (let h = 0; h < 24; h++) {
-            let label = document.createElement('div');
-            label.className = 'time-slot-label';
-            label.textContent = `${String(h).padStart(2, '0')}:00`;
-            timeLabelsContainer.appendChild(label);
-            label = document.createElement('div');
-            label.className = 'time-slot-label';
-            label.textContent = `${String(h).padStart(2, '0')}:30`;
-            timeLabelsContainer.appendChild(label);
-        }
-    }
-
-    generateTimeLabels();
+    // Verwijder generateTimeLabels() functie
+    // function generateTimeLabels() { ... }
 
     saveCustomTrainingBtn.addEventListener('click', () => {
         const trainingName = customTrainingNameInput.value.trim();
@@ -1305,12 +1696,12 @@ function loadSavedWeeks() {
     });
 
     function loadCustomMeasurements() {
-        const availableModulesContainer = document.getElementById('available-modules');
+        // Verwijder alleen de dynamisch toegevoegde aangepaste metingen uit de hoofd-zijbalk container
         availableModulesContainer.querySelectorAll('.drag-item[data-type^="custom-"]').forEach(item => item.remove());
 
         const savedCustomMeasurements = JSON.parse(localStorage.getItem('customMeasurements') || '[]');
         const customMeasurementsList = document.getElementById('custom-measurements-list');
-        customMeasurementsList.innerHTML = '';
+        customMeasurementsList.innerHTML = ''; // Clear the specific custom measurements list
 
         if (savedCustomMeasurements.length === 0) {
             customMeasurementsList.innerHTML = '<p class="text-gray-400 text-sm">Geen aangepaste metingen.</p>';
@@ -1337,10 +1728,12 @@ function loadSavedWeeks() {
             }
 
             measurementItem.innerHTML = `
-                <span><i class="${measurement.icon} mr-2 ${measurement.zoneColor || ''}"></i>${measurement.name}</span>
-                <button class="remove-saved-item-btn text-red-400 hover:text-red-300" data-id="${measurement.id}" data-list="customMeasurements"><i class="fas fa-times"></i></button>
+                <div class="flex items-center justify-between w-full">
+                    <span><i class="${measurement.icon} mr-2 ${measurement.zoneColor || ''}"></i>${measurement.name}</span>
+                    <button class="remove-saved-item-btn text-red-400 hover:text-red-300" data-id="${measurement.id}" data-list="customMeasurements"><i class="fas fa-times"></i></button>
+                </div>
             `;
-            availableModulesContainer.appendChild(measurementItem);
+            availableModulesContainer.appendChild(measurementItem); // Add to main sidebar list
             
             measurementItem.addEventListener('dragstart', (e) => {
                 draggedItemData = { ...e.target.dataset };
@@ -1352,42 +1745,69 @@ function loadSavedWeeks() {
                         draggedItemData.customMeasurementDefinition = null;
                     }
                 }
+                isDraggingExistingItem = true; // Mark as existing item being moved
+                originalParent = e.target.parentNode; // Store its current parent
                 e.dataTransfer.setData('text/plain', JSON.stringify(draggedItemData));
                 e.dataTransfer.effectAllowed = 'move';
             });
 
             customMeasurementsList.appendChild(measurementItem.cloneNode(true)); // Add to the dedicated list too
         });
-        addRemoveListenersToSavedItems();
+        addRemoveListenersToSavedItems(); // Re-attach listeners for dynamically loaded items
+        // Update de zichtbaarheid van de zijbalk na het laden van items
+        updateSidebarVisibility(document.querySelector('.tab-button.active').dataset.tab);
     }
 
     document.getElementById('settings-btn').addEventListener('click', () => {
         showMessage('Globale instellingen functionaliteit komt hier (nog niet geïmplementeerd).', 'info');
     });
 
-    const categorySelect = document.getElementById('category-select');
-    const categoryContents = document.querySelectorAll('.category-content');
-
     categorySelect.addEventListener('change', (e) => {
         const selectedCategory = e.target.value;
         categoryContents.forEach(contentDiv => {
             if (contentDiv.id === `category-${selectedCategory}`) {
                 contentDiv.classList.add('active');
+                contentDiv.style.display = 'block'; // Zorg dat de geselecteerde categorie zichtbaar is
+                contentDiv.querySelectorAll('.drag-item').forEach(item => item.style.display = 'flex'); // Toon items in de categorie
             } else {
                 contentDiv.classList.remove('active');
+                contentDiv.style.display = 'none'; // Verberg andere categorieën
             }
         });
     });
 
-    document.querySelector('.tab-button[data-tab="form-builder"]').click();
-    const initialCategory = categorySelect.value;
-    categoryContents.forEach(contentDiv => {
-        if (contentDiv.id === `category-${initialCategory}`) {
-            contentDiv.classList.add('active');
-        } else {
-            contentDiv.classList.remove('active');
-        }
-    });
+    // Initialiseer bij het laden van de view
+    (async function() {
+        // Verzamel alle basis sleepbare items eenmalig bij de eerste initialisatie
+        availableModulesContainer.querySelectorAll('.category-content:not(#custom-measurements-list):not(#standard-schemas)').forEach(categoryDiv => {
+            // Loop over alle drag-items binnen elke categorie
+            categoryDiv.querySelectorAll('.drag-item').forEach(item => {
+                const itemData = { ...item.dataset };
+                itemData.displayType = itemData.type; // Gebruik de data-type als displayType voor basiselementen
+                itemData.sortOrder = 1; // Basiselementen komen eerst
+                baseDraggableItems.push(itemData);
+            });
+        });
 
-    loadCustomMeasurements();
+        // Voeg standaard schema's toe (deze zijn ook basis drag-items)
+        document.getElementById('category-standard-schemas').querySelectorAll('.drag-item').forEach(item => {
+            const itemData = { ...item.dataset };
+            itemData.displayType = itemData.type === 'day' ? 'Standaard Dag' : itemData.type; // Specifieke displayType voor standaard dagen
+            itemData.sortOrder = 1.1; // Na basis elementen, voor custom measurements
+            baseDraggableItems.push(itemData);
+        });
+
+
+        const userRole = await getUserRole(currentUserId);
+        if (userRole === 'admin') {
+            if (formBuilderTab) formBuilderTab.style.display = 'block';
+            if (formBuilderTabButton) formBuilderTabButton.style.display = 'block';
+        } else {
+            if (formBuilderTab) formBuilderTab.style.display = 'none';
+            if (formBuilderTabButton) formBuilderTabButton.style.display = 'none';
+        }
+        // Activeer de Dag tab bij het laden van de pagina
+        document.querySelector('.tab-button[data-tab="dag"]').click();
+        renderAllSavedItems(); // Laad alle opgeslagen items bij opstart
+    })();
 }
