@@ -23,7 +23,7 @@ import { initRestReportsView } from './js/restReportsView.js'; // NIEUW: Importe
 import { initDashboardReportsView } from './js/dashboardReportsView.js';
 import { initSchedulesView } from './js/schedulesView.js';
 import { initLessonSchedulerView } from './js/lessonSchedulerView.js';
-import { initLessonScheduleBuilderView } from './js/lessonScheduleBuilderView.js'; // NIEUW: Importeer de lesroosterbouwer
+import { initLessonScheduleBuilderView } from './js/lessonScheduleBuilder.js'; // NIEUW: Importeer de lesroosterbouwer
 import { initMeetingPlannerView } from './js/meetingPlannerView.js';
 import { initMessagesView } from './js/messagesView.js';
 import { initMemberSpecificprogressView, showDetailedGraph } from './js/memberSpecificprogressView.js';

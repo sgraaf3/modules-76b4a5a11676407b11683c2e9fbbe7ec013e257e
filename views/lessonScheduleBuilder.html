@@ -16,6 +16,7 @@
                 <option value="budo">Budo</option>
                 <option value="dance">Dans</option>
                 <option value="swim">Zwemmen</option>
+                <option value="group">Groepslessen</option>
                 <!-- Meer categorieën kunnen hier worden toegevoegd -->
             </select>
         </div>
@@ -33,10 +34,15 @@
                 <option value="budo">Budo</option>
                 <option value="dance">Dans</option>
                 <option value="swim">Zwemmen</option>
+                <option value="group">Groepslessen</option>
             </select>
             <input type="text" id="newLessonTeacher" placeholder="Docent" class="p-2 rounded-md bg-gray-700 border border-gray-600 text-gray-200">
+            <input type="time" id="newLessonStartTime" placeholder="Starttijd" class="p-2 rounded-md bg-gray-700 border border-gray-600 text-gray-200">
             <input type="number" id="newLessonDuration" placeholder="Duur (min)" min="1" class="p-2 rounded-md bg-gray-700 border border-gray-600 text-gray-200">
-            <textarea id="newLessonExplanation" placeholder="Uitleg" rows="2" class="p-2 rounded-md bg-gray-700 border border-gray-600 text-gray-200"></textarea>
+            <input type="text" id="newLessonRoom" placeholder="Lokaal/Ruimte" class="p-2 rounded-md bg-gray-700 border border-gray-600 text-gray-200">
+            <input type="number" id="newLessonTotalPlaces" placeholder="Totaal aantal plaatsen" min="1" class="p-2 rounded-md bg-gray-700 border border-gray-600 text-gray-200">
+            <textarea id="newLessonExplanation" placeholder="Uitleg (voor leden)" rows="2" class="p-2 rounded-md bg-gray-700 border border-gray-600 text-gray-200"></textarea>
+            <textarea id="newLessonTeacherNotes" placeholder="Notities (alleen voor docent)" rows="2" class="p-2 rounded-md bg-gray-700 border border-gray-600 text-gray-200"></textarea>
             <input type="text" id="newLessonDocs" placeholder="Document URL (optioneel)" class="p-2 rounded-md bg-gray-700 border border-gray-600 text-gray-200">
             <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200">Les Toevoegen</button>
         </form>
@@ -61,44 +67,53 @@
             <div class="calendar-header-day text-gray-400">Zaterdag</div>
             <div class="calendar-header-day text-gray-400">Zondag</div>
 
+            <!-- Dagen van de week, nu met scrollbare inhoud -->
             <div class="calendar-day-cell-lesson" data-day-of-week="Maandag">
-                <div class="lesson-drop-zone drop-zone h-full min-h-[100px] p-2">
+                <div class="lesson-drop-zone drop-zone h-full min-h-[100px] p-2 overflow-y-auto">
                     <p class="text-gray-500 text-sm">Sleep lessen hierheen</p>
                 </div>
             </div>
             <div class="calendar-day-cell-lesson" data-day-of-week="Dinsdag">
-                <div class="lesson-drop-zone drop-zone h-full min-h-[100px] p-2">
+                <div class="lesson-drop-zone drop-zone h-full min-h-[100px] p-2 overflow-y-auto">
                     <p class="text-gray-500 text-sm">Sleep lessen hierheen</p>
                 </div>
             </div>
             <div class="calendar-day-cell-lesson" data-day-of-week="Woensdag">
-                <div class="lesson-drop-zone drop-zone h-full min-h-[100px] p-2">
+                <div class="lesson-drop-zone drop-zone h-full min-h-[100px] p-2 overflow-y-auto">
                     <p class="text-gray-500 text-sm">Sleep lessen hierheen</p>
                 </div>
             </div>
             <div class="calendar-day-cell-lesson" data-day-of-week="Donderdag">
-                <div class="lesson-drop-zone drop-zone h-full min-h-[100px] p-2">
+                <div class="lesson-drop-zone drop-zone h-full min-h-[100px] p-2 overflow-y-auto">
                     <p class="text-gray-500 text-sm">Sleep lessen hierheen</p>
                 </div>
             </div>
             <div class="calendar-day-cell-lesson" data-day-of-week="Vrijdag">
-                <div class="lesson-drop-zone drop-zone h-full min-h-[100px] p-2">
+                <div class="lesson-drop-zone drop-zone h-full min-h-[100px] p-2 overflow-y-auto">
                     <p class="text-gray-500 text-sm">Sleep lessen hierheen</p>
                 </div>
             </div>
             <div class="calendar-day-cell-lesson" data-day-of-week="Zaterdag">
-                <div class="lesson-drop-zone drop-zone h-full min-h-[100px] p-2">
+                <div class="lesson-drop-zone drop-zone h-full min-h-[100px] p-2 overflow-y-auto">
                     <p class="text-gray-500 text-sm">Sleep lessen hierheen</p>
                 </div>
             </div>
             <div class="calendar-day-cell-lesson" data-day-of-week="Zondag">
-                <div class="lesson-drop-zone drop-zone h-full min-h-[100px] p-2">
+                <div class="lesson-drop-zone drop-zone h-full min-h-[100px] p-2 overflow-y-auto">
                     <p class="text-gray-500 text-sm">Sleep lessen hierheen</p>
                 </div>
             </div>
         </div>
 
-        <button id="saveLessonScheduleBtn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200 w-full mt-4">
+        <div class="flex flex-col md:flex-row gap-2 mt-4">
+            <button id="copyLessonBtn" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200 flex-grow">
+                <i class="fas fa-copy mr-2"></i>Kopieer Les
+            </button>
+            <button id="copyWeekBtn" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200 flex-grow">
+                <i class="fas fa-calendar-alt mr-2"></i>Kopieer Hele Week
+            </button>
+        </div>
+        <button id="saveLessonScheduleBtn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200 w-full mt-2">
             <i class="fas fa-save mr-2"></i>Sla Lesrooster op
         </button>
     </div>
@@ -106,82 +121,50 @@
 
 <div id="message-box" class="message-box"></div>
 
-<style>
-    /* Specifieke stijlen voor de lesroosterbouwer kalender */
-    .calendar-grid-lesson {
-        display: grid;
-        grid-template-columns: repeat(7, 1fr);
-        gap: 0.5rem;
-    }
-    .calendar-header-day {
-        text-align: center;
-        font-weight: bold;
-        padding: 0.5rem;
-        background-color: #1f2937; /* bg-gray-800 */
-        border-radius: 0.375rem;
-    }
-    .calendar-day-cell-lesson {
-        background-color: #2c2c34;
-        border-radius: 0.5rem;
-        min-height: 150px; /* Voldoende ruimte voor lessen */
-        padding: 0.5rem;
-        border: 2px dashed #4b5563; /* Drop zone style */
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
-    }
-    .lesson-drop-zone.drag-over {
-        background-color: #2d3748;
-        border-color: #60a5fa;
-    }
-    .lesson-item {
-        background-color: #374151; /* bg-gray-700 */
-        padding: 0.75rem;
-        border-radius: 0.5rem;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        display: flex;
-        flex-direction: column;
-        position: relative;
-        cursor: grab;
-    }
-    .lesson-item .lesson-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        font-weight: bold;
-        color: #e5e7eb;
-        margin-bottom: 0.5rem;
-    }
-    .lesson-item .lesson-details {
-        font-size: 0.875rem;
-        color: #9ca3af;
-        margin-bottom: 0.5rem;
-    }
-    .lesson-item .lesson-settings {
-        display: none; /* Standaard verborgen */
-        flex-direction: column;
-        gap: 0.5rem;
-        margin-top: 0.5rem;
-    }
-    .lesson-item .lesson-settings.active {
-        display: flex;
-    }
-    .lesson-item input, .lesson-item select, .lesson-item textarea {
-        background-color: #1f2937;
-        border: 1px solid #374151;
-        color: #e5e7eb;
-        padding: 0.4rem;
-        border-radius: 0.3rem;
-        font-size: 0.875rem;
-    }
-    .lesson-item .remove-btn {
-        position: absolute;
-        top: 0.5rem;
-        right: 0.5rem;
-        background: none;
-        border: none;
-        color: #f87171;
-        cursor: pointer;
-        font-size: 1rem;
-    }
-</style>
+<!-- Modal voor Kopiëren Les -->
+<div id="copyLessonModal" class="modal-overlay">
+    <div class="modal-content">
+        <button id="copyLessonModalCloseBtn" class="modal-close-btn">X</button>
+        <h3 class="modal-title">Kopieer Les</h3>
+        <p class="modal-body-text">Kies de dagen en/of weken waarnaar u de les wilt kopiëren.</p>
+        <div class="flex flex-col gap-3">
+            <div class="flex flex-col">
+                <label for="copyLessonTargetDays" class="text-sm font-medium text-gray-400 mb-1">Kies Dagen (Ctrl/Cmd + klik voor meerdere):</label>
+                <select id="copyLessonTargetDays" multiple class="p-2 rounded-md bg-gray-700 border border-gray-600 text-gray-200 h-24">
+                    <option value="Maandag">Maandag</option>
+                    <option value="Dinsdag">Dinsdag</option>
+                    <option value="Woensdag">Woensdag</option>
+                    <option value="Donderdag">Donderdag</option>
+                    <option value="Vrijdag">Vrijdag</option>
+                    <option value="Zaterdag">Zaterdag</option>
+                    <option value="Zondag">Zondag</option>
+                </select>
+            </div>
+            <div class="flex flex-col">
+                <label for="copyLessonTargetWeeks" class="text-sm font-medium text-gray-400 mb-1">Kopieer voor de volgende X weken:</label>
+                <input type="number" id="copyLessonTargetWeeks" min="0" value="0" class="p-2 rounded-md bg-gray-700 border border-gray-600 text-gray-200">
+            </div>
+        </div>
+        <div class="modal-button-group">
+            <button id="confirmCopyLessonBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md">Kopieer</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal voor Kopiëren Week -->
+<div id="copyWeekModal" class="modal-overlay">
+    <div class="modal-content">
+        <button id="copyWeekModalCloseBtn" class="modal-close-btn">X</button>
+        <h3 class="modal-title">Kopieer Hele Week</h3>
+        <p class="modal-body-text">Kopieer de huidige weekplanning naar de volgende X weken.</p>
+        <div class="flex flex-col gap-3">
+            <div class="flex flex-col">
+                <label for="copyWeekTargetWeeks" class="text-sm font-medium text-gray-400 mb-1">Kopieer voor de volgende X weken:</label>
+                <input type="number" id="copyWeekTargetWeeks" min="1" value="1" class="p-2 rounded-md bg-gray-700 border border-gray-600 text-gray-200">
+            </div>
+        </div>
+        <div class="modal-button-group">
+            <button id="confirmCopyWeekBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md">Kopieer</button>
+        </div>
+    </div>
+</div>
