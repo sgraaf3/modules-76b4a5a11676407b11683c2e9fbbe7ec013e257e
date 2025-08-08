@@ -67,7 +67,6 @@
             border-color: #60a5fa;
         }
         .tab-content {
-            display: none;
             opacity: 0;
             transform: translateY(20px); /* Begin iets lager */
             transition: opacity 0.3s ease-out, transform 0.3s ease-out;
@@ -78,11 +77,14 @@
             padding: 1.5rem; /* Zorg voor padding zoals in main-content */
         }
         .tab-content.active {
-            display: block;
             opacity: 1;
             transform: translateY(0);
             position: relative; /* Zorgt dat het ruimte inneemt als het actief is */
         }
+        .tab-content.hidden {
+            display: none; /* Zorg dat verborgen tabbladen echt niet zichtbaar zijn */
+        }
+
         .drag-item {
             background-color: #374151; /* bg-gray-700 */
             padding: 0.75rem;
@@ -150,73 +152,85 @@
 
         /* Dag Weergave Specifieke Stijlen */
         .day-timeline-container {
-            display: flex; /* Gebruik flexbox voor stapelen */
-            flex-direction: column; /* Stapel verticaal */
-            gap: 0.5rem; /* Ruimte tussen items */
+            display: grid;
+            grid-template-columns: 50px 1fr; /* Tijdlabel kolom en inhoudskolom */
+            gap: 0.5rem;
             margin-top: 1rem;
             border: 2px dashed #4b5563;
             border-radius: 0.5rem;
             padding: 1rem;
-            min-height: 300px;
-            position: relative;
+            min-height: 300px; /* Voldoende hoogte voor de tijdlijn */
+            position: relative; /* Voor absolute positionering van items */
         }
-        /* Verwijder tijdlabels en gerelateerde stijlen */
-        .time-labels, .time-slot-label {
-            display: none !important;
+        .time-labels {
+            display: flex;
+            flex-direction: column;
+            /* Hoogte van 24 uur * 2 slots/uur * 25px/slot = 1200px */
+            height: 1200px; /* Vaste hoogte voor tijdlabels */
+        }
+        .time-slot-label {
+            text-align: right;
+            padding-right: 0.5rem;
+            color: #9ca3af;
+            font-size: 0.8rem;
+            height: 25px; /* 30 minuten per 25px */
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
         }
         .day-drop-zone-content { /* Dit is de werkelijke dropzone */
             position: relative; /* Cruciaal voor absolute positioning van children */
-            min-height: 100%; /* Zorg dat het dropgebied groot genoeg is */
+            min-height: 1200px; /* Zorg dat het dropgebied groot genoeg is voor 24 uur */
             overflow-y: auto; /* Allow scrolling if items go beyond view */
             padding: 0; /* Remove padding here, items will position themselves */
             border: none; /* Remove border from here, it's on the container */
-            display: flex; /* Maak het een flex container */
-            flex-direction: column; /* Stapel items */
-            gap: 0.5rem; /* Ruimte tussen de items */
         }
         .timeline-item {
-            position: relative; /* Relatieve positionering voor stapelen */
-            width: 100%; /* Neem de volledige breedte */
+            position: absolute; /* Position absolutely within day-drop-zone-content */
+            left: 0;
+            width: 100%; /* Take full width of the content area */
             background-color: #2c2c34;
             border-radius: 0.375rem;
             padding: 0.5rem;
             font-size: 0.9rem;
             color: #e5e7eb;
-            min-height: 40px;
+            min-height: 40px; /* Minimum height for items */
             display: flex;
-            flex-direction: column; /* Zorgt dat header en settings onder elkaar staan */
+            flex-direction: column; /* Allow header and settings to stack */
+            align-items: flex-start; /* Align content to start */
+            justify-content: space-between;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-            transition: background-color 0.2s ease;
-            z-index: 10;
+            transition: background-color 0.2s ease; /* Add transition for visual feedback */
+            z-index: 10; /* Ensure items are above drop zone border */
+            cursor: pointer; /* Indicate clickable */
+        }
+        .timeline-item .element-header {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .timeline-item .element-settings {
+            width: 100%;
+            padding-top: 0.5rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            margin-top: 0.5rem;
         }
         .timeline-item.hr-zone-bar {
-            height: auto;
-            min-height: 40px;
+            height: auto; /* Allow content to dictate height */
+            min-height: 40px; /* Base height for readability */
             justify-content: flex-start;
             overflow: hidden;
             white-space: nowrap;
         }
         .timeline-item .remove-btn {
-            position: absolute;
-            right: 0.5rem;
-            top: 0.5rem; /* Pas aan voor nieuwe layout */
             background: none;
             border: none;
-            color: #f87171;
+            color: #f87171; /* text-red-400 */
             cursor: pointer;
             font-size: 1rem;
-            z-index: 1;
+            margin-left: 0.5rem;
         }
-        .element-settings {
-            display: none; /* Standaard verborgen */
-        }
-        .element-settings.hidden {
-            display: none;
-        }
-        .element-settings:not(.hidden) {
-            display: flex; /* Toon als niet verborgen */
-        }
-
 
         /* Week & Maand Weergave Kalender Stijlen */
         .calendar-grid {
@@ -252,6 +266,11 @@
             font-size: 0.8rem;
             padding: 0.4rem;
         }
+        /* Styling for dropped items in week/block view */
+        .dropped-item {
+            cursor: grab; /* Indicate draggable */
+        }
+
 
         /* Settings Icon */
         .settings-icon-btn {
@@ -281,6 +300,17 @@
         }
         .category-content.active {
             display: block;
+        }
+        /* Nieuwe CSS voor gecombineerde lijst */
+        #all-saved-items-list {
+            display: none; /* Standaard verborgen, wordt door JS getoond indien nodig */
+            flex-direction: column;
+            gap: 0.75rem; /* gap-3 */
+            margin-top: 1rem;
+        }
+        #all-saved-items-list .drag-item {
+            background-color: #2c2c34; /* Donkerder dan de algemene drag-items */
+            border: 1px solid #4b5563;
         }
     </style>
 </head>
@@ -475,73 +505,72 @@
 
                 <div id="category-standard-schemas" class="category-content">
                     <h4 class="text-md font-semibold mb-2 text-gray-300">Cardio Schema's</h4>
-                    <div class="drag-item" draggable="true" data-type="day" data-name="Basis Cardio Dag" data-icon="fas fa-running" data-content='[{"type":"hr-zone","name":"Opwarming","icon":"fas fa-fire","zoneColor":"text-yellow-400","duration":10,"progressionEnabled":false,"progressionValue":null},{"type":"hr-zone","name":"Duurzaamheid 1","icon":"fas fa-heartbeat","zoneColor":"text-blue-400","duration":30,"progressionEnabled":true,"progressionValue":2},{"type":"hr-zone","name":"Afkoeling","icon":"fas fa-snowflake","zoneColor":"text-cyan-400","duration":5,"progressionEnabled":false,"progressionValue":null}]'>
+                    <div class="drag-item" draggable="true" data-type="day" data-name="Basis Cardio Dag" data-icon="fas fa-running" data-content='[{"type":"hr-zone","name":"Opwarming","icon":"fas fa-fire","zoneColor":"text-yellow-400","duration":10,"progressionEnabled":false,"progressionValue":null,"topPosition":0},{"type":"hr-zone","name":"Duurzaamheid 1","icon":"fas fa-heartbeat","zoneColor":"text-blue-400","duration":30,"progressionEnabled":true,"progressionValue":2,"topPosition":50},{"type":"hr-zone","name":"Afkoeling","icon":"fas fa-snowflake","zoneColor":"text-cyan-400","duration":5,"progressionEnabled":false,"progressionValue":null,"topPosition":100}]'>
                         <span><i class="fas fa-running mr-2 text-blue-300"></i>Basis Cardio Dag</span>
                         <i class="fas fa-grip-vertical text-gray-400"></i>
                     </div>
-                    <div class="drag-item" draggable="true" data-type="day" data-name="Gemiddelde Cardio Dag" data-icon="fas fa-running" data-content='[{"type":"hr-zone","name":"Opwarming","icon":"fas fa-fire","zoneColor":"text-yellow-400","duration":10,"progressionEnabled":false,"progressionValue":null},{"type":"hr-zone","name":"Duurzaamheid 2","icon":"fas fa-heartbeat","zoneColor":"text-indigo-400","duration":40,"progressionEnabled":true,"progressionValue":3},{"type":"hr-zone","name":"Intensief 1","icon":"fas fa-bolt","zoneColor":"text-orange-400","duration":15,"progressionEnabled":false,"progressionValue":null},{"type":"hr-zone","name":"Afkoeling","icon":"fas fa-snowflake","zoneColor":"text-cyan-400","duration":5,"progressionEnabled":false,"progressionValue":null}]'>
+                    <div class="drag-item" draggable="true" data-type="day" data-name="Gemiddelde Cardio Dag" data-icon="fas fa-running" data-content='[{"type":"hr-zone","name":"Opwarming","icon":"fas fa-fire","zoneColor":"text-yellow-400","duration":10,"progressionEnabled":false,"progressionValue":null,"topPosition":0},{"type":"hr-zone","name":"Duurzaamheid 2","icon":"fas fa-heartbeat","zoneColor":"text-indigo-400","duration":40,"progressionEnabled":true,"progressionValue":3,"topPosition":50},{"type":"hr-zone","name":"Intensief 1","icon":"fas fa-bolt","zoneColor":"text-orange-400","duration":15,"progressionEnabled":false,"progressionValue":null,"topPosition":100},{"type":"hr-zone","name":"Afkoeling","icon":"fas fa-snowflake","zoneColor":"text-cyan-400","duration":5,"progressionEnabled":false,"progressionValue":null,"topPosition":150}]'>
                         <span><i class="fas fa-running mr-2 text-purple-300"></i>Gemiddelde Cardio Dag</span>
                         <i class="fas fa-grip-vertical text-gray-400"></i>
                     </div>
-                    <div class="drag-item" draggable="true" data-type="day" data-name="Gevorderde Cardio Dag" data-icon="fas fa-running" data-content='[{"type":"hr-zone","name":"Opwarming","icon":"fas fa-fire","zoneColor":"text-yellow-400","duration":15,"progressionEnabled":false,"progressionValue":null},{"type":"hr-zone","name":"Intensief 2","icon":"fas fa-bolt","zoneColor":"text-red-400","duration":30,"progressionEnabled":true,"progressionValue":5},{"type":"hr-zone","name":"Duurzaamheid 3","icon":"fas fa-heartbeat","zoneColor":"text-purple-400","duration":20,"progressionEnabled":false,"progressionValue":null},{"type":"hr-zone","name":"Afkoeling","icon":"fas fa-snowflake","zoneColor":"text-cyan-400","duration":10,"progressionEnabled":false,"progressionValue":null}]'>
+                    <div class="drag-item" draggable="true" data-type="day" data-name="Gevorderde Cardio Dag" data-icon="fas fa-running" data-content='[{"type":"hr-zone","name":"Opwarming","icon":"fas fa-fire","zoneColor":"text-yellow-400","duration":15,"progressionEnabled":false,"progressionValue":null,"topPosition":0},{"type":"hr-zone","name":"Intensief 2","icon":"fas fa-bolt","zoneColor":"text-red-400","duration":30,"progressionEnabled":true,"progressionValue":5,"topPosition":50},{"type":"hr-zone","name":"Duurzaamheid 3","icon":"fas fa-heartbeat","zoneColor":"text-purple-400","duration":20,"progressionEnabled":false,"progressionValue":null,"topPosition":100},{"type":"hr-zone","name":"Afkoeling","icon":"fas fa-snowflake","zoneColor":"text-cyan-400","duration":10,"progressionEnabled":false,"progressionValue":null,"topPosition":150}]'>
                         <span><i class="fas fa-running mr-2 text-red-300"></i>Gevorderde Cardio Dag</span>
                         <i class="fas fa-grip-vertical text-gray-400"></i>
                     </div>
 
                     <h4 class="text-md font-semibold mt-4 mb-2 text-gray-300">Kracht Schema's</h4>
-                    <div class="drag-item" draggable="true" data-type="day" data-name="Basis Kracht Dag" data-icon="fas fa-dumbbell" data-content='[{"type":"strength-exercise","name":"Full Body Training","icon":"fas fa-dumbbell","zoneColor":"text-red-400","inputType":"reps_sets","reps":10,"sets":3,"minReps":8,"maxReps":12,"minSets":3,"maxSets":4,"progressionEnabled":true,"progressionValue":1,"notes":"Focus op techniek"}]'>
+                    <div class="drag-item" draggable="true" data-type="day" data-name="Basis Kracht Dag" data-icon="fas fa-dumbbell" data-content='[{"type":"strength-exercise","name":"Full Body Training","icon":"fas fa-dumbbell","zoneColor":"text-red-400","inputType":"reps_sets","reps":10,"sets":3,"minReps":8,"maxReps":12,"minSets":3,"maxSets":4,"progressionEnabled":true,"progressionValue":1,"notes":"Focus op techniek","topPosition":0}]'>
                         <span><i class="fas fa-dumbbell mr-2 text-red-300"></i>Basis Kracht Dag</span>
                         <i class="fas fa-grip-vertical text-gray-400"></i>
                     </div>
-                    <div class="drag-item" draggable="true" data-type="day" data-name="Gemiddelde Kracht Dag" data-icon="fas fa-dumbbell" data-content='[{"type":"strength-exercise","name":"Geïsoleerde Training","icon":"fas fa-hand-fist","zoneColor":"text-orange-400","inputType":"reps_sets","reps":8,"sets":4,"minReps":6,"maxReps":10,"minSets":3,"maxSets":5,"progressionEnabled":true,"progressionValue":1,"notes":"Supersets mogelijk"},{"type":"strength-exercise","name":"Plyometrisch","icon":"fas fa-bounce","zoneColor":"text-lime-400","inputType":"time","duration":20,"minTime":15,"maxTime":25,"progressionEnabled":false,"progressionValue":null,"notes":"Explosieve kracht"}]'>
+                    <div class="drag-item" draggable="true" data-type="day" data-name="Gemiddelde Kracht Dag" data-icon="fas fa-dumbbell" data-content='[{"type":"strength-exercise","name":"Geïsoleerde Training","icon":"fas fa-hand-fist","zoneColor":"text-orange-400","inputType":"reps_sets","reps":8,"sets":4,"minReps":6,"maxReps":10,"minSets":3,"maxSets":5,"progressionEnabled":true,"progressionValue":1,"notes":"Supersets mogelijk","topPosition":0},{"type":"strength-exercise","name":"Plyometrisch","icon":"fas fa-bounce","zoneColor":"text-lime-400","inputType":"time","duration":20,"minTime":15,"maxTime":25,"progressionEnabled":false,"progressionValue":null,"notes":"Explosieve kracht","topPosition":50}]'>
                         <span><i class="fas fa-dumbbell mr-2 text-orange-300"></i>Gemiddelde Kracht Dag</span>
                         <i class="fas fa-grip-vertical text-gray-400"></i>
                     </div>
 
                     <h4 class="text-md font-semibold mt-4 mb-2 text-gray-300">Herstel Schema's</h4>
-                    <div class="drag-item" draggable="true" data-type="day" data-name="Actieve Herstel Dag" data-icon="fas fa-walking" data-content='[{"type":"recovery-activity","name":"Actief Herstel","icon":"fas fa-walking","zoneColor":"text-blue-400","inputType":"time","duration":30,"notes":"Lichte wandeling of fietsen"},{"type":"recovery-activity","name":"Stretching Sessie","icon":"fas fa-stretch","zoneColor":"text-pink-400","inputType":"time","duration":15,"notes":"Focus op grote spiergroepen"}]'>
+                    <div class="drag-item" draggable="true" data-type="day" data-name="Actieve Herstel Dag" data-icon="fas fa-walking" data-content='[{"type":"recovery-activity","name":"Actief Herstel","icon":"fas fa-walking","zoneColor":"text-blue-400","inputType":"time","duration":30,"notes":"Lichte wandeling of fietsen","topPosition":0},{"type":"recovery-activity","name":"Stretching Sessie","icon":"fas fa-stretch","zoneColor":"text-pink-400","inputType":"time","duration":15,"notes":"Focus op grote spiergroepen","topPosition":50}]'>
                         <span><i class="fas fa-walking mr-2 text-blue-300"></i>Actieve Herstel Dag</span>
                         <i class="fas fa-grip-vertical text-gray-400"></i>
                     </div>
-                    <div class="drag-item" draggable="true" data-type="day" data-name="Rustdag met Meting" data-icon="fas fa-bed" data-content='[{"type":"rest-day","name":"Rustdag","icon":"fas fa-bed","zoneColor":"text-gray-500"},{"type":"rest-measurement-base","name":"Rustmeting (Basis)","icon":"fas fa-heart-circle-bolt","zoneColor":"text-emerald-400"}]'>
+                    <div class="drag-item" draggable="true" data-type="day" data-name="Rustdag met Meting" data-icon="fas fa-bed" data-content='[{"type":"rest-day","name":"Rustdag","icon":"fas fa-bed","zoneColor":"text-gray-500","topPosition":0},{"type":"rest-measurement-base","name":"Rustmeting (Basis)","icon":"fas fa-heart-circle-bolt","zoneColor":"text-emerald-400","topPosition":50}]'>
                         <span><i class="fas fa-bed mr-2 text-gray-300"></i>Rustdag met Meting</span>
                         <i class="fas fa-grip-vertical text-gray-400"></i>
                     </div>
 
                     <h4 class="text-md font-semibold mt-4 mb-2 text-gray-300">Coördinatie Schema's</h4>
-                    <div class="drag-item" draggable="true" data-type="day" data-name="Basis Coördinatie Dag" data-icon="fas fa-balance-scale" data-content='[{"type":"coordination-activity","name":"Balansoefeningen","icon":"fas fa-balance-scale","zoneColor":"text-teal-400","inputType":"time","duration":20,"notes":"Eenvoudige balansoefeningen"}]'>
+                    <div class="drag-item" draggable="true" data-type="day" data-name="Basis Coördinatie Dag" data-icon="fas fa-balance-scale" data-content='[{"type":"coordination-activity","name":"Balansoefeningen","icon":"fas fa-balance-scale","zoneColor":"text-teal-400","inputType":"time","duration":20,"notes":"Eenvoudige balansoefeningen","topPosition":0}]'>
                         <span><i class="fas fa-balance-scale mr-2 text-teal-300"></i>Basis Coördinatie Dag</span>
                         <i class="fas fa-grip-vertical text-gray-400"></i>
                     </div>
 
                     <h4 class="text-md font-semibold mt-4 mb-2 text-gray-300">Flexibiliteit Schema's</h4>
-                    <div class="drag-item" draggable="true" data-type="day" data-name="Flexibiliteit Sessie" data-icon="fas fa-child-reaching" data-content='[{"type":"flexibility-activity","name":"Dynamisch Rekken","icon":"fas fa-child-reaching","zoneColor":"text-rose-400","inputType":"time","duration":25,"notes":"Voor warming-up"},{"type":"flexibility-activity","name":"Yoga Sessie","icon":"fas fa-om","zoneColor":"text-amber-400","inputType":"time","duration":45,"notes":"Focus op lenigheid"}]'>
+                    <div class="drag-item" draggable="true" data-type="day" data-name="Flexibiliteit Sessie" data-icon="fas fa-child-reaching" data-content='[{"type":"flexibility-activity","name":"Dynamisch Rekken","icon":"fas fa-child-reaching","zoneColor":"text-rose-400","inputType":"time","duration":25,"notes":"Voor warming-up","topPosition":0},{"type":"flexibility-activity","name":"Yoga Sessie","icon":"fas fa-om","zoneColor":"text-amber-400","inputType":"time","duration":45,"notes":"Focus op lenigheid","topPosition":50}]'>
                         <span><i class="fas fa-child-reaching mr-2 text-fuchsia-300"></i>Flexibiliteit Sessie</span>
                         <i class="fas fa-grip-vertical text-gray-400"></i>
                     </div>
 
                     <h4 class="text-md font-semibold mt-4 mb-2 text-gray-300">Snelheid Schema's</h4>
-                    <div class="drag-item" draggable="true" data-type="day" data-name="Sprint Dag" data-icon="fas fa-running" data-content='[{"type":"speed-activity","name":"Sprinttraining","icon":"fas fa-running","zoneColor":"text-red-500","inputType":"reps_sets","reps":10,"sets":5,"notes":"Korte, maximale sprints"}]'>
+                    <div class="drag-item" draggable="true" data-type="day" data-name="Sprint Dag" data-icon="fas fa-running" data-content='[{"type":"speed-activity","name":"Sprinttraining","icon":"fas fa-running","zoneColor":"text-red-500","inputType":"reps_sets","reps":10,"sets":5,"notes":"Korte, maximale sprints","topPosition":0}]'>
                         <span><i class="fas fa-running mr-2 text-red-300"></i>Sprint Dag</span>
                         <i class="fas fa-grip-vertical text-gray-400"></i>
                     </div>
 
                     <h4 class="text-md font-semibold mt-4 mb-2 text-gray-300">Voeding Schema's</h4>
-                    <div class="drag-item" draggable="true" data-type="day" data-name="Voedingsplan Dag" data-icon="fas fa-utensils" data-content='[{"type":"nutrition-activity","name":"Maaltijdplan","icon":"fas fa-utensils","zoneColor":"text-lime-300","duration":null,"notes":"Volg gepersonaliseerd maaltijdplan"},{"type":"nutrition-activity","name":"Hydratatie Doel","icon":"fas fa-water","zoneColor":"text-blue-300","duration":null,"notes":"Drink 3 liter water"}]'>
+                    <div class="drag-item" draggable="true" data-type="day" data-name="Voedingsplan Dag" data-icon="fas fa-utensils" data-content='[{"type":"nutrition-activity","name":"Maaltijdplan","icon":"fas fa-utensils","zoneColor":"text-lime-300","duration":null,"notes":"Volg gepersonaliseerd maaltijdplan","topPosition":0},{"type":"nutrition-activity","name":"Hydratatie Doel","icon":"fas fa-water","zoneColor":"text-blue-300","duration":null,"notes":"Drink 3 liter water","topPosition":50}]'>
                         <span><i class="fas fa-utensils mr-2 text-lime-300"></i>Voedingsplan Dag</span>
                         <i class="fas fa-grip-vertical text-gray-400"></i>
                     </div>
                 </div>
 
-
-                <h3 class="text-lg font-bold mt-6 mb-2 text-gray-100">Aangepaste Metingen</h3>
-                <div id="custom-measurements-list">
+                <div id="custom-measurements-list" class="category-content">
+                    <h3 class="text-lg font-bold mt-6 mb-2 text-gray-100">Aangepaste Metingen</h3>
                     <p class="text-gray-400 text-sm">Geen aangepaste metingen.</p>
                 </div>
 
-                <h3 class="text-lg font-bold mt-6 mb-2 text-gray-100">Opgeslagen Schema's & Elementen</h3>
-                <div id="all-saved-items-list" class="flex flex-col gap-2">
-                    <p class="text-gray-400 text-sm">Laden...</p>
+                <div id="all-saved-items-list" class="category-content">
+                    <h3 class="text-lg font-bold mt-6 mb-2 text-gray-100">Opgeslagen Schema's</h3>
+                    <p class="text-gray-400 text-sm">Nog geen schema's opgeslagen.</p>
                 </div>
 
                 <button id="create-day-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200 w-full mt-4">
@@ -571,7 +600,8 @@
                 <h2 class="text-xl font-bold mb-2 text-gray-100">Configureer Dag</h2>
                 <input type="text" id="current-day-name" placeholder="Naam van deze dag (bijv. Maandag Intensief)" class="p-2 rounded-md bg-gray-700 border border-gray-600 text-gray-200 w-full mb-4">
                 <div class="day-timeline-container">
-                    <!-- Tijdlabels zijn verwijderd -->
+                    <div class="time-labels" id="day-time-labels">
+                        </div>
                     <div id="day-drop-zone" class="day-drop-zone-content drop-zone">
                         <p class="text-gray-400 text-center">Sleep hartslagzones, rust, metingen of documenten hierheen om de dag te configureren.</p>
                     </div>
@@ -579,13 +609,13 @@
                 <button id="save-day-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200 w-full mt-4">
                     <i class="fas fa-save mr-2"></i>Sla Dag op
                 </button>
-                <h3 class="text-lg font-bold mt-6 mb-2 text-gray-100">Opgeslagen Dagen (oude lijst, wordt vervangen door gecombineerde lijst)</h3>
+                <h3 class="text-lg font-bold mt-6 mb-2 text-gray-100">Opgeslagen Dagen</h3>
                 <div id="saved-days-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     <p class="text-gray-400 col-span-full">Nog geen dagen opgeslagen.</p>
                 </div>
             </div>
 
-            <div id="tab-week" class="tab-content">
+            <div id="tab-week" class="tab-content hidden">
                 <h2 class="text-xl font-bold mb-2 text-gray-100">Configureer Week</h2>
                 <input type="text" id="current-week-name" placeholder="Naam van deze week (bijv. Week 1 Piektraining)" class="p-2 rounded-md bg-gray-700 border border-gray-600 text-gray-200 w-full mb-4">
                 <div class="calendar-grid">
@@ -635,13 +665,13 @@
                 <button id="save-week-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200 w-full mt-4">
                     <i class="fas fa-save mr-2"></i>Sla Week op
                 </button>
-                <h3 class="text-lg font-bold mt-6 mb-2 text-gray-100">Opgeslagen Weken (oude lijst, wordt vervangen door gecombineerde lijst)</h3>
+                <h3 class="text-lg font-bold mt-6 mb-2 text-gray-100">Opgeslagen Weken</h3>
                 <div id="saved-weeks-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     <p class="text-gray-400 col-span-full">Nog geen weken opgeslagen.</p>
                 </div>
             </div>
 
-            <div id="tab-blok" class="tab-content">
+            <div id="tab-blok" class="tab-content hidden">
                 <h2 class="text-xl font-bold mb-2 text-gray-100">Configureer Blok</h2>
                 <input type="text" id="current-blok-name" placeholder="Naam van dit blok (bijv. Voorbereiding Marathon)" class="p-2 rounded-md bg-gray-700 border border-gray-600 text-gray-200 w-full mb-4">
                 <textarea id="current-blok-notes" placeholder="Notities voor dit blok (bijv. Belangrijke mijlpalen, focuspunten)" rows="3" class="p-2 rounded-md bg-gray-700 border border-gray-600 text-gray-200 w-full mb-4"></textarea>
@@ -651,13 +681,13 @@
                 <button id="save-blok-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200 w-full mt-4">
                     <i class="fas fa-save mr-2"></i>Sla Blok op
                 </button>
-                <h3 class="text-lg font-bold mt-6 mb-2 text-gray-100">Opgeslagen Blokken (oude lijst, wordt vervangen door gecombineerde lijst)</h3>
+                <h3 class="text-lg font-bold mt-6 mb-2 text-gray-100">Opgeslagen Blokken</h3>
                 <div id="saved-bloks-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     <p class="text-gray-400 col-span-full">Nog geen blokken opgeslagen.</p>
                 </div>
             </div>
 
-            <div id="tab-form-builder" class="tab-content">
+            <div id="tab-form-builder" class="tab-content hidden">
                 <h2 class="text-xl font-bold mb-2 text-gray-100">Form Builder: Aangepaste Metingen</h2>
 
                 <div class="bg-gray-700 p-4 rounded-lg mb-6">

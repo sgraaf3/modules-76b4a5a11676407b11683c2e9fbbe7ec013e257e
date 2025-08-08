@@ -24,6 +24,10 @@ export async function initFinanceView() {
     const transactionMemberEmployeeInput = document.getElementById('transactionMemberEmployee');
     const clearTransactionFormBtn = document.getElementById('clearTransactionFormBtn');
 
+    const totalIncomeDisplay = document.getElementById('totalIncomeDisplay');
+    const totalExpenseDisplay = document.getElementById('totalExpenseDisplay');
+    const netProfitDisplay = document.getElementById('netProfitDisplay');
+
     async function loadTransactions() {
         try {
             const transactions = await getAllData('finance');
@@ -33,6 +37,9 @@ export async function initFinanceView() {
 
             if (transactions.length === 0) {
                 transactionsList.innerHTML = '<p class="text-gray-400">Geen transacties gevonden.</p>';
+                if (totalIncomeDisplay) totalIncomeDisplay.textContent = '€ 0.00';
+                if (totalExpenseDisplay) totalExpenseDisplay.textContent = '€ 0.00';
+                if (netProfitDisplay) netProfitDisplay.textContent = '€ 0.00';
                 return;
             }
 
@@ -60,9 +67,9 @@ export async function initFinanceView() {
                 }
             });
 
-            document.querySelector('#financeView .data-card .main-value.text-green-400').textContent = `€ ${totalIncome.toFixed(2)}`;
-            document.querySelector('#financeView .data-card .main-value.text-red-400').textContent = `€ ${totalExpense.toFixed(2)}`;
-            document.querySelector('#financeView .data-card:nth-child(3) .main-value').textContent = `€ ${(totalIncome - totalExpense).toFixed(2)}`;
+            if (totalIncomeDisplay) totalIncomeDisplay.textContent = `€ ${totalIncome.toFixed(2)}`;
+            if (totalExpenseDisplay) totalExpenseDisplay.textContent = `€ ${totalExpense.toFixed(2)}`;
+            if (netProfitDisplay) netProfitDisplay.textContent = `€ ${(totalIncome - totalExpense).toFixed(2)}`;
 
             // Koppel event listeners voor verwijderknoppen
             transactionsList.querySelectorAll('[data-action="delete-transaction"]').forEach(button => {
@@ -95,8 +102,8 @@ export async function initFinanceView() {
                 type: transactionTypeInput.value,
                 amount: parseFloat(transactionAmountInput.value),
                 description: transactionDescriptionInput.value,
-                productService: transactionProductServiceInput.value, // Nieuw veld
-                memberEmployee: transactionMemberEmployeeInput.value, // Nieuw veld
+                productService: transactionProductServiceInput.value,
+                memberEmployee: transactionMemberEmployeeInput.value,
                 date: new Date().toISOString()
             };
             try {
@@ -123,3 +130,4 @@ export async function initFinanceView() {
     await loadTransactions(); // Laad transacties bij initialisatie van de view
     financeView.dataset.initialized = true; // Markeer als geïnitialiseerd
 }
+

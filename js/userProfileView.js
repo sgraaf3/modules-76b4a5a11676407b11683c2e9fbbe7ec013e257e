@@ -39,15 +39,72 @@ export async function initUserProfileView(data) {
     }
 
     async function loadAssignedSubscription() {
-        // ... (implementation to come in a future step)
+        try {
+            const subscriptions = await getAllData('subscriptions');
+            const userSubscription = subscriptions.find(sub => sub.assignedTo === userId);
+            const section = document.getElementById('assigned-subscription-section');
+
+            if (userSubscription) {
+                section.innerHTML = `
+                    <div class="bg-gray-700 p-4 rounded-lg">
+                        <p><strong>Type:</strong> ${userSubscription.type}</p>
+                        <p><strong>Status:</strong> ${userSubscription.status}</p>
+                        <p><strong>Startdatum:</strong> ${new Date(userSubscription.startDate).toLocaleDateString()}</p>
+                        <p><strong>Einddatum:</strong> ${new Date(userSubscription.endDate).toLocaleDateString()}</p>
+                    </div>
+                `;
+            } else {
+                section.innerHTML = '<p class="text-gray-400">Geen abonnement toegewezen.</p>';
+            }
+        } catch (error) {
+            console.error("Error loading assigned subscription:", error);
+            showNotification('Error loading subscription.', 'error');
+        }
     }
 
     async function loadTrainingHistory() {
-        // ... (implementation to come in a future step)
+        try {
+            const sessions = await getAllData('trainingSessions');
+            const userSessions = sessions.filter(session => session.userId === userId);
+            const section = document.getElementById('training-history-section');
+
+            if (userSessions.length > 0) {
+                section.innerHTML = userSessions.map(session => `
+                    <div class="bg-gray-700 p-4 rounded-lg mb-2">
+                        <p><strong>Datum:</strong> ${new Date(session.date).toLocaleDateString()}</p>
+                        <p><strong>Type:</strong> ${session.type}</p>
+                        <p><strong>Duur:</strong> ${session.duration} minuten</p>
+                    </div>
+                `).join('');
+            } else {
+                section.innerHTML = '<p class="text-gray-400">Geen trainingsgeschiedenis beschikbaar.</p>';
+            }
+        } catch (error) {
+            console.error("Error loading training history:", error);
+            showNotification('Error loading training history.', 'error');
+        }
     }
 
     async function loadActivityLog() {
-        // ... (implementation to come in a future step)
+        try {
+            const activities = await getAllData('memberActivity');
+            const userActivities = activities.filter(activity => activity.userId === userId);
+            const section = document.getElementById('activity-log-section');
+
+            if (userActivities.length > 0) {
+                section.innerHTML = userActivities.map(activity => `
+                    <div class="bg-gray-700 p-4 rounded-lg mb-2">
+                        <p><strong>Datum:</strong> ${new Date(activity.date).toLocaleString()}</p>
+                        <p><strong>Activiteit:</strong> ${activity.activity}</p>
+                    </div>
+                `).join('');
+            } else {
+                section.innerHTML = '<p class="text-gray-400">Geen activiteitenlog beschikbaar.</p>';
+            }
+        } catch (error) {
+            console.error("Error loading activity log:", error);
+            showNotification('Error loading activity log.', 'error');
+        }
     }
 
     if (userProfileForm) {

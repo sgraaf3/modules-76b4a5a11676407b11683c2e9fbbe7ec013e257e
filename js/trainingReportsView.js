@@ -49,7 +49,7 @@ function getHrZone(currentHR, at, rmssd) {
 
 
 // Functie om een gedetailleerd rapport te genereren en weer te geven
-async function loadTrainingSessionReports(session) {
+async function displayDetailedTrainingReport(session) {
     const detailedReportContainer = document.getElementById('detailedReportContainer');
     if (!detailedReportContainer) {
         console.error("Detailed report container not found.");

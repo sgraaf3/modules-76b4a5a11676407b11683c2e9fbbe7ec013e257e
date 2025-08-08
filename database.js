@@ -1,5 +1,5 @@
 const DB_NAME = 'SportsCRMDB';
-const DB_VERSION = 12; // VERSIE VERHOOGD NAAR 12 voor de nieuwe 'lessons' store
+const DB_VERSION = 14; // VERSIE VERHOOGD NAAR 14 voor de nieuwe 'testProtocols' store
 
 const USER_PROFILE_STORE = 'userProfile';
 const TRAINING_SESSIONS_STORE = 'trainingSessions';
@@ -21,6 +21,8 @@ const DOCS_STORE = 'documents';
 const TOGGLE_SETTINGS_STORE = 'toggleSettings';
 const DASHBOARD_SETTINGS_STORE = 'dashboardSettings';
 const NUTRITION_PROGRAMS_STORE = 'nutritionPrograms';
+const ASSIGNED_NUTRITION_PROGRAMS_STORE = 'assignedNutritionPrograms'; // NIEUW
+const FOOD_LOGS_STORE = 'foodLogs'; // NIEUW
 const SPORT_STORE = 'sportData';
 const ACTIVITIES_STORE = 'activitiesData';
 const PERMISSIONS_STORE = 'permissionsData';
@@ -29,6 +31,7 @@ const ACTION_CENTER_STORE = 'actionCenterData';
 const USER_ROLE_STORE = 'userRoles';
 const SLEEP_DATA_STORE = 'sleepData';
 const LESSONS_STORE = 'lessons'; // NIEUW: Store voor individuele lessen
+const TEST_PROTOCOLS_STORE = 'testProtocols'; // NIEUW
 
 let dbInstance;
 
@@ -48,12 +51,13 @@ export async function openDatabase() {
                 LOGS_STORE, REGISTRY_STORE, MEMBER_MEMBERSHIP_STORE,
                 FINANCE_STORE, DOCS_STORE, TOGGLE_SETTINGS_STORE,
                 DASHBOARD_SETTINGS_STORE, NUTRITION_PROGRAMS_STORE,
-                SPORT_STORE, ACTIVITIES_STORE, PERMISSIONS_STORE, NOTES_STORE, ACTION_CENTER_STORE,
+                ASSIGNED_NUTRITION_PROGRAMS_STORE, FOOD_LOGS_STORE, 
+                SPORT_STORE, ACTIVITIES_STORE, PERMISSIONS_STORE, NOTES_STORE, ACTION_CENTER_STORE, // ACTION_CENTER_STORE toegevoegd
                 USER_ROLE_STORE,
                 SLEEP_DATA_STORE,
                 'restSessionsFree',
                 'restSessionsAdvanced',
-                LESSONS_STORE // NIEUW: Voeg de 'lessons' store toe
+                LESSONS_STORE, TEST_PROTOCOLS_STORE // NIEUW
             ];
 
             stores.forEach(storeName => {
@@ -70,6 +74,12 @@ export async function openDatabase() {
                         options = { keyPath: 'userId' }; // userRoles gebruikt 'userId' als keyPath, geen autoIncrement
                     } else if (storeName === LESSON_SCHEDULES_STORE) {
                         options = { keyPath: 'id' }; // lessonSchedules gebruikt 'id' als keyPath (bijv. 'week-0')
+                    } else if (storeName === ASSIGNED_NUTRITION_PROGRAMS_STORE) {
+                        options = { keyPath: 'id', autoIncrement: true }; // Nieuwe store
+                    } else if (storeName === FOOD_LOGS_STORE) {
+                        options = { keyPath: 'id', autoIncrement: true }; // Nieuwe store
+                    } else if (storeName === TEST_PROTOCOLS_STORE) {
+                        options = { keyPath: 'id', autoIncrement: true }; // Nieuwe store
                     }
                     db.createObjectStore(storeName, options);
                 }

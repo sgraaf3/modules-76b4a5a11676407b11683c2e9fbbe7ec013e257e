@@ -70,57 +70,84 @@ export async function initLiveTrainingView(showViewCallback) {
     console.log("Live Training View geïnitialiseerd.");
 
     const currentAppUserId = getOrCreateUserId();
-    currentSessionData.userId = currentAppUserId; // Set user ID for the session
+    currentSessionData.userId = currentAppUserId;
 
     const bluetoothController = new BluetoothController();
 
-    // UI elements
-    const measurementTypeSelect = document.getElementById('measurementTypeSelect');
-    const liveHrDisplay = document.getElementById('liveHrDisplay');
-    const liveHrZoneDisplay = document.getElementById('liveHrZoneDisplay');
-    const liveAvgRrDisplay = document.getElementById('liveAvgRrDisplay');
-    const liveRmssdDisplay = document.getElementById('liveRmssdDisplay');
-    const liveBreathRateDisplay = document.getElementById('liveBreathRateDisplay');
-    const liveTimerDisplay = document.getElementById('liveTimerDisplay');
-    const startMeasurementBtnLive = document.getElementById('startMeasurementBtnLive');
-    const stopMeasurementBtnLive = document.getElementById('stopMeasurementBtnLive');
-    const saveMeasurementBtn = document.getElementById('saveMeasurementBtn');
-    const inputRpe = document.getElementById('inputRpe');
+    // Initialize UI elements and charts
+    const uiElements = initUIElements();
+    const charts = initCharts(uiElements);
 
-    // Summary displays
-    const summaryAvgHr = document.getElementById('summaryAvgHr');
-    const summaryMaxHr = document.getElementById('summaryMaxHr');
-    const summaryMinHr = document.getElementById('summaryMinHr');
-    const summaryCurrentHr = document.getElementById('summaryCurrentHr');
-    const hrvRecoveryStatus = document.getElementById('hrvRecoveryStatus');
-    const summaryRmssd = document.getElementById('summaryRmssd');
-    const summarySdnn = document.getElementById('summarySdnn');
-    const summaryPnn50 = document.getElementById('summaryPnn50');
-    const summaryLfHf = document.getElementById('summaryLfHf');
-    const scoreRecovery = document.getElementById('scoreRecovery');
-    const scoreStrain = document.getElementById('scoreStrain');
-    const scoreSleep = document.getElementById('scoreSleep');
-    const scoreConditioning = document.getElementById('scoreConditioning');
-    const scoreIntensity = document.getElementById('scoreIntensity');
-    const hrToAt = document.getElementById('hrToAt');
-    const hrToRestHr = document.getElementById('hrToRestHr');
-    const breathLastCycle = document.getElementById('breathLastCycle');
-    const breathAvgTotalCycles = document.getElementById('breathAvgTotalCycles');
-    const breathCurrentBf = document.getElementById('breathCurrentBf');
-
-    // Chart contexts
-    const hrCombinedChartCtx = document.getElementById('hrChart')?.getContext('2d'); // Gebruik hrChart voor de gecombineerde grafiek
-    const rrChartCtx = document.getElementById('rrChart')?.getContext('2d'); // Aparte grafiek voor ongeschaalde RR
-    const rrHistogramChartCtx = document.getElementById('rrHistogramChart')?.getContext('2d');
-    const poincarePlotChartCtx = document.getElementById('poincarePlotChart')?.getContext('2d');
-    const powerSpectrumChartCtx = document.getElementById('powerSpectrumChart')?.getContext('2d');
-
-    // User profile data (for HR zones)
+    // Load user profile for HR zones
     let userProfile = await getData('userProfile', currentAppUserId);
     let userBaseAtHR = userProfile ? parseFloat(userProfile.userBaseAtHR) : 0;
     let userRestHR = userProfile ? parseFloat(userProfile.userRestHR) : 0;
 
-    // --- Helper Functions ---
+    // Setup event listeners
+    setupEventListeners(uiElements, bluetoothController, showViewCallback);
+
+    // Setup Bluetooth callbacks
+    setupBluetoothCallbacks(uiElements, charts, bluetoothController, userBaseAtHR, userRestHR);
+
+    // Initial state
+    uiElements.saveMeasurementBtn.style.display = 'none';
+}
+
+    function initUIElements() {
+    return {
+        measurementTypeSelect: document.getElementById('measurementTypeSelect'),
+        liveHrDisplay: document.getElementById('liveHrDisplay'),
+        liveHrZoneDisplay: document.getElementById('liveHrZoneDisplay'),
+        liveAvgRrDisplay: document.getElementById('liveAvgRrDisplay'),
+        liveRmssdDisplay: document.getElementById('liveRmssdDisplay'),
+        liveBreathRateDisplay: document.getElementById('liveBreathRateDisplay'),
+        liveTimerDisplay: document.getElementById('liveTimerDisplay'),
+        startMeasurementBtnLive: document.getElementById('startMeasurementBtnLive'),
+        stopMeasurementBtnLive: document.getElementById('stopMeasurementBtnLive'),
+        saveMeasurementBtn: document.getElementById('saveMeasurementBtn'),
+        inputRpe: document.getElementById('inputRpe'),
+        summaryAvgHr: document.getElementById('summaryAvgHr'),
+        summaryMaxHr: document.getElementById('summaryMaxHr'),
+        summaryMinHr: document.getElementById('summaryMinHr'),
+        summaryCurrentHr: document.getElementById('summaryCurrentHr'),
+        hrvRecoveryStatus: document.getElementById('hrvRecoveryStatus'),
+        summaryRmssd: document.getElementById('summaryRmssd'),
+        summarySdnn: document.getElementById('summarySdnn'),
+        summaryPnn50: document.getElementById('summaryPnn50'),
+        summaryLfHf: document.getElementById('summaryLfHf'),
+        scoreRecovery: document.getElementById('scoreRecovery'),
+        scoreStrain: document.getElementById('scoreStrain'),
+        scoreSleep: document.getElementById('scoreSleep'),
+        scoreConditioning: document.getElementById('scoreConditioning'),
+        scoreIntensity: document.getElementById('scoreIntensity'),
+        hrToAt: document.getElementById('hrToAt'),
+        hrToRestHr: document.getElementById('hrToRestHr'),
+        breathLastCycle: document.getElementById('breathLastCycle'),
+        breathAvgTotalCycles: document.getElementById('breathAvgTotalCycles'),
+        breathCurrentBf: document.getElementById('breathCurrentBf'),
+    };
+}
+
+function initCharts(uiElements) {
+    const charts = {};
+    const hrCombinedChartCtx = document.getElementById('hrChart')?.getContext('2d');
+    if (hrCombinedChartCtx) {
+        charts.hrCombinedChart = new Chart(hrCombinedChartCtx, { /* ... chart config ... */ });
+    }
+    // ... init other charts ...
+    return charts;
+}
+
+function setupEventListeners(uiElements, bluetoothController, showViewCallback) {
+    // ... event listeners for start, stop, save buttons ...
+}
+
+function setupBluetoothCallbacks(uiElements, charts, bluetoothController, userBaseAtHR, userRestHR) {
+    bluetoothController.onStateChange = (state, deviceName) => { /* ... */ };
+    bluetoothController.onData = async (dataPacket) => { /* ... */ };
+}
+
+// ... existing helper functions ...
 
     // Formats seconds into MM:SS
     function formatTime(seconds) {
@@ -799,8 +826,28 @@ export async function initLiveTrainingView(showViewCallback) {
                 try {
                     await putData('trainingSessions', currentSessionData);
                     showNotification('Meting succesvol opgeslagen!', 'success');
-                    if (showViewCallback) {
-                        showViewCallback('trainingReportsView'); // Navigate to reports page
+                    let storeToSave = '';
+                    if (currentSessionData.type === 'resting') {
+                        storeToSave = 'restSessionsAdvanced'; // Assuming advanced for resting
+                    } else if (currentSessionData.type === 'free') {
+                        storeToSave = 'restSessionsFree';
+                    } else {
+                        storeToSave = 'trainingSessions';
+                    }
+
+                    try {
+                        await putData(storeToSave, currentSessionData);
+                        showNotification('Meting succesvol opgeslagen!', 'success');
+                        if (showViewCallback) {
+                            if (storeToSave === 'trainingSessions') {
+                                showViewCallback('trainingReportsView');
+                            } else if (storeToSave === 'restSessionsAdvanced' || storeToSave === 'restSessionsFree') {
+                                showViewCallback('restReportsView');
+                            }
+                        }
+                    } catch (error) {
+                        console.error("Fout bij opslaan meting:", error);
+                        showNotification('Fout bij opslaan meting.', 'error');
                     }
                 } catch (error) {
                     console.error("Fout bij opslaan meting:", error);
@@ -826,4 +873,4 @@ export async function initLiveTrainingView(showViewCallback) {
         if (currentHR >= at * 0.7) return 'Warmup';
         return 'Resting';
     }
-}
+

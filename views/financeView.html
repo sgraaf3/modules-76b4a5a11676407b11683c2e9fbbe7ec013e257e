@@ -8,17 +8,17 @@
     <div class="flex flex-col gap-4">
         <div class="data-card">
             <div class="card-header"><h3>Totaal Inkomen</h3></div>
-            <div class="main-value text-green-400">€ 0.00</div>
+            <div class="main-value text-green-400" id="totalIncomeDisplay">€ 0.00</div>
             <div class="sub-value">Deze maand</div>
         </div>
         <div class="data-card">
             <div class="card-header"><h3>Totaal Uitgaven</h3></div>
-            <div class="main-value text-red-400">€ 0.00</div>
+            <div class="main-value text-red-400" id="totalExpenseDisplay">€ 0.00</div>
             <div class="sub-value">Deze maand</div>
         </div>
         <div class="data-card">
             <div class="card-header"><h3>Netto Winst</h3></div>
-            <div class="main-value">€ 0.00</div>
+            <div class="main-value" id="netProfitDisplay">€ 0.00</div>
             <div class="sub-value">Deze maand</div>
         </div>
     </div>
@@ -58,3 +58,4 @@
         <button type="button" id="clearTransactionFormBtn" class="bg-gray-600 hover:bg-gray-700 text-gray-200 font-bold py-2 px-4 rounded-md transition-colors duration-200">Formulier Leegmaken</button>
     </form>
 </div>
+

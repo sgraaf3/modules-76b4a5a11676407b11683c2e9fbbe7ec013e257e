@@ -14,10 +14,12 @@ export async function initRegistryView() {
     const memberStatusSelect = document.getElementById('memberStatus');
     const memberRoleSelect = document.getElementById('memberRole');
     const clearMemberFormBtn = document.getElementById('clearMemberFormBtn');
+    const memberSearchInput = document.getElementById('memberSearchInput');
+    const memberFilterStatus = document.getElementById('memberFilterStatus');
 
     async function loadMembers() {
         try {
-            const members = await getAllData('registry');
+            let members = await getAllData('registry');
             membersList.innerHTML = '';
 
             if (members.length === 0) {
@@ -25,7 +27,23 @@ export async function initRegistryView() {
                 return;
             }
 
+            // Apply search and filter
+            const searchTerm = memberSearchInput.value.toLowerCase();
+            const filterStatus = memberFilterStatus.value;
+
+            members = members.filter(member => {
+                const matchesSearch = member.name.toLowerCase().includes(searchTerm) ||
+                                      member.email.toLowerCase().includes(searchTerm);
+                const matchesStatus = filterStatus === '' || member.status === filterStatus;
+                return matchesSearch && matchesStatus;
+            });
+
             members.sort((a, b) => new Date(b.joinDate) - new Date(a.joinDate));
+
+            if (members.length === 0) {
+                membersList.innerHTML = '<p class="text-gray-400">No matching users found.</p>';
+                return;
+            }
 
             for (const member of members) {
                 const role = await getUserRole(member.id) || 'member';
@@ -82,7 +100,7 @@ export async function initRegistryView() {
             membersList.querySelectorAll('[data-action="view-profile"]').forEach(button => {
                 button.addEventListener('click', (event) => {
                     const memberId = event.target.dataset.id;
-                    window.showView('userProfileView', { userId: memberId });
+                    window.showView('memberSpecificprogressView', { userId: memberId }); // Changed to memberSpecificprogressView
                 });
             });
 
@@ -130,6 +148,14 @@ export async function initRegistryView() {
             memberIdInput.value = '';
             showNotification('Form cleared.', 'info');
         });
+    }
+
+    // Event listeners for search and filter
+    if (memberSearchInput) {
+        memberSearchInput.addEventListener('input', loadMembers);
+    }
+    if (memberFilterStatus) {
+        memberFilterStatus.addEventListener('change', loadMembers);
     }
 
     await loadMembers();

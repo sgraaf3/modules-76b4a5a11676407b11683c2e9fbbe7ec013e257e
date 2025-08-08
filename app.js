@@ -98,7 +98,6 @@ const viewConfig = {
     'lessonSchedulerView': { html: 'views/lessonSchedulerView.html', init: initLessonSchedulerView },
     'scheduleBuilderView': { html: 'views/scheduleBuilderView.html', init: initScheduleBuilderView }, 
     'lessonScheduleBuilderView': { html: './views/lessonScheduleBuilder.html', init: initLessonScheduleBuilderView }, // NIEUW: Lesroosterbouwer
-    'meetingPlannerView': { html: './views/meetingPlannerView.html', init: initMeetingPlannerView },
     'messagesView': { html: './views/messagesView.html', init: initMessagesView },
     'memberSpecificprogressView': { html: './views/memberSpecificprogressView.html', init: initMemberSpecificprogressView },
     'webGraphsView': { html: './views/webGraphsView.html', init: showDetailedGraph },

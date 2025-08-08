@@ -5,6 +5,15 @@
 </div>
 <div class="p-4">
     <h2 class="text-xl font-bold text-gray-100 border-b border-gray-700 pb-2 mb-4">User Overview</h2>
+    <div class="mb-4">
+        <input type="text" id="memberSearchInput" placeholder="Search by name or email..." class="p-2 rounded-md bg-gray-700 border border-gray-600 text-gray-200 w-full mb-2">
+        <select id="memberFilterStatus" class="p-2 rounded-md bg-gray-700 border border-gray-600 text-gray-200 w-full">
+            <option value="">All Statuses</option>
+            <option value="Active">Active</option>
+            <option value="Inactive">Inactive</option>
+            <option value="Pending">Pending</option>
+        </select>
+    </div>
     <div id="membersList" class="flex flex-col gap-3 mb-4">
         <!-- Users will be dynamically loaded here -->
         <p class="text-gray-400">No users found.</p>
