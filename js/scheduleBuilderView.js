@@ -197,10 +197,86 @@ export function initScheduleBuilderView() {
                     droppedItem.dataset.documentName = data.documentName;
                     innerHtmlContent += `<span class="ml-2 text-gray-400">(${data.documentName})</span>`;
                 } else if (data.type === 'custom-training-measurement' && data.customMeasurementDefinition) {
-                    const totalDuration = data.customMeasurementDefinition.reduce((sum, item) => sum + (item.duration || 0), 0);
-                    innerHtmlContent += `<span class="ml-2 text-gray-400">(${totalDuration} min)</span>`;
-                } else if (data.type === 'custom-rest-measurement' && data.customMeasurementDescription) {
-                     innerHtmlContent += `<span class="ml-2 text-gray-400">(${data.customMeasurementDescription.substring(0, 20)}...)</span>`;
+                    innerHtmlContent += `<div class="custom-training-details mt-2 p-2 bg-gray-800 rounded-md w-full">`;
+                    data.customMeasurementDefinition.forEach(subItem => {
+                        let subItemHtml = `
+                            <div class="nested-activity-item flex items-center justify-between p-1 mb-1 rounded-md bg-gray-700"
+                                data-type="${subItem.type}"
+                                data-name="${subItem.name}"
+                                data-icon="${subItem.icon}"
+                                data-zone-color="${subItem.zoneColor || ''}"
+                                data-input-type="${subItem.inputType || ''}"
+                                data-duration="${subItem.duration || ''}"
+                                data-progression-enabled="${subItem.progressionEnabled || false}"
+                                data-progression-value="${subItem.progressionValue || ''}"
+                                data-reps="${subItem.reps || ''}"
+                                data-sets="${subItem.sets || ''}"
+                                data-min-reps="${subItem.minReps || ''}"
+                                data-max-reps="${subItem.maxReps || ''}"
+                                data-min-sets="${subItem.minSets || ''}"
+                                data-max-sets="${subItem.maxSets || ''}"
+                                data-min-time="${subItem.minTime || ''}"
+                                data-max-time="${subItem.maxTime || ''}"
+                                data-notes="${subItem.notes || ''}"
+                            >
+                                <span><i class="${subItem.icon} mr-2 ${subItem.zoneColor || ''}"></i>${subItem.name}</span>
+                                <div class="flex items-center space-x-2 ml-auto w-full md:w-auto flex-wrap">
+                        `;
+
+                        if (subItem.type === 'hr-zone') {
+                            subItemHtml += `
+                                <input type="number" placeholder="Minuten" class="w-20 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-duration-input value="${subItem.duration || ''}">
+                                <label class="flex items-center text-sm text-gray-300">
+                                    <input type="checkbox" class="form-checkbox h-4 w-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500" data-progression-checkbox ${subItem.progressionEnabled ? 'checked' : ''}>
+                                    <span class="ml-1">Wekelijks toenemen?</span>
+                                </label>
+                                <input type="number" placeholder="Minuten" class="w-16 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-progression-value-input value="${subItem.progressionValue || ''}" ${!subItem.progressionEnabled ? 'disabled' : ''}>
+                                <input type="text" placeholder="Notities" class="w-24 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-notes-input value="${subItem.notes || ''}">
+                            `;
+                        } else if (['strength-exercise', 'recovery-activity', 'coordination-activity', 'flexibility-activity', 'speed-activity', 'nutrition-activity'].includes(subItem.type)) {
+                            const timeDisplay = subItem.inputType === 'reps_sets' ? 'display:none;' : 'display:flex;';
+                            const repsSetsDisplay = subItem.inputType === 'time' || !subItem.inputType ? 'display:none;' : 'display:flex;';
+
+                            subItemHtml += `
+                                <select class="p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm mt-1" data-input-type-select>
+                                    <option value="time" ${subItem.inputType === 'time' ? 'selected' : ''}>Tijd (min)</option>
+                                    <option value="reps_sets" ${subItem.inputType === 'reps_sets' ? 'selected' : ''}>Reps & Sets</option>
+                                </select>
+                                <div class="flex items-center space-x-1 mt-1" data-time-inputs style="${timeDisplay}">
+                                    <input type="number" placeholder="Duur" class="w-16 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-duration-input value="${subItem.duration || ''}">
+                                    <input type="number" placeholder="Min" class="w-16 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-min-time-input value="${subItem.minTime || ''}">
+                                    <input type="number" placeholder="Max" class="w-16 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-max-time-input value="${subItem.maxTime || ''}">
+                                </div>
+                                <div class="flex items-center space-x-1 mt-1" data-reps-sets-inputs style="${repsSetsDisplay}">
+                                    <input type="number" placeholder="Reps" class="w-16 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-reps-input value="${subItem.reps || ''}">
+                                    <input type="number" placeholder="Sets" class="w-16 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-sets-input value="${subItem.sets || ''}">
+                                    <input type="number" placeholder="Min R" class="w-16 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-min-reps-input value="${subItem.minReps || ''}">
+                                    <input type="number" placeholder="Max R" class="w-16 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-max-reps-input value="${subItem.maxReps || ''}">
+                                    <input type="number" placeholder="Min S" class="w-16 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-min-sets-input value="${subItem.minSets || ''}">
+                                    <input type="number" placeholder="Max S" class="w-16 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-max-sets-input value="${subItem.maxSets || ''}">
+                                </div>
+                                <label class="flex items-center text-sm text-gray-300 mt-1">
+                                    <input type="checkbox" class="form-checkbox h-4 w-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500" data-progression-checkbox ${subItem.progressionEnabled ? 'checked' : ''}>
+                                    <span class="ml-1">Wekelijks toenemen?</span>
+                                </label>
+                                <input type="number" placeholder="Waarde" class="w-16 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm mt-1" data-progression-value-input value="${subItem.progressionValue || ''}" ${!subItem.progressionEnabled ? 'disabled' : ''}>
+                                <input type="text" placeholder="Notities" class="w-24 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm mt-1" data-notes-input value="${subItem.notes || ''}">
+                            `;
+                        }
+                        subItemHtml += `
+                                </div>
+                            </div>
+                        `;
+                        innerHtmlContent += subItemHtml;
+                    });
+                    innerHtmlContent += `</div>`;
+                } else if (data.type === 'custom-rest-measurement') {
+                    innerHtmlContent += `
+                        <div class="custom-rest-details mt-2 p-2 bg-gray-800 rounded-md w-full text-sm text-gray-300">
+                            <p><strong>Beschrijving:</strong> ${data.customMeasurementDescription || 'Geen beschrijving'}</p>
+                            <p><strong>Doelen/Formules:</strong> ${data.customMeasurementGoals || 'Geen doelen'}</p>
+                        </div>
+                    `;
                 } else if (['strength-exercise', 'recovery-activity', 'coordination-activity', 'flexibility-activity', 'speed-activity', 'nutrition-activity'].includes(data.type)) {
                     // Determine initial display based on data.inputType
                     const timeDisplay = data.inputType === 'reps_sets' ? 'display:none;' : 'display:flex;';
@@ -362,242 +438,355 @@ export function initScheduleBuilderView() {
 
         showMessage(`${data.name} toegevoegd!`, 'success');
     };
-});
+        });
+    }),
 
-// --- Hulpfunctie om dropzones te vullen bij kopiëren en laden ---
-function populateDropZone(dropZoneElement, contentData, targetType) {
-    dropZoneElement.innerHTML = ''; // Maak de dropzone leeg
-    if (!contentData || (Array.isArray(contentData) && contentData.length === 0 && dropZoneElement.id !== 'blok-drop-zone')) { // targetType 'object' is for week/month slots
-         const newPlaceholder = document.createElement('p');
-         newPlaceholder.className = 'text-gray-400 text-center text-sm';
-         if (dropZoneElement.id === 'day-drop-zone' || dropZoneElement.id === 'custom-training-zones-drop-zone') {
-            newPlaceholder.textContent = 'Sleep HR zones of oefeningen hierheen om de training te definiëren.';
-         } else if (dropZoneElement.classList.contains('day-slot')) {
-            newPlaceholder.textContent = 'Sleep dag hier';
-         } else if (dropZoneElement.classList.contains('week-slot')) {
-            newPlaceholder.textContent = 'Sleep week hier';
-         } else if (dropZoneElement.id === 'blok-drop-zone') {
-            newPlaceholder.textContent = 'Sleep weken hierheen om het blok te configureren.';
-         }
-         dropZoneElement.appendChild(newPlaceholder);
-         return;
-    }
+    // --- Hulpfunctie om dropzones te vullen bij kopiëren en laden ---
+    function populateDropZone(dropZoneElement, contentData, targetType) {
+        dropZoneElement.innerHTML = ''; // Maak de dropzone leeg
+        if (!contentData || (Array.isArray(contentData) && contentData.length === 0 && dropZoneElement.id !== 'blok-drop-zone')) { // targetType 'object' is for week/month slots
+            const newPlaceholder = document.createElement('p');
+            newPlaceholder.className = 'text-gray-400 text-center text-sm';
+            if (dropZoneElement.id === 'day-drop-zone' || dropZoneElement.id === 'custom-training-zones-drop-zone') {
+                newPlaceholder.textContent = 'Sleep HR zones of oefeningen hierheen om de training te definiëren.';
+            } else if (dropZoneElement.classList.contains('day-slot')) {
+                newPlaceholder.textContent = 'Sleep dag hier';
+            } else if (dropZoneElement.classList.contains('week-slot')) {
+                newPlaceholder.textContent = 'Sleep week hier';
+            } else if (dropZoneElement.id === 'blok-drop-zone') {
+                newPlaceholder.textContent = 'Sleep weken hierheen om het blok te configureren.';
+            }
+            dropZoneElement.appendChild(newPlaceholder);
+            return;
+        }
 
-    if (Array.isArray(contentData)) { // Voor Dag (array van activiteiten) of Custom Training (array van zones)
-        contentData.forEach(item => {
-            const droppedItem = document.createElement('div');
-            droppedItem.dataset.id = item.id || generateUniqueId();
-            droppedItem.dataset.type = item.type;
-            droppedItem.dataset.name = item.name;
-            droppedItem.dataset.icon = item.icon;
-            if (item.zoneColor) droppedItem.dataset.zoneColor = item.zoneColor;
-            if (item.content) droppedItem.dataset.content = JSON.stringify(item.content); 
-            if (item.documentName) droppedItem.dataset.documentName = item.documentName;
-            if (item.customMeasurementType) droppedItem.dataset.customMeasurementType = item.customMeasurementType;
-            if (item.customMeasurementDefinition) droppedItem.dataset.customMeasurementDefinition = JSON.stringify(item.customMeasurementDefinition);
-            if (item.customMeasurementDescription) droppedItem.dataset.customMeasurementDescription = item.customMeasurementDescription;
-            if (item.customMeasurementGoals) droppedItem.dataset.customMeasurementGoals = item.customMeasurementGoals;
+        if (Array.isArray(contentData)) { // Voor Dag (array van activiteiten) of Custom Training (array van zones)
+            contentData.forEach(item => {
+                const droppedItem = document.createElement('div');
+                droppedItem.dataset.id = item.id || generateUniqueId();
+                droppedItem.dataset.type = item.type;
+                droppedItem.dataset.name = item.name;
+                droppedItem.dataset.icon = item.icon;
+                if (item.zoneColor) droppedItem.dataset.zoneColor = item.zoneColor;
+                if (item.content) droppedItem.dataset.content = JSON.stringify(item.content); 
+                if (item.documentName) droppedItem.dataset.documentName = item.documentName;
+                if (item.customMeasurementType) droppedItem.dataset.customMeasurementType = item.customMeasurementType;
+                if (item.customMeasurementDefinition) droppedItem.dataset.customMeasurementDefinition = JSON.stringify(item.customMeasurementDefinition);
+                if (item.customMeasurementDescription) droppedItem.dataset.customMeasurementDescription = item.customMeasurementDescription;
+                if (item.customMeasurementGoals) droppedItem.dataset.customMeasurementGoals = item.customMeasurementGoals;
 
 
-            let innerHtmlContent = `<span><i class="${item.icon} mr-2 ${item.zoneColor || ''}"></i>${item.name}</span>`;
-            
-            if (item.type === 'hr-zone') {
-                droppedItem.className = `timeline-item flex items-center p-2 mb-1 rounded-md bg-gray-700 hr-zone-bar`;
-                innerHtmlContent += `
-                    <div class="flex items-center space-x-2 ml-auto">
-                        <input type="number" placeholder="Minuten" class="w-20 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-duration-input value="${item.duration || ''}">
-                        <label class="flex items-center text-sm text-gray-300">
-                            <input type="checkbox" class="form-checkbox h-4 w-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500" data-progression-checkbox ${item.progressionEnabled ? 'checked' : ''}>
-                            <span class="ml-1">Wekelijks toenemen?</span>
-                        </label>
-                        <input type="number" placeholder="Minuten" class="w-16 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-progression-value-input value="${item.progressionValue || ''}" ${!item.progressionEnabled ? 'disabled' : ''}>
-                        <input type="text" placeholder="Notities" class="w-24 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-notes-input value="${item.notes || ''}">
-                    </div>
-                `;
-            } else {
-                droppedItem.className = 'timeline-item flex items-center p-2 mb-1 rounded-md bg-gray-700';
-                if (item.type === 'document-link') {
-                    innerHtmlContent += `<span class="ml-2 text-gray-400">(${item.documentName || 'Onbekend Document'})</span>`;
-                } else if (item.type === 'custom-training-measurement') {
-                    const totalDuration = item.customMeasurementDefinition ? item.customMeasurementDefinition.reduce((sum, subItem) => sum + (subItem.duration || 0), 0) : 0;
-                    innerHtmlContent += `<span class="ml-2 text-gray-400">(${totalDuration} min)</span>`;
-                } else if (item.type === 'custom-rest-measurement') {
-                    innerHtmlContent += `<span class="ml-2 text-gray-400">(${item.customMeasurementDescription ? item.customMeasurementDescription.substring(0, 20) + '...' : 'Geen beschrijving'})</span>`;
-                } else if (['strength-exercise', 'recovery-activity', 'coordination-activity', 'flexibility-activity', 'speed-activity', 'nutrition-activity'].includes(item.type)) {
+                let innerHtmlContent = `<span><i class="${item.icon} mr-2 ${item.zoneColor || ''}"></i>${item.name}</span>`;
+                
+                if (item.type === 'hr-zone') {
+                    droppedItem.className = `timeline-item flex items-center p-2 mb-1 rounded-md bg-gray-700 hr-zone-bar`;
                     innerHtmlContent += `
-                        <div class="flex items-center space-x-2 ml-auto w-full md:w-auto flex-wrap">
-                            <select class="p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm mt-1" data-input-type-select>
-                                <option value="time" ${item.inputType === 'time' ? 'selected' : ''}>Tijd (min)</option>
-                                <option value="reps_sets" ${item.inputType === 'reps_sets' ? 'selected' : ''}>Reps & Sets</option>
-                            </select>
-                            <div class="flex items-center space-x-1 mt-1" data-time-inputs style="${item.inputType === 'reps_sets' ? 'display:none;' : ''}">
-                                <input type="number" placeholder="Duur" class="w-16 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-duration-input value="${item.duration || ''}">
-                                <input type="number" placeholder="Min" class="w-16 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-min-time-input value="${item.minTime || ''}">
-                                <input type="number" placeholder="Max" class="w-16 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-max-time-input value="${item.maxTime || ''}">
-                            </div>
-                            <div class="flex items-center space-x-1 mt-1" data-reps-sets-inputs style="${item.inputType === 'time' || !item.inputType ? 'display:none;' : ''}">
-                                <input type="number" placeholder="Reps" class="w-16 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-reps-input value="${item.reps || ''}">
-                                <input type="number" placeholder="Sets" class="w-16 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-sets-input value="${item.sets || ''}">
-                                <input type="number" placeholder="Min R" class="w-16 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-min-reps-input value="${item.minReps || ''}">
-                                <input type="number" placeholder="Max R" class="w-16 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-max-reps-input value="${item.maxReps || ''}">
-                                <input type="number" placeholder="Min S" class="w-16 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-min-sets-input value="${item.minSets || ''}">
-                                <input type="number" placeholder="Max S" class="w-16 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-max-sets-input value="${item.maxSets || ''}">
-                            </div>
-                            <label class="flex items-center text-sm text-gray-300 mt-1">
+                        <div class="flex items-center space-x-2 ml-auto">
+                            <input type="number" placeholder="Minuten" class="w-20 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-duration-input value="${item.duration || ''}">
+                            <label class="flex items-center text-sm text-gray-300">
                                 <input type="checkbox" class="form-checkbox h-4 w-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500" data-progression-checkbox ${item.progressionEnabled ? 'checked' : ''}>
                                 <span class="ml-1">Wekelijks toenemen?</span>
                             </label>
-                            <input type="number" placeholder="Waarde" class="w-16 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm mt-1" data-progression-value-input value="${item.progressionValue || ''}" ${!item.progressionEnabled ? 'disabled' : ''}>
-                            <input type="text" placeholder="Notities" class="w-24 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm mt-1" data-notes-input value="${item.notes || ''}">
+                            <input type="number" placeholder="Minuten" class="w-16 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-progression-value-input value="${item.progressionValue || ''}" ${!item.progressionEnabled ? 'disabled' : ''}>
+                            <input type="text" placeholder="Notities" class="w-24 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-notes-input value="${item.notes || ''}">
                         </div>
                     `;
-                }
-            }
-            innerHtmlContent += `<button class="remove-btn"><i class="fas fa-times"></i></button>`;
-            droppedItem.innerHTML = innerHtmlContent;
-            
-            // Set position for loaded items in day-drop-zone
-            if (dropZoneElement.id === 'day-drop-zone') {
-                droppedItem.style.top = `${item.topPosition || 0}px`;
-                droppedItem.style.left = '0';
-                droppedItem.style.width = '100%';
-                droppedItem.style.position = 'absolute';
-            }
+                } else {
+                    droppedItem.className = 'timeline-item flex items-center p-2 mb-1 rounded-md bg-gray-700';
+                    if (item.type === 'document-link') {
+                        innerHtmlContent += `<span class="ml-2 text-gray-400">(${item.documentName || 'Onbekend Document'})</span>`;
+                    } else if (item.type === 'custom-training-measurement') {
+                        innerHtmlContent += `<div class="custom-training-details mt-2 p-2 bg-gray-800 rounded-md w-full">`;
+                        item.customMeasurementDefinition.forEach(subItem => {
+                            let subItemHtml = `
+                                <div class="nested-activity-item flex items-center justify-between p-1 mb-1 rounded-md bg-gray-700"
+                                    data-type="${subItem.type}"
+                                    data-name="${subItem.name}"
+                                    data-icon="${subItem.icon}"
+                                    data-zone-color="${subItem.zoneColor || ''}"
+                                    data-input-type="${subItem.inputType || ''}"
+                                    data-duration="${subItem.duration || ''}"
+                                    data-progression-enabled="${subItem.progressionEnabled || false}"
+                                    data-progression-value="${subItem.progressionValue || ''}"
+                                    data-reps="${subItem.reps || ''}"
+                                    data-sets="${subItem.sets || ''}"
+                                    data-min-reps="${subItem.minReps || ''}"
+                                    data-max-reps="${subItem.maxReps || ''}"
+                                    data-min-sets="${subItem.minSets || ''}"
+                                    data-max-sets="${subItem.maxSets || ''}"
+                                    data-min-time="${subItem.minTime || ''}"
+                                    data-max-time="${subItem.maxTime || ''}"
+                                    data-notes="${subItem.notes || ''}"
+                                >
+                                    <span><i class="${subItem.icon} mr-2 ${subItem.zoneColor || ''}"></i>${subItem.name}</span>
+                                    <div class="flex items-center space-x-2 ml-auto w-full md:w-auto flex-wrap">
+                            `;
 
-            dropZoneElement.appendChild(droppedItem);
+                            if (subItem.type === 'hr-zone') {
+                                subItemHtml += `
+                                    <input type="number" placeholder="Minuten" class="w-20 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-duration-input value="${subItem.duration || ''}">
+                                    <label class="flex items-center text-sm text-gray-300">
+                                        <input type="checkbox" class="form-checkbox h-4 w-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500" data-progression-checkbox ${subItem.progressionEnabled ? 'checked' : ''}>
+                                        <span class="ml-1">Wekelijks toenemen?</span>
+                                    </label>
+                                    <input type="number" placeholder="Minuten" class="w-16 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-progression-value-input value="${subItem.progressionValue || ''}" ${!subItem.progressionEnabled ? 'disabled' : ''}>
+                                    <input type="text" placeholder="Notities" class="w-24 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-notes-input value="${subItem.notes || ''}">
+                                `;
+                            } else if (['strength-exercise', 'recovery-activity', 'coordination-activity', 'flexibility-activity', 'speed-activity', 'nutrition-activity'].includes(subItem.type)) {
+                                const timeDisplay = subItem.inputType === 'reps_sets' ? 'display:none;' : 'display:flex;';
+                                const repsSetsDisplay = subItem.inputType === 'time' || !subItem.inputType ? 'display:none;' : 'display:flex;';
 
-            // Event listeners for loaded items
-            if (item.type === 'hr-zone' || ['strength-exercise', 'recovery-activity', 'coordination-activity', 'flexibility-activity', 'speed-activity', 'nutrition-activity'].includes(item.type)) {
-                const inputTypeSelect = droppedItem.querySelector('[data-input-type-select]');
-                const timeInputsDiv = droppedItem.querySelector('[data-time-inputs]');
-                const repsSetsInputsDiv = droppedItem.querySelector('[data-reps-sets-inputs]');
-                const progressionCheckbox = droppedItem.querySelector('[data-progression-checkbox]');
-                const progressionValueInput = droppedItem.querySelector('[data-progression-value-input]');
+                                subItemHtml += `
+                                    <select class="p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm mt-1" data-input-type-select>
+                                        <option value="time" ${subItem.inputType === 'time' ? 'selected' : ''}>Tijd (min)</option>
+                                        <option value="reps_sets" ${subItem.inputType === 'reps_sets' ? 'selected' : ''}>Reps & Sets</option>
+                                    </select>
+                                    <div class="flex items-center space-x-1 mt-1" data-time-inputs style="${timeDisplay}">
+                                        <input type="number" placeholder="Duur" class="w-16 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-duration-input value="${subItem.duration || ''}">
+                                        <input type="number" placeholder="Min" class="w-16 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-min-time-input value="${subItem.minTime || ''}">
+                                        <input type="number" placeholder="Max" class="w-16 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-max-time-input value="${subItem.maxTime || ''}">
+                                    </div>
+                                    <div class="flex items-center space-x-1 mt-1" data-reps-sets-inputs style="${repsSetsDisplay}">
+                                        <input type="number" placeholder="Reps" class="w-16 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-reps-input value="${subItem.reps || ''}">
+                                        <input type="number" placeholder="Sets" class="w-16 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-sets-input value="${subItem.sets || ''}">
+                                        <input type="number" placeholder="Min R" class="w-16 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-min-reps-input value="${subItem.minReps || ''}">
+                                        <input type="number" placeholder="Max R" class="w-16 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-max-reps-input value="${subItem.maxReps || ''}">
+                                        <input type="number" placeholder="Min S" class="w-16 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-min-sets-input value="${subItem.minSets || ''}">
+                                        <input type="number" placeholder="Max S" class="w-16 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-max-sets-input value="${subItem.maxSets || ''}">
+                                    </div>
+                                    <label class="flex items-center text-sm text-gray-300 mt-1">
+                                        <input type="checkbox" class="form-checkbox h-4 w-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500" data-progression-checkbox ${subItem.progressionEnabled ? 'checked' : ''}>
+                                        <span class="ml-1">Wekelijks toenemen?</span>
+                                    </label>
+                                    <input type="number" placeholder="Waarde" class="w-16 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm mt-1" data-progression-value-input value="${subItem.progressionValue || ''}" ${!subItem.progressionEnabled ? 'disabled' : ''}>
+                                    <input type="text" placeholder="Notities" class="w-24 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm mt-1" data-notes-input value="${subItem.notes || ''}">
+                                `;
+                            }
+                            subItemHtml += `
+                                    </div>
+                                </div>
+                            `;
+                            innerHtmlContent += subItemHtml;
+                        });
+                        innerHtmlContent += `</div>`;
+                    } else if (item.type === 'custom-rest-measurement') {
+                        innerHtmlContent += `
+                            <div class="custom-rest-details mt-2 p-2 bg-gray-800 rounded-md w-full text-sm text-gray-300">\
+                                <p><strong>Beschrijving:</strong> ${item.customMeasurementDescription || 'Geen beschrijving'}</p>\
+                                <p><strong>Doelen/Formules:</strong> ${item.customMeasurementGoals || 'Geen doelen'}</p>\
+                            </div>\
+                        `;
+                    } else if (['strength-exercise', 'recovery-activity', 'coordination-activity', 'flexibility-activity', 'speed-activity', 'nutrition-activity'].includes(item.type)) {
+                        // Determine initial display based on item.inputType
+                        const timeDisplay = item.inputType === 'reps_sets' ? 'display:none;' : 'display:flex;';
+                        const repsSetsDisplay = item.inputType === 'time' || !item.inputType ? 'display:none;' : 'display:flex;';
 
-                if (inputTypeSelect) {
-                    inputTypeSelect.addEventListener('change', () => {
-                        if (inputTypeSelect.value === 'time') {
-                            if (timeInputsDiv) timeInputsDiv.style.display = 'flex';
-                            if (repsSetsInputsDiv) repsSetsInputsDiv.style.display = 'none';
-                        } else {
-                            if (timeInputsDiv) timeInputsDiv.style.display = 'none';
-                            if (repsSetsInputsDiv) repsSetsInputsDiv.style.display = 'flex';
-                        }
-                    });
-                    inputTypeSelect.dispatchEvent(new Event('change')); // Trigger initial display
-                }
-                if (progressionCheckbox && progressionValueInput) {
-                    progressionCheckbox.addEventListener('change', () => {
-                        progressionValueInput.disabled = !progressionCheckbox.checked;
-                        if (!progressionCheckbox.checked) {
-                            progressionValueInput.value = '';
-                        }
-                    });
-                }
-            }
-            droppedItem.querySelector('.remove-btn').addEventListener('click', () => {
-                droppedItem.remove();
-                if (dropZoneElement.children.length === 0) {
-                    const newPlaceholder = document.createElement('p');
-                    newPlaceholder.className = 'text-gray-400 text-center text-sm';
-                    newPlaceholder.textContent = 'Sleep HR zones of oefeningen hierheen om de training te definiëren.';
-                    dropZoneElement.appendChild(newPlaceholder);
-                }
-            });
-        });
-    } else if (contentData && typeof contentData === 'object' && targetType === 'object') { // Voor Week (object met dagen), Maand (object met weken)
-        for (const key in contentData) {
-            const slot = dropZoneElement.querySelector(`[data-${dropZoneElement.classList.contains('day-slot') ? 'day-of-week' : 'week-number'}="${key}"]`);
-            if (slot) {
-                slot.innerHTML = ''; // Clear placeholder
-                if (contentData[key]) {
-                    const item = contentData[key];
-                    const droppedItem = document.createElement('div');
-                    droppedItem.className = 'dropped-item flex flex-col p-2 mb-1 rounded-md bg-gray-700';
-                    droppedItem.dataset.id = item.id;
-                    droppedItem.dataset.type = item.type;
-                    droppedItem.dataset.name = item.name;
-                    droppedItem.dataset.icon = item.icon;
-                    droppedItem.dataset.content = JSON.stringify(item.content); // Recursief voor geneste content
-
-                    // Samenvatting voor dag/week in kalenderweergave
-                    let summaryHtml = '';
-                    if (item.type === 'day' && item.content && Array.isArray(item.content)) {
-                        const hrZonesSummary = item.content.filter(act => act.type === 'hr-zone').map(hrz => `${hrz.name} (${hrz.duration} min)`).join(', ');
-                        const otherActivities = item.content.filter(act => act.type !== 'hr-zone').map(act => act.name).join(', ');
-                        summaryHtml = `<div class="text-xs text-gray-400 mt-1">${hrZonesSummary}${otherActivities ? (hrZonesSummary ? '; ' : '') + otherActivities : ''}</div>`;
-                    } else if (item.type === 'week' && item.content && typeof item.content === 'object') {
-                        const daysCount = Object.values(item.content).filter(d => d !== null).length;
-                        summaryHtml = `<div class="text-xs text-gray-400 mt-1">${daysCount} dagen geconfigureerd</div>`;
+                        innerHtmlContent += `
+                            <div class="flex items-center space-x-2 ml-auto w-full md:w-auto flex-wrap">
+                                <select class="p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm mt-1" data-input-type-select>
+                                    <option value="time" ${item.inputType === 'time' ? 'selected' : ''}>Tijd (min)</option>
+                                    <option value="reps_sets" ${item.inputType === 'reps_sets' ? 'selected' : ''}>Reps & Sets</option>
+                                </select>
+                                <div class="flex items-center space-x-1 mt-1" data-time-inputs style="${timeDisplay}">
+                                    <input type="number" placeholder="Duur" class="w-16 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-duration-input value="${item.duration || ''}">
+                                    <input type="number" placeholder="Min" class="w-16 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-min-time-input value="${item.minTime || ''}">
+                                    <input type="number" placeholder="Max" class="w-16 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-max-time-input value="${item.maxTime || ''}">
+                                </div>
+                                <div class="flex items-center space-x-1 mt-1" data-reps-sets-inputs style="${repsSetsDisplay}">
+                                    <input type="number" placeholder="Reps" class="w-16 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-reps-input value="${item.reps || ''}">
+                                    <input type="number" placeholder="Sets" class="w-16 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-sets-input value="${item.sets || ''}">
+                                    <input type="number" placeholder="Min R" class="w-16 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-min-reps-input value="${item.minReps || ''}">
+                                    <input type="number" placeholder="Max R" class="w-16 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-max-reps-input value="${item.maxReps || ''}">
+                                    <input type="number" placeholder="Min S" class="w-16 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-min-sets-input value="${item.minSets || ''}">
+                                    <input type="number" placeholder="Max S" class="w-16 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-max-sets-input value="${item.maxSets || ''}">
+                                </div>
+                                <label class="flex items-center text-sm text-gray-300 mt-1">
+                                    <input type="checkbox" class="form-checkbox h-4 w-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500" data-progression-checkbox ${item.progressionEnabled ? 'checked' : ''}>
+                                    <span class="ml-1">Wekelijks toenemen?</span>
+                                </label>
+                                <input type="number" placeholder="Waarde" class="w-16 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm mt-1" data-progression-value-input value="${item.progressionValue || ''}" ${!item.progressionEnabled ? 'disabled' : ''}>
+                                <input type="text" placeholder="Notities" class="w-24 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm mt-1" data-notes-input value="${item.notes || ''}">
+                            </div>
+                        `;
                     }
+                }
+                innerHtmlContent += `<button class="remove-btn"><i class="fas fa-times"></i></button>`;
+                droppedItem.innerHTML = innerHtmlContent;
+                
+                // Set position for loaded items in day-drop-zone
+                if (dropZoneElement.id === 'day-drop-zone') {
+                    droppedItem.style.top = `${item.topPosition || 0}px`;
+                    droppedItem.style.left = '0';
+                    droppedItem.style.width = '100%';
+                    droppedItem.style.position = 'absolute';
+                }
 
-                    droppedItem.innerHTML = `
-                        <span><i class="${item.icon} mr-2"></i>${item.name}</span>
-                        ${summaryHtml}
-                        <button class="remove-btn absolute top-1 right-1"><i class="fas fa-times"></i></button>
-                    `;
-                    slot.appendChild(droppedItem);
+                dropZoneElement.appendChild(droppedItem);
 
-                    droppedItem.querySelector('.remove-btn').addEventListener('click', () => {
-                        droppedItem.remove();
+                // Event listeners for loaded items
+                if (item.type === 'hr-zone' || ['strength-exercise', 'recovery-activity', 'coordination-activity', 'flexibility-activity', 'speed-activity', 'nutrition-activity'].includes(item.type) || item.type === 'custom-training-measurement') {
+                    // Handle nested items within custom-training-measurement
+                    if (item.type === 'custom-training-measurement' && item.customMeasurementDefinition) {
+                        droppedItem.querySelectorAll('.nested-activity-item').forEach(nestedItem => {
+                            const inputTypeSelect = nestedItem.querySelector('[data-input-type-select]');
+                            const timeInputsDiv = nestedItem.querySelector('[data-time-inputs]');
+                            const repsSetsInputsDiv = nestedItem.querySelector('[data-reps-sets-inputs]');
+                            const progressionCheckbox = nestedItem.querySelector('[data-progression-checkbox]');
+                            const progressionValueInput = nestedItem.querySelector('[data-progression-value-input]');
+
+                            if (inputTypeSelect) {
+                                inputTypeSelect.addEventListener('change', () => {
+                                    if (inputTypeSelect.value === 'time') {
+                                        if (timeInputsDiv) timeInputsDiv.style.display = 'flex';
+                                        if (repsSetsInputsDiv) repsSetsInputsDiv.style.display = 'none';
+                                    } else {
+                                        if (timeInputsDiv) timeInputsDiv.style.display = 'none';
+                                        if (repsSetsInputsDiv) repsSetsInputsDiv.style.display = 'flex';
+                                    }
+                                });
+                                inputTypeSelect.dispatchEvent(new Event('change')); // Trigger initial display
+                            }
+                            if (progressionCheckbox && progressionValueInput) {
+                                progressionCheckbox.addEventListener('change', () => {
+                                    progressionValueInput.disabled = !progressionCheckbox.checked;
+                                    if (!progressionCheckbox.checked) {
+                                        progressionValueInput.value = '';
+                                    }
+                                });
+                            }
+                        });
+                    } else { // For single hr-zone or other activity types
+                        const inputTypeSelect = droppedItem.querySelector('[data-input-type-select]');
+                        const timeInputsDiv = droppedItem.querySelector('[data-time-inputs]');
+                        const repsSetsInputsDiv = droppedItem.querySelector('[data-reps-sets-inputs]');
+                        const progressionCheckbox = droppedItem.querySelector('[data-progression-checkbox]');
+                        const progressionValueInput = droppedItem.querySelector('[data-progression-value-input]');
+
+                        if (inputTypeSelect) {
+                            inputTypeSelect.addEventListener('change', () => {
+                                if (inputTypeSelect.value === 'time') {
+                                    if (timeInputsDiv) timeInputsDiv.style.display = 'flex';
+                                    if (repsSetsInputsDiv) repsSetsInputsDiv.style.display = 'none';
+                                } else {
+                                    if (timeInputsDiv) timeInputsDiv.style.display = 'none';
+                                    if (repsSetsInputsDiv) repsSetsInputsDiv.style.display = 'flex';
+                                }
+                            });
+                            inputTypeSelect.dispatchEvent(new Event('change')); // Trigger initial display
+                        }
+                        if (progressionCheckbox && progressionValueInput) {
+                            progressionCheckbox.addEventListener('change', () => {
+                                progressionValueInput.disabled = !progressionCheckbox.checked;
+                                if (!progressionCheckbox.checked) {
+                                    progressionValueInput.value = '';
+                                }
+                            });
+                        }
+                    }
+                }
+                droppedItem.querySelector('.remove-btn').addEventListener('click', () => {
+                    droppedItem.remove();
+                    if (dropZoneElement.children.length === 0) {
+                        const newPlaceholder = document.createElement('p');
+                        newPlaceholder.className = 'text-gray-400 text-center text-sm';
+                        newPlaceholder.textContent = 'Sleep HR zones of oefeningen hierheen om de training te definiëren.';
+                        dropZoneElement.appendChild(newPlaceholder);
+                    }
+                });
+            });
+        } else if (contentData && typeof contentData === 'object' && targetType === 'object') { // Voor Week (object met dagen), Maand (object met weken)
+            for (const key in contentData) {
+                const slot = dropZoneElement.querySelector(`[data-${dropZoneElement.classList.contains('day-slot') ? 'day-of-week' : 'week-number'}="${key}"]`);
+                if (slot) {
+                    slot.innerHTML = ''; // Clear placeholder
+                    if (contentData[key]) {
+                        const item = contentData[key];
+                        const droppedItem = document.createElement('div');
+                        droppedItem.className = 'dropped-item flex flex-col p-2 mb-1 rounded-md bg-gray-700';
+                        droppedItem.dataset.id = item.id;
+                        droppedItem.dataset.type = item.type;
+                        droppedItem.dataset.name = item.name;
+                        droppedItem.dataset.icon = item.icon;
+                        droppedItem.dataset.content = JSON.stringify(item.content); // Recursief voor geneste content
+
+                        // Samenvatting voor dag/week in kalenderweergave
+                        let summaryHtml = '';
+                        if (item.type === 'day' && item.content && Array.isArray(item.content)) {
+                            const hrZonesSummary = item.content.filter(act => act.type === 'hr-zone').map(hrz => `${hrz.name} (${hrz.duration} min)`).join(', ');
+                            const otherActivities = item.content.filter(act => act.type !== 'hr-zone').map(act => act.name).join(', ');
+                            summaryHtml = `<div class="text-xs text-gray-400 mt-1">${hrZonesSummary}${otherActivities ? (hrZonesSummary ? '; ' : '') + otherActivities : ''}</div>`;
+                        } else if (item.type === 'week' && item.content && typeof item.content === 'object') {
+                            const daysCount = Object.values(item.content).filter(d => d !== null).length;
+                            summaryHtml = `<div class="text-xs text-gray-400 mt-1">${daysCount} dagen geconfigureerd</div>`;
+                        }
+
+                        droppedItem.innerHTML = `
+                            <span><i class="${item.icon} mr-2"></i>${item.name}</span>
+                            ${summaryHtml}
+                            <button class="remove-btn absolute top-1 right-1"><i class="fas fa-times"></i></button>
+                        `;
+                        slot.appendChild(droppedItem);
+
+                        droppedItem.querySelector('.remove-btn').addEventListener('click', () => {
+                            droppedItem.remove();
+                            const newPlaceholder = document.createElement('p');
+                            newPlaceholder.className = 'text-gray-400 text-center text-sm';
+                            newPlaceholder.textContent = slot.classList.contains('day-slot') ? 'Sleep dag hier' : 'Sleep week hier';
+                            slot.appendChild(newPlaceholder);
+                        });
+                    } else {
                         const newPlaceholder = document.createElement('p');
                         newPlaceholder.className = 'text-gray-400 text-center text-sm';
                         newPlaceholder.textContent = slot.classList.contains('day-slot') ? 'Sleep dag hier' : 'Sleep week hier';
                         slot.appendChild(newPlaceholder);
-                    });
-                } else {
-                    const newPlaceholder = document.createElement('p');
-                    newPlaceholder.className = 'text-gray-400 text-center text-sm';
-                    newPlaceholder.textContent = slot.classList.contains('day-slot') ? 'Sleep dag hier' : 'Sleep week hier';
-                    slot.appendChild(newPlaceholder);
+                    }
                 }
             }
-        }
-    } else if (dropZoneElement.id === 'blok-drop-zone') { // Voor Blok (array van maanden)
-         if (contentData.length === 0) {
-             const newPlaceholder = document.createElement('p');
-             newPlaceholder.className = 'text-gray-400 text-center';
-             newPlaceholder.textContent = 'Sleep weken hierheen om het blok te configureren.';
-             dropZoneElement.appendChild(newPlaceholder);
-             return;
-        }
-        contentData.forEach(item => {
-            const droppedItem = document.createElement('div');
-            droppedItem.className = 'dropped-item flex flex-col p-3 rounded-md bg-gray-700';
-            droppedItem.dataset.id = item.id;
-            droppedItem.dataset.type = item.type;
-            droppedItem.dataset.name = item.name;
-            droppedItem.dataset.icon = item.icon;
-            droppedItem.dataset.content = JSON.stringify(item.content);
-            if (item.repetitions) droppedItem.dataset.repetitions = item.repetitions; // Load repetitions
+        } else if (dropZoneElement.id === 'blok-drop-zone') { // Voor Blok (array van maanden)
+            if (contentData.length === 0) {
+                const newPlaceholder = document.createElement('p');
+                newPlaceholder.className = 'text-gray-400 text-center';
+                newPlaceholder.textContent = 'Sleep weken hierheen om het blok te configureren.';
+                dropZoneElement.appendChild(newPlaceholder);
+                return;
+            }
+            contentData.forEach(item => {
+                const droppedItem = document.createElement('div');
+                droppedItem.className = 'dropped-item flex flex-col p-3 rounded-md bg-gray-700';
+                droppedItem.dataset.id = item.id;
+                droppedItem.dataset.type = item.type;
+                droppedItem.dataset.name = item.name;
+                droppedItem.dataset.icon = item.icon;
+                droppedItem.dataset.content = JSON.stringify(item.content);
+                if (item.repetitions) droppedItem.dataset.repetitions = item.repetitions; // Load repetitions
 
-            droppedItem.innerHTML = `
-                <div class="flex items-center justify-between w-full">
-                    <span><i class="${item.icon} mr-2 text-cyan-300"></i>${item.name}</span>
-                    <div class="flex items-center space-x-2 ml-auto">
-                        <span class="text-sm text-gray-300">Herhalingen:</span>
-                        <input type="number" value="${item.repetitions || 1}" min="1" class="w-16 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-repetitions-input>
+                droppedItem.innerHTML = `
+                    <div class="flex items-center justify-between w-full">
+                        <span><i class="${item.icon} mr-2 text-cyan-300"></i>${item.name}</span>
+                        <div class="flex items-center space-x-2 ml-auto">
+                            <span class="text-sm text-gray-300">Herhalingen:</span>
+                            <input type="number" value="${item.repetitions || 1}" min="1" class="w-16 p-1 rounded-md bg-gray-800 border border-gray-600 text-gray-200 text-sm" data-repetitions-input>
+                        </div>
+                        <button class="remove-btn"><i class="fas fa-times"></i></button>
                     </div>
-                    <button class="remove-btn"><i class="fas fa-times"></i></button>
-                </div>
-                <div class="text-xs text-gray-300 mt-2">
-                    ${Object.keys(item.content).filter(day => item.content[day]).map(day => `<span class="inline-block bg-gray-800 rounded-full px-2 py-1 text-xs font-semibold text-gray-300 mr-1 mb-1">${item.content[day].name}</span>`).join('')}
-                </div>
-            `;
-            dropZoneElement.appendChild(droppedItem);
+                    <div class="text-xs text-gray-300 mt-2">
+                        ${Object.keys(item.content).filter(day => item.content[day]).map(day => `<span class="inline-block bg-gray-800 rounded-full px-2 py-1 text-xs font-semibold text-gray-300 mr-1 mb-1">${item.content[day].name}</span>`).join('')}
+                    </div>
+                `;
+                dropZoneElement.appendChild(droppedItem);
 
-            droppedItem.querySelector('.remove-btn').addEventListener('click', () => {
-                droppedItem.remove();
-                if (dropZoneElement.children.length === 0) {
-                    const newPlaceholder = document.createElement('p');
-                    newPlaceholder.className = 'text-gray-400 text-center';
-                    newPlaceholder.textContent = 'Sleep weken hierheen om het blok te configureren.';
-                    dropZoneElement.appendChild(newPlaceholder);
-                }
+                droppedItem.querySelector('.remove-btn').addEventListener('click', () => {
+                    droppedItem.remove();
+                    if (dropZoneElement.children.length === 0) {
+                        const newPlaceholder = document.createElement('p');
+                        newPlaceholder.className = 'text-gray-400 text-center';
+                        newPlaceholder.textContent = 'Sleep weken hierheen om het blok te configureren.';
+                        dropZoneElement.appendChild(newPlaceholder);
+                    }
+                });
             });
-        });
+        }
     }
-}
 
 
     // --- Opslaan en Laden van Schema's (via localStorage) ---
@@ -648,11 +837,57 @@ function populateDropZone(dropZoneElement, contentData, targetType) {
                 activity.documentName = item.dataset.documentName;
             } else if (item.dataset.type === 'custom-training-measurement') {
                 activity.customMeasurementType = item.dataset.customMeasurementType;
-                activity.customMeasurementDefinition = JSON.parse(item.dataset.customMeasurementDefinition);
+                const nestedActivities = [];
+                item.querySelectorAll('.nested-activity-item').forEach(nestedItem => {
+                    const nestedActivity = {
+                        type: nestedItem.dataset.type,
+                        name: nestedItem.dataset.name,
+                        icon: nestedItem.querySelector('i').className,
+                        zoneColor: nestedItem.dataset.zoneColor || '',
+                        inputType: nestedItem.querySelector('[data-input-type-select]') ? nestedItem.querySelector('[data-input-type-select]').value : nestedItem.dataset.inputType || '',
+                        notes: nestedItem.querySelector('[data-notes-input]') ? nestedItem.querySelector('[data-notes-input]').value : nestedItem.dataset.notes || '',
+                        progressionEnabled: nestedItem.querySelector('[data-progression-checkbox]') ? nestedItem.querySelector('[data-progression-checkbox]').checked : (nestedItem.dataset.progressionEnabled === 'true'),
+                        progressionValue: nestedItem.querySelector('[data-progression-value-input]') ? parseInt(nestedItem.querySelector('[data-progression-value-input]').value) || null : parseInt(nestedItem.dataset.progressionValue) || null
+                    };
+
+                    if (nestedActivity.inputType === 'time') {
+                        nestedActivity.duration = nestedItem.querySelector('[data-duration-input]') ? parseInt(nestedItem.querySelector('[data-duration-input]').value) || null : parseInt(nestedItem.dataset.duration) || null;
+                        nestedActivity.minTime = nestedItem.querySelector('[data-min-time-input]') ? parseInt(nestedItem.querySelector('[data-min-time-input]').value) || null : parseInt(nestedItem.dataset.minTime) || null;
+                        nestedActivity.maxTime = nestedItem.querySelector('[data-max-time-input]') ? parseInt(nestedItem.querySelector('[data-max-time-input]').value) || null : parseInt(nestedItem.dataset.maxTime) || null;
+                    } else if (nestedActivity.inputType === 'reps_sets') {
+                        nestedActivity.reps = nestedItem.querySelector('[data-reps-input]') ? parseInt(nestedItem.querySelector('[data-reps-input]').value) || null : parseInt(nestedItem.dataset.reps) || null;
+                        nestedActivity.sets = nestedItem.querySelector('[data-sets-input]') ? parseInt(nestedItem.querySelector('[data-sets-input]').value) || null : parseInt(nestedItem.dataset.sets) || null;
+                        nestedActivity.minReps = nestedItem.querySelector('[data-min-reps-input]') ? parseInt(nestedItem.querySelector('[data-min-reps-input]').value) || null : parseInt(nestedItem.dataset.minReps) || null;
+                        nestedActivity.maxReps = nestedItem.querySelector('[data-max-reps-input]') ? parseInt(nestedItem.querySelector('[data-max-reps-input]').value) || null : parseInt(nestedItem.dataset.maxReps) || null;
+                        nestedActivity.minSets = nestedItem.querySelector('[data-min-sets-input]') ? parseInt(nestedItem.querySelector('[data-min-sets-input]').value) || null : parseInt(nestedItem.dataset.minSets) || null;
+                        nestedActivity.maxSets = nestedItem.querySelector('[data-max-sets-input]') ? parseInt(nestedItem.querySelector('[data-max-sets-input]').value) || null : parseInt(nestedItem.dataset.maxSets) || null;
+                    }
+
+                    nestedActivities.push(nestedActivity);
+                });
+                activity.customMeasurementDefinition = nestedActivities;
             } else if (item.dataset.type === 'custom-rest-measurement') {
                 activity.customMeasurementType = item.dataset.customMeasurementType;
-                activity.customMeasurementDescription = item.dataset.customMeasurementDescription;
-                activity.customMeasurementGoals = item.dataset.customMeasurementGoals;
+                activity.customMeasurementDescription = item.querySelector('.custom-rest-details p:nth-child(1)') ? item.querySelector('.custom-rest-details p:nth-child(1)').textContent.replace('Beschrijving: ', '').trim() : item.dataset.customMeasurementDescription;
+                activity.customMeasurementGoals = item.querySelector('.custom-rest-details p:nth-child(2)') ? item.querySelector('.custom-rest-details p:nth-child(2)').textContent.replace('Doelen/Formules: ', '').trim() : item.dataset.customMeasurementGoals;
+            } else if (['strength-exercise', 'recovery-activity', 'coordination-activity', 'flexibility-activity', 'speed-activity', 'nutrition-activity'].includes(item.dataset.type)) {
+                activity.inputType = item.querySelector('[data-input-type-select]') ? item.querySelector('[data-input-type-select]').value : item.dataset.inputType || '';
+                activity.notes = item.querySelector('[data-notes-input]') ? item.querySelector('[data-notes-input]').value : item.dataset.notes || '';
+                activity.progressionEnabled = item.querySelector('[data-progression-checkbox]') ? item.querySelector('[data-progression-checkbox]').checked : (item.dataset.progressionEnabled === 'true');
+                activity.progressionValue = item.querySelector('[data-progression-value-input]') ? parseInt(item.querySelector('[data-progression-value-input]').value) || null : parseInt(item.dataset.progressionValue) || null;
+
+                if (activity.inputType === 'time') {
+                    activity.duration = item.querySelector('[data-duration-input]') ? parseInt(item.querySelector('[data-duration-input]').value) || null : parseInt(item.dataset.duration) || null;
+                    activity.minTime = item.querySelector('[data-min-time-input]') ? parseInt(item.querySelector('[data-min-time-input]').value) || null : parseInt(item.dataset.minTime) || null;
+                    activity.maxTime = item.querySelector('[data-max-time-input]') ? parseInt(item.querySelector('[data-max-time-input]').value) || null : parseInt(item.dataset.maxTime) || null;
+                } else if (activity.inputType === 'reps_sets') {
+                    activity.reps = item.querySelector('[data-reps-input]') ? parseInt(item.querySelector('[data-reps-input]').value) || null : parseInt(item.dataset.reps) || null;
+                    activity.sets = item.querySelector('[data-sets-input]') ? parseInt(item.querySelector('[data-sets-input]').value) || null : parseInt(item.dataset.sets) || null;
+                    activity.minReps = item.querySelector('[data-min-reps-input]') ? parseInt(item.querySelector('[data-min-reps-input]').value) || null : parseInt(item.dataset.minReps) || null;
+                    activity.maxReps = item.querySelector('[data-max-reps-input]') ? parseInt(item.querySelector('[data-max-reps-input]').value) || null : parseInt(item.dataset.maxReps) || null;
+                    activity.minSets = item.querySelector('[data-min-sets-input]') ? parseInt(item.querySelector('[data-min-sets-input]').value) || null : parseInt(item.dataset.minSets) || null;
+                    activity.maxSets = item.querySelector('[data-max-sets-input]') ? parseInt(item.querySelector('[data-max-sets-input]').value) || null : parseInt(item.dataset.maxSets) || null;
+                }
             }
             activities.push(activity);
         });
@@ -780,7 +1015,7 @@ function populateDropZone(dropZoneElement, contentData, targetType) {
         slot.innerHTML = '<p class="text-gray-400 text-center text-sm">Sleep dag hier</p>';
     });
     loadSavedWeeks();
-});
+    });
 
 function loadSavedWeeks() {
     savedWeeksList.innerHTML = '';
@@ -947,32 +1182,96 @@ function loadSavedWeeks() {
         let itemName = '';
         let contentToCopy = (type === 'day' || type === 'custom-training-measurement') ? [] : {}; 
 
+        function createNewItem(type, namePrompt, listName, icon, color) {
+        const copyOption = confirm(`Wil je kopiëren van een bestaande ${type}?`);
+        let itemName = '';
+        let contentToCopy = (type === 'day' || type === 'custom-training-measurement') ? [] : {};
+
         if (copyOption) {
             const itemIdToCopy = prompt(`Voer de ID in van de ${type} die je wilt kopiëren:`);
-            if (itemIdToCopy) {
-                const savedItems = JSON.parse(localStorage.getItem(`cardio${listName}`) || '[]');
-                const itemToCopy = savedItems.find(item => item.id === itemIdToCopy);
-                if (itemToCopy) {
-                    itemName = prompt(`${namePrompt} (kopie van "${itemToCopy.name}"):`);
-                    if (itemName) {
-                        contentToCopy = JSON.parse(JSON.stringify(itemToCopy.activities || itemToCopy.days || itemToCopy.weeks || itemToCopy.customMeasurementDefinition));
-                        // Specifieke kopie voor blok notes
-                        if (type === 'block' && itemToCopy.notes) {
-                            contentToCopy.notes = itemToCopy.notes;
-                        }
-                    }
-                } else {
-                    showMessage(`${type} met opgegeven ID niet gevonden.`, 'error');
+            if (itemIdToCopy === null || itemIdToCopy.trim() === '') { // User cancelled or entered empty
+                showMessage(`Kopiëren geannuleerd. Geen ID opgegeven.`, 'info');
+                return;
+            }
+            const savedItems = JSON.parse(localStorage.getItem(`cardio${listName}`) || '[]');
+            const itemToCopy = savedItems.find(item => item.id === itemIdToCopy);
+            if (itemToCopy) {
+                itemName = prompt(`${namePrompt} (kopie van "${itemToCopy.name}"):`);
+                if (itemName === null || itemName.trim() === '') { // User cancelled or entered empty for the new name
+                    showMessage(`Kopiëren geannuleerd. Geen naam opgegeven.`, 'info');
                     return;
                 }
+                contentToCopy = JSON.parse(JSON.stringify(itemToCopy.activities || itemToCopy.days || itemToCopy.weeks || itemToCopy.customMeasurementDefinition));
+                // Specifieke kopie voor blok notes
+                if (type === 'block' && itemToCopy.notes) {
+                    contentToCopy.notes = itemToCopy.notes;
+                }
             } else {
-                return; 
+                showMessage(`${type} met opgegeven ID niet gevonden.`, 'error');
+                return;
             }
         } else {
             itemName = prompt(namePrompt);
+            if (itemName === null || itemName.trim() === '') { // User cancelled or entered empty for the new name
+                showMessage(`Aanmaken geannuleerd. Geen naam opgegeven.`, 'info');
+                return;
+            }
         }
         
-        if (itemName) {
+        // If we reach here, itemName should be valid
+        const itemId = generateUniqueId();
+        const newItemElement = document.createElement('div');
+        newItemElement.className = 'drag-item';
+        newItemElement.setAttribute('draggable', 'true');
+        newItemElement.dataset.type = type;
+        newItemElement.dataset.id = itemId;
+        newItemElement.dataset.name = itemName;
+            
+        // Specifieke content voor custom measurements
+        if (type === 'custom-training-measurement') {
+            newItemElement.dataset.customMeasurementType = 'training';
+            newItemElement.dataset.customMeasurementDefinition = JSON.stringify(contentToCopy);
+            newItemElement.dataset.content = '[]'; // Custom training definition is not 'content' for day
+        } else if (type === 'custom-rest-measurement') {
+            newItemElement.dataset.customMeasurementType = 'rest';
+            newItemElement.dataset.customMeasurementDescription = contentToCopy.customMeasurementDescription || '';
+            newItemElement.dataset.customMeasurementGoals = contentToCopy.customMeasurementGoals || '';
+            newItemElement.dataset.content = '[]'; // Custom rest definition is not 'content' for day
+        } else {
+            newItemElement.dataset.content = JSON.stringify(contentToCopy);
+        }
+
+
+        newItemElement.innerHTML = `
+            <div class="flex items-center justify-between w-full">
+                <span><i class="${icon} mr-2 ${color}"></i>${itemName}</span>
+                <i class="fas fa-grip-vertical text-gray-400"></i>
+            </div>
+        `;
+        document.getElementById('available-modules').appendChild(newItemElement);
+        
+        // Voeg dragstart listener toe aan het nieuwe element
+        newItemElement.addEventListener('dragstart', (e) => {
+            draggedItemData = {
+                type: e.target.dataset.type,
+                name: e.target.dataset.name,
+                icon: e.target.dataset.icon,
+                id: e.target.dataset.id,
+                content: e.target.dataset.content ? JSON.parse(e.target.dataset.content) : null,
+                zoneColor: e.target.dataset.zoneColor || '',
+                duration: e.target.dataset.duration || null,
+                progressionEnabled: e.target.dataset.progressionEnabled === 'true',
+                progressionValue: e.target.dataset.progressionValue || null,
+                customMeasurementType: e.target.dataset.customMeasurementType || null,
+                customMeasurementDefinition: e.target.dataset.customMeasurementDefinition ? JSON.parse(e.target.dataset.customMeasurementDefinition) : null,
+                customMeasurementDescription: e.target.dataset.customMeasurementDescription || null,
+                customMeasurementGoals: e.target.dataset.customMeasurementGoals || null
+            };
+            e.dataTransfer.setData('text/plain', JSON.stringify(draggedItemData));
+            e.dataTransfer.effectAllowed = 'move';
+        });
+        showMessage(`Nieuwe ${type} '${itemName}' gemaakt!`, 'success');
+    }
             const itemId = generateUniqueId();
             const newItemElement = document.createElement('div');
             newItemElement.className = 'drag-item';
@@ -1025,20 +1324,19 @@ function loadSavedWeeks() {
                 e.dataTransfer.effectAllowed = 'move';
             });
             showMessage(`Nieuwe ${type} '${itemName}' gemaakt!`, 'success');
-        }
     }
 
     document.getElementById('create-day-btn').addEventListener('click', () => {
         createNewItem('day', 'Naam voor de nieuwe dag:', 'Days', 'fas fa-calendar-day', 'text-blue-300');
-    });
+    }),
 
     document.getElementById('create-week-btn').addEventListener('click', () => {
         createNewItem('week', 'Naam voor de nieuwe week:', 'Weeks', 'fas fa-calendar-week', 'text-purple-300');
-    });
+    }),
 
     document.getElementById('create-block-btn').addEventListener('click', () => { // Aangepaste ID
         createNewItem('block', 'Naam voor het nieuwe blok:', 'Bloks', 'fas fa-layer-group', 'text-cyan-300');
-    });
+    }),
 
     // Genereer tijdlabels voor de dagweergave
     function generateTimeLabels() {
@@ -1056,10 +1354,10 @@ function loadSavedWeeks() {
             label.textContent = `${String(h).padStart(2, '0')}:30`;
             timeLabelsContainer.appendChild(label);
         }
-    }
+    },
 
     // Roep generateTimeLabels aan bij het laden van de pagina
-    generateTimeLabels();
+    generateTimeLabels(),
 
 
 
@@ -1071,7 +1369,7 @@ function loadSavedWeeks() {
             showMessage('Geef de aangepaste training een naam.', 'error');
             return;
         }
-
+    
         const definition = [];
         let hasError = false;
         customTrainingZonesDropZone.querySelectorAll('.dropped-item').forEach(item => {
@@ -1118,7 +1416,7 @@ function loadSavedWeeks() {
         customTrainingNameInput.value = '';
         customTrainingZonesDropZone.innerHTML = '<p class="text-gray-400 text-center text-sm">Sleep HR zones hierheen om de training te definiëren.</p>';
         loadCustomMeasurements();
-    });
+    }),
 
     // Opslaan Aangepaste Rust Meting
     saveCustomRestBtn.addEventListener('click', () => {
@@ -1152,7 +1450,7 @@ function loadSavedWeeks() {
         customRestDescriptionInput.value = '';
         customRestGoalsInput.value = '';
         loadCustomMeasurements();
-    });
+    }),
 
     // Laden Aangepaste Metingen naar zijbalk
     function loadCustomMeasurements() {
@@ -1214,16 +1512,14 @@ function loadSavedWeeks() {
                 e.dataTransfer.effectAllowed = 'move';
             });
         });
-    }
+    },
 
     // Settings button click handler
     document.getElementById('settings-btn').addEventListener('click', () => {
         showMessage('Globale instellingen functionaliteit komt hier (nog niet geïmplementeerd).', 'info');
-    });
+    }),
 
-    // Categorie selectie logica
-    const categorySelect = document.getElementById('category-select');
-    const categoryContents = document.querySelectorAll('.category-content');
+   
 
     categorySelect.addEventListener('change', (e) => {
         const selectedCategory = e.target.value;
@@ -1234,20 +1530,17 @@ function loadSavedWeeks() {
                 contentDiv.classList.remove('active');
             }
         });
-    });
+    }),
 
     // Initialiseer met de standaard geselecteerde categorie
     // document.addEventListener('DOMContentLoaded', () => { // This event listener is handled by app.js
         // Activeer de Form Builder tab bij het laden
-        document.querySelector('.tab-button[data-tab="form-builder"]').click();
+        document.querySelector('.tab-button[data-tab="form-builder"]').click(),
 
-        const initialCategory = categorySelect.value;
         categoryContents.forEach(contentDiv => {
             if (contentDiv.id === `category-${initialCategory}`) {
                 contentDiv.classList.add('active');
             } else {
                 contentDiv.classList.remove('active');
             }
-        });
-    // });
-})}
+        })}
